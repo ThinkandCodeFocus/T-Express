@@ -1,0 +1,62 @@
+/**
+ * Service Catégories
+ */
+
+import { apiClient } from '@/lib/api-client';
+import { API_CONFIG } from '@/config/api.config';
+import type { Categorie } from '@/types/api.types';
+
+export const categorieService = {
+  /**
+   * Récupérer la liste des catégories
+   */
+  async getListe(): Promise<Categorie[]> {
+    const response = await apiClient.post<{ categories: Categorie[] }>(
+      API_CONFIG.endpoints.categories.liste
+    );
+    return response.categories;
+  },
+
+  /**
+   * Récupérer le détail d'une catégorie
+   */
+  async getDetail(categorieId: number): Promise<Categorie> {
+    const response = await apiClient.post<{ categorie: Categorie }>(
+      API_CONFIG.endpoints.categories.detail,
+      { categorie_id: categorieId }
+    );
+    return response.categorie;
+  },
+
+  /**
+   * Créer une catégorie
+   */
+  async creer(data: Partial<Categorie>): Promise<Categorie> {
+    const response = await apiClient.post<{ categorie: Categorie }>(
+      API_CONFIG.endpoints.admin.categories.creer,
+      data
+    );
+    return response.categorie;
+  },
+
+  /**
+   * Modifier une catégorie
+   */
+  async modifier(id: number, data: Partial<Categorie>): Promise<Categorie> {
+    const response = await apiClient.post<{ categorie: Categorie }>(
+      API_CONFIG.endpoints.admin.categories.modifier,
+      { id, ...data }
+    );
+    return response.categorie;
+  },
+
+  /**
+   * Supprimer une catégorie
+   */
+  async supprimer(id: number): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      API_CONFIG.endpoints.admin.categories.supprimer,
+      { id }
+    );
+  },
+};

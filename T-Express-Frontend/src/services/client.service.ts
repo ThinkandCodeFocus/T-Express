@@ -1,30 +1,41 @@
 /**
- * Service Client/Profil
+ * Service Clients (Admin)
  */
 
 import { apiClient } from '@/lib/api-client';
 import { API_CONFIG } from '@/config/api.config';
-import type { Client, UpdateClientData } from '@/types/api.types';
+import type { Client } from '@/types/api.types';
 
 export const clientService = {
   /**
-   * Récupérer le profil du client connecté
+   * Récupérer la liste des clients
    */
-  async getProfil(): Promise<Client> {
+  async getListe(page: number = 1, perPage: number = 20, recherche?: string): Promise<any> {
+    return apiClient.post(
+      API_CONFIG.endpoints.admin.clients.liste,
+      { page, per_page: perPage, recherche },
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Récupérer le détail d'un client
+   */
+  async getDetail(id: number): Promise<Client> {
     const response = await apiClient.post<{ client: Client }>(
-      API_CONFIG.endpoints.client.profile,
-      {},
+      API_CONFIG.endpoints.admin.clients.detail,
+      { client_id: id },
       { requiresAuth: true }
     );
     return response.client;
   },
 
   /**
-   * Mettre à jour le profil
+   * Créer un client
    */
-  async updateProfil(data: UpdateClientData): Promise<Client> {
-    const response = await apiClient.post<{ client: Client; message: string }>(
-      API_CONFIG.endpoints.client.update,
+  async creer(data: Partial<Client & { password: string }>): Promise<Client> {
+    const response = await apiClient.post<{ client: Client }>(
+      API_CONFIG.endpoints.admin.clients.creer,
       data,
       { requiresAuth: true }
     );
@@ -32,44 +43,25 @@ export const clientService = {
   },
 
   /**
-   * Liste des clients (admin)
+   * Modifier un client
    */
-  async getListe(): Promise<Client[]> {
-    const response = await apiClient.get<{ clients: Client[] }>(
-      API_CONFIG.endpoints.admin.clients.liste
-    );
-    return response.clients;
-  },
-
-  /**
-   * Créer un client (admin)
-   */
-  async creer(data: Partial<Client>): Promise<Client> {
-    const response = await apiClient.post<{ client: Client }>(
-      API_CONFIG.endpoints.admin.clients.creer,
-      data
-    );
-    return response.client;
-  },
-
-  /**
-   * Modifier un client (admin)
-   */
-  async modifier(id: number, data: Partial<Client>): Promise<Client> {
+  async modifier(id: number, data: Partial<Client & { password?: string }>): Promise<Client> {
     const response = await apiClient.post<{ client: Client }>(
       API_CONFIG.endpoints.admin.clients.modifier,
-      { id, ...data }
+      { client_id: id, ...data },
+      { requiresAuth: true }
     );
     return response.client;
   },
 
   /**
-   * Supprimer un client (admin)
+   * Supprimer un client
    */
   async supprimer(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.clients.supprimer,
-      { id }
+      { client_id: id },
+      { requiresAuth: true }
     );
   },
 };

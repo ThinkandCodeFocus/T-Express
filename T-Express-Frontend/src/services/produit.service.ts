@@ -11,18 +11,22 @@ export const produitService = {
    * Récupérer la liste des produits
    */
   async getListe(): Promise<Produit[]> {
-    const response = await apiClient.get<{ produits: Produit[] }>(
-      API_CONFIG.endpoints.admin.produits.liste
+    const response = await apiClient.post<{ produits: Produit[] }>(
+      API_CONFIG.endpoints.admin.produits.liste,
+      {},
+      { requiresAuth: true }
     );
-    return response.produits;
+    return response.produits || [];
   },
 
   /**
    * Récupérer le détail d'un produit
    */
   async getDetail(id: number): Promise<Produit> {
-    const response = await apiClient.get<{ produit: Produit }>(
-      `${API_CONFIG.endpoints.admin.produits.liste}/${id}`
+    const response = await apiClient.post<{ produit: Produit }>(
+      API_CONFIG.endpoints.admin.produits.detail,
+      { produit_id: id },
+      { requiresAuth: true }
     );
     return response.produit;
   },
@@ -33,7 +37,8 @@ export const produitService = {
   async creer(data: Partial<Produit>): Promise<Produit> {
     const response = await apiClient.post<{ produit: Produit }>(
       API_CONFIG.endpoints.admin.produits.creer,
-      data
+      data,
+      { requiresAuth: true }
     );
     return response.produit;
   },
@@ -44,7 +49,8 @@ export const produitService = {
   async modifier(id: number, data: Partial<Produit>): Promise<Produit> {
     const response = await apiClient.post<{ produit: Produit }>(
       API_CONFIG.endpoints.admin.produits.modifier,
-      { id, ...data }
+      { produit_id: id, ...data },
+      { requiresAuth: true }
     );
     return response.produit;
   },
@@ -55,7 +61,8 @@ export const produitService = {
   async supprimer(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.produits.supprimer,
-      { id }
+      { produit_id: id },
+      { requiresAuth: true }
     );
   },
 };

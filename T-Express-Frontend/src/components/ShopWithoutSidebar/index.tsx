@@ -1,21 +1,72 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import CustomSelect from "../ShopWithSidebar/CustomSelect";
 
-import shopData from "../Shop/shopData";
+import { catalogueService } from "@/services/catalogue.service";
+import { adaptProduitsToProducts } from "@/types/adapters";
+import type { Product } from "@/types/product";
 
 const ShopWithoutSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedSort, setSelectedSort] = useState("0");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [perPage] = useState(12);
 
   const options = [
     { label: "Latest Products", value: "0" },
     { label: "Best Selling", value: "1" },
     { label: "Old Products", value: "2" },
   ];
+
+  useEffect(() => {
+    loadProducts();
+  }, [selectedSort, currentPage]);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      let response;
+      
+      if (selectedSort === "0") {
+        // Latest Products
+        response = await catalogueService.rechercher({
+          tri: 'recent',
+          page: currentPage,
+          per_page: perPage,
+        });
+      } else if (selectedSort === "1") {
+        // Best Selling
+        response = await catalogueService.rechercher({
+          en_vedette: true,
+          page: currentPage,
+          per_page: perPage,
+        });
+      } else {
+        // Old Products
+        response = await catalogueService.rechercher({
+          tri: 'ancien',
+          page: currentPage,
+          per_page: perPage,
+        });
+      }
+
+      const adaptedProducts = adaptProduitsToProducts(response.data || []);
+      setProducts(adaptedProducts);
+      setTotalProducts(response.total || 0);
+    } catch (error: any) {
+      console.error('Erreur lors du chargement des produits', error);
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -32,10 +83,19 @@ const ShopWithoutSidebar = () => {
                 <div className="flex items-center justify-between">
                   {/* <!-- top bar left --> */}
                   <div className="flex flex-wrap items-center gap-4">
-                    <CustomSelect options={options} />
+                    <CustomSelect 
+                      options={options} 
+                      value={selectedSort}
+                      onChange={(value) => {
+                        setSelectedSort(value);
+                        setCurrentPage(1);
+                      }}
+                    />
 
                     <p>
-                      Showing <span className="text-dark">9 of 50</span>{" "}
+                      Showing <span className="text-dark">
+                        {loading ? '...' : `${products.length} of ${totalProducts}`}
+                      </span>{" "}
                       Products
                     </p>
                   </div>
@@ -122,21 +182,37 @@ const ShopWithoutSidebar = () => {
               </div>
 
               {/* <!-- Products Grid Tab Content Start --> */}
-              <div
-                className={`${
-                  productStyle === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9"
-                    : "flex flex-col gap-7.5"
-                }`}
-              >
-                {shopData.map((item, key) =>
-                  productStyle === "grid" ? (
-                    <SingleGridItem item={item} key={key} />
-                  ) : (
-                    <SingleListItem item={item} key={key} />
-                  )
-                )}
-              </div>
+              {loading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-gray-200 rounded-lg h-64 mb-4"></div>
+                      <div className="bg-gray-200 rounded h-4 mb-2"></div>
+                      <div className="bg-gray-200 rounded h-4 w-2/3"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : products.length === 0 ? (
+                <div className="text-center py-20">
+                  <p className="text-dark-4 text-lg">Aucun produit trouvé</p>
+                </div>
+              ) : (
+                <div
+                  className={`${
+                    productStyle === "grid"
+                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9"
+                      : "flex flex-col gap-7.5"
+                  }`}
+                >
+                  {products.map((item) =>
+                    productStyle === "grid" ? (
+                      <SingleGridItem item={item} key={item.id} />
+                    ) : (
+                      <SingleListItem item={item} key={item.id} />
+                    )
+                  )}
+                </div>
+              )}
               {/* <!-- Products Grid Tab Content End --> */}
 
               {/* <!-- Products Pagination Start --> */}

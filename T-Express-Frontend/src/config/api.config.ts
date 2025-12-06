@@ -34,6 +34,12 @@ export const API_CONFIG = {
       detail: '/categories/detail',
     },
     
+    // Sections Hero
+    hero: {
+      liste: '/hero/liste',
+      detail: '/hero/detail',
+    },
+    
     // Panier
     panier: {
       contenu: '/panier/contenu',
@@ -83,52 +89,85 @@ export const API_CONFIG = {
       commentaire: '/articles/commentaire',
     },
     
-    // Admin (à prévoir)
+    // Paramètres
+    settings: {
+      footer: '/settings/footer',
+    },
+    
+    // Admin
     admin: {
       produits: {
-        liste: '/admin/produits',
+        liste: '/admin/produits/liste',
+        detail: '/admin/produits/detail',
         creer: '/admin/produits/creer',
         modifier: '/admin/produits/modifier',
         supprimer: '/admin/produits/supprimer',
       },
       categories: {
-        liste: '/admin/categories',
+        liste: '/admin/categories/liste',
+        detail: '/admin/categories/detail',
         creer: '/admin/categories/creer',
         modifier: '/admin/categories/modifier',
         supprimer: '/admin/categories/supprimer',
       },
+      hero: {
+        liste: '/admin/hero/liste',
+        detail: '/admin/hero/detail',
+        creer: '/admin/hero/creer',
+        modifier: '/admin/hero/modifier',
+        supprimer: '/admin/hero/supprimer',
+        toggleActif: '/admin/hero/toggle-actif',
+      },
       clients: {
-        liste: '/admin/clients',
+        liste: '/admin/clients/liste',
+        detail: '/admin/clients/detail',
         creer: '/admin/clients/creer',
         modifier: '/admin/clients/modifier',
         supprimer: '/admin/clients/supprimer',
       },
       commandes: {
-        liste: '/admin/commandes',
+        liste: '/admin/commandes/liste',
         detail: '/admin/commandes/detail',
-        updateStatus: '/admin/commandes/status',
+        updateStatus: '/admin/commandes/changer-statut',
       },
       stock: {
-        liste: '/admin/stock',
-        update: '/admin/stock/update',
+        liste: '/admin/stock/liste',
+        update: '/admin/stock/ajuster',
+      },
+      dashboard: {
+        stats: '/admin/dashboard/stats',
       },
       avis: {
-        liste: '/admin/avis',
+        liste: '/admin/avis/liste',
+        detail: '/admin/avis/detail',
+        modifier: '/admin/avis/modifier',
         supprimer: '/admin/avis/supprimer',
       },
       retours: {
-        liste: '/admin/retours',
-        valider: '/admin/retours/valider',
+        liste: '/admin/retours/liste',
+        detail: '/admin/retours/detail',
+        approuver: '/admin/retours/approuver',
         refuser: '/admin/retours/refuser',
         supprimer: '/admin/retours/supprimer',
       },
       paiements: {
-        liste: '/admin/paiements',
+        liste: '/admin/paiements/liste',
+        detail: '/admin/paiements/detail',
+        modifierStatut: '/admin/paiements/modifier-statut',
         supprimer: '/admin/paiements/supprimer',
       },
       livraisons: {
-        liste: '/admin/livraisons',
-        update: '/admin/livraisons/update',
+        liste: '/admin/livraisons/liste',
+        detail: '/admin/livraisons/detail',
+        modifierStatut: '/admin/livraisons/modifier-statut',
+        supprimer: '/admin/livraisons/supprimer',
+      },
+      articles: {
+        liste: '/admin/articles/liste',
+        detail: '/admin/articles/detail',
+        creer: '/admin/articles/creer',
+        modifier: '/admin/articles/modifier',
+        supprimer: '/admin/articles/supprimer',
       },
       adresses: {
         liste: '/admin/adresses',

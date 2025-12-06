@@ -1,39 +1,42 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { livraisonService } from "@/services/livraison.service";
-import { clientService } from "@/services/client.service";
-import { commandeService } from "@/services/commande.service";
-import type { Livraison, Client, Commande } from "@/types/api.types";
+import type { Livraison } from "@/types/api.types";
+import { LOCALE_CONFIG } from "@/config/api.config";
+import toast from "react-hot-toast";
 
-const STATUTS = [
-  { value: "en_attente", label: "En attente" },
-  { value: "en_cours", label: "En cours" },
-  { value: "livree", label: "Livrée" },
-  { value: "echouee", label: "Échouée" },
-];
+const STATUT_COLORS: Record<string, { bg: string; text: string }> = {
+  en_preparation: { bg: "bg-yellow-light-4", text: "text-yellow-dark-2" },
+  expediee: { bg: "bg-blue-light-5", text: "text-blue-dark" },
+  en_transit: { bg: "bg-purple-100", text: "text-purple-700" },
+  livree: { bg: "bg-green-light-6", text: "text-green-dark" },
+  retournee: { bg: "bg-red-light-6", text: "text-red-dark" },
+};
 
 export default function AdminLivraisons() {
   const [livraisons, setLivraisons] = useState<Livraison[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [updating, setUpdating] = useState(false);
+  const [filters, setFilters] = useState({ statut: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({ statut: "", numero_suivi: "", date_livraison_prevue: "" });
 
-  // Charger livraisons, clients, commandes
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [livraisonData, clientData, commandeData] = await Promise.all([
-        livraisonService.getListe(),
-        clientService.getListe(),
-        commandeService.getListe(),
-      ]);
-      setLivraisons(livraisonData);
-      setClients(clientData);
-      setCommandes(commandeData);
+      const response = await livraisonService.getListe(
+        currentPage,
+        20,
+        filters.statut || undefined
+      );
+      setLivraisons(response.data || []);
+      setTotalPages(response.meta?.last_page || 1);
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des livraisons.");
+      toast.error(e.message || "Erreur lors du chargement");
     } finally {
       setLoading(false);
     }
@@ -41,92 +44,228 @@ export default function AdminLivraisons() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, filters]);
 
-  // Modifier le statut
-  const handleUpdateStatus = async (id: number, statut: string) => {
-    setUpdating(true);
+  const openEditModal = (livraison: Livraison) => {
+    setEditId(livraison.id);
+    setEditForm({
+      statut: livraison.statut,
+      numero_suivi: livraison.numero_suivi || "",
+      date_livraison_prevue: livraison.date_livraison_prevue || "",
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editId) return;
     try {
-      await livraisonService.update(id, statut);
+      await livraisonService.modifierStatut(
+        editId,
+        editForm.statut,
+        editForm.numero_suivi || undefined,
+        editForm.date_livraison_prevue || undefined
+      );
+      toast.success("Livraison modifiée avec succès");
+      setEditId(null);
       fetchData();
     } catch (e: any) {
-      setError(e.message || "Erreur lors de la mise à jour du statut.");
-    } finally {
-      setUpdating(false);
+      toast.error(e.message || "Erreur lors de la modification.");
     }
   };
 
-  // Trouver le nom du client
-  const getClientNom = (commande_id: number) => {
-    const commande = commandes.find((c) => c.id === commande_id);
-    if (!commande) return "-";
-    const client = clients.find((cl) => cl.id === commande.client_id);
-    return client ? `${client.prenom} ${client.nom}` : "-";
-  };
-
-  // Trouver l'adresse de livraison
-  const getAdresse = (commande_id: number) => {
-    const commande = commandes.find((c) => c.id === commande_id);
-    return commande?.adresse_livraison?.adresse_ligne_1 || "-";
-  };
-
-  // Trouver la référence commande
-  const getCommandeRef = (commande_id: number) => {
-    return commandes.find((c) => c.id === commande_id)?.numero_commande || `#${commande_id}`;
-  };
-
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Gestion des livraisons</h1>
-      <div className="bg-white rounded shadow p-6">
+    <div className="p-6 lg:p-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-dark mb-2">Gestion des livraisons</h1>
+        <p className="text-dark-4">Suivez et gérez toutes les livraisons</p>
+      </div>
+
+      {/* Filtres */}
+      <div className="bg-white rounded-xl shadow-2 p-4 mb-6 border border-gray-3">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-dark mb-2">Filtrer par statut</label>
+            <select
+              value={filters.statut}
+              onChange={(e) => setFilters({ ...filters, statut: e.target.value })}
+              className="w-full border border-gray-3 rounded-lg px-4 py-2"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="en_preparation">En préparation</option>
+              <option value="expediee">Expédiée</option>
+              <option value="en_transit">En transit</option>
+              <option value="livree">Livrée</option>
+              <option value="retournee">Retournée</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={() => setFilters({ statut: "" })}
+              className="px-4 py-2 border border-gray-3 rounded-lg hover:bg-gray-1"
+            >
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-2 border border-gray-3 overflow-hidden">
         {loading ? (
-          <div>Chargement...</div>
+          <div className="flex items-center justify-center py-20">
+            <div className="w-16 h-16 border-4 border-blue-light-5 border-t-blue rounded-full animate-spin"></div>
+          </div>
         ) : error ? (
-          <div className="text-red-600 mb-4">{error}</div>
+          <div className="bg-red-light-6 border-2 border-red-light-3 rounded-xl p-6 m-6">
+            <p className="text-red-dark">{error}</p>
+            <button onClick={fetchData} className="mt-4 bg-red text-white px-4 py-2 rounded-lg">
+              Réessayer
+            </button>
+          </div>
         ) : (
-          <table className="w-full text-left">
-            <thead>
-              <tr>
-                <th className="py-2 px-3">ID</th>
-                <th className="py-2 px-3">Commande</th>
-                <th className="py-2 px-3">Client</th>
-                <th className="py-2 px-3">Adresse</th>
-                <th className="py-2 px-3">Statut</th>
-                <th className="py-2 px-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {livraisons.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-4">Aucune livraison trouvée.</td>
-                </tr>
-              ) : (
-                livraisons.map((l) => (
-                  <tr key={l.id}>
-                    <td className="py-2 px-3">{l.id}</td>
-                    <td className="py-2 px-3">{getCommandeRef(l.commande_id)}</td>
-                    <td className="py-2 px-3">{getClientNom(l.commande_id)}</td>
-                    <td className="py-2 px-3">{getAdresse(l.commande_id)}</td>
-                    <td className="py-2 px-3">
-                      <select
-                        value={l.statut}
-                        onChange={(e) => handleUpdateStatus(l.id, e.target.value)}
-                        disabled={updating}
-                        className="border rounded px-2 py-1"
-                      >
-                        {STATUTS.map((s) => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="py-2 px-3">-</td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-1 border-b border-gray-3">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Commande</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Client</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Numéro de suivi</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Statut</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Date prévue</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-dark-4 uppercase">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-gray-3">
+                  {livraisons.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center">
+                        <p className="text-dark-4">Aucune livraison trouvée</p>
+                      </td>
+                    </tr>
+                  ) : (
+                    livraisons.map((l) => {
+                      const statutColor = STATUT_COLORS[l.statut] || { bg: "bg-gray-3", text: "text-dark-4" };
+                      return (
+                        <tr key={l.id} className="hover:bg-gray-1 transition-colors">
+                          <td className="px-6 py-4 font-semibold text-dark">{l.id}</td>
+                          <td className="px-6 py-4 text-dark">
+                            {l.commande?.numero_commande || `#${l.commande_id}`}
+                          </td>
+                          <td className="px-6 py-4 text-dark">
+                            {l.commande?.client ? `${l.commande.client.prenom} ${l.commande.client.nom}` : `Client #${l.commande?.client_id}`}
+                          </td>
+                          <td className="px-6 py-4 text-dark-4">
+                            {l.numero_suivi || "-"}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statutColor.bg} ${statutColor.text}`}>
+                              {l.statut}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-dark-4 text-sm">
+                            {l.date_livraison_prevue ? LOCALE_CONFIG.formatDate(l.date_livraison_prevue) : "-"}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => openEditModal(l)}
+                              className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
+                              title="Modifier"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-3 flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border border-gray-3 hover:bg-gray-1 disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                <span className="text-dark-4">Page {currentPage} sur {totalPages}</span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border border-gray-3 hover:bg-gray-1 disabled:opacity-50"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* Modal modification */}
+      {editId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-3 w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-dark mb-4">Modifier la livraison</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Statut *</label>
+                  <select
+                    value={editForm.statut}
+                    onChange={(e) => setEditForm({ ...editForm, statut: e.target.value })}
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3"
+                  >
+                    <option value="en_preparation">En préparation</option>
+                    <option value="expediee">Expédiée</option>
+                    <option value="en_transit">En transit</option>
+                    <option value="livree">Livrée</option>
+                    <option value="retournee">Retournée</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Numéro de suivi</label>
+                  <input
+                    type="text"
+                    value={editForm.numero_suivi}
+                    onChange={(e) => setEditForm({ ...editForm, numero_suivi: e.target.value })}
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3"
+                    placeholder="Ex: TRACK123456"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Date de livraison prévue</label>
+                  <input
+                    type="date"
+                    value={editForm.date_livraison_prevue}
+                    onChange={(e) => setEditForm({ ...editForm, date_livraison_prevue: e.target.value })}
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-3">
+                <button
+                  onClick={() => setEditId(null)}
+                  className="px-4 py-2 border border-gray-3 rounded-lg hover:bg-gray-1"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-blue text-white rounded-lg hover:bg-blue-dark"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

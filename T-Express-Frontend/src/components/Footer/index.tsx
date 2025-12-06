@@ -1,8 +1,50 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { apiClient } from "@/lib/api-client";
+import { API_CONFIG } from "@/config/api.config";
+
+interface FooterSettings {
+  adresse: string;
+  telephone: string;
+  email: string;
+  copyright: string;
+  facebook_url: string;
+  twitter_url: string;
+  instagram_url: string;
+  linkedin_url: string;
+}
 
 const Footer = () => {
   const year = new Date().getFullYear();
+  const [settings, setSettings] = useState<FooterSettings>({
+    adresse: "Adresse à définir par l'administrateur",
+    telephone: "Téléphone à définir par l'administrateur",
+    email: "Email à définir par l'administrateur",
+    copyright: "Tous droits réservés. Contenu défini par l'administrateur.",
+    facebook_url: "#",
+    twitter_url: "#",
+    instagram_url: "#",
+    linkedin_url: "#",
+  });
+
+  useEffect(() => {
+    const loadFooterSettings = async () => {
+      try {
+        const response = await apiClient.post<{ footer: FooterSettings }>(
+          API_CONFIG.endpoints.settings.footer,
+          {}
+        );
+        if (response.footer) {
+          setSettings(response.footer);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des paramètres du footer', error);
+      }
+    };
+
+    loadFooterSettings();
+  }, []);
 
   return (
     <footer className="overflow-hidden">
@@ -11,7 +53,7 @@ const Footer = () => {
         <div className="flex flex-wrap xl:flex-nowrap gap-10 xl:gap-19 xl:justify-between pt-17.5 xl:pt-22.5 pb-10 xl:pb-15">
           <div className="max-w-[330px] w-full">
             <h2 className="mb-7.5 text-custom-1 font-medium text-dark">
-              Help & Support
+              Aide & Support
             </h2>
 
             <ul className="flex flex-col gap-3">
@@ -32,7 +74,7 @@ const Footer = () => {
                     />
                   </svg>
                 </span>
-                685 Market Street,Las Vegas, LA 95820,United States.
+                {settings.adresse}
               </li>
 
               <li>
@@ -61,7 +103,7 @@ const Footer = () => {
                       fill="#3C50E0"
                     />
                   </svg>
-                  (+099) 532-786-9843
+                  {settings.telephone}
                 </a>
               </li>
 
@@ -81,7 +123,7 @@ const Footer = () => {
                       fill="#3C50E0"
                     />
                   </svg>
-                  support@example.com
+                  {settings.email}
                 </a>
               </li>
             </ul>
@@ -89,9 +131,11 @@ const Footer = () => {
             {/* <!-- Social Links start --> */}
             <div className="flex items-center gap-4 mt-7.5">
               <a
-                href="#"
+                href={settings.facebook_url}
                 aria-label="Facebook Social Link"
                 className="flex ease-out duration-200 hover:text-blue"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   className="fill-current"
@@ -114,9 +158,11 @@ const Footer = () => {
               </a>
 
               <a
-                href="#"
+                href={settings.twitter_url}
                 aria-label="Twitter Social Link"
                 className="flex ease-out duration-200 hover:text-blue"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   className="fill-current"
@@ -134,9 +180,11 @@ const Footer = () => {
               </a>
 
               <a
-                href="#"
+                href={settings.instagram_url}
                 aria-label="Instagram Social Link"
                 className="flex ease-out duration-200 hover:text-blue"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   className="fill-current"
@@ -169,9 +217,11 @@ const Footer = () => {
               </a>
 
               <a
-                href="#"
+                href={settings.linkedin_url}
                 aria-label="Linkedin Social Link"
                 className="flex ease-out duration-200 hover:text-blue"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   className="fill-current"
@@ -198,33 +248,33 @@ const Footer = () => {
 
           <div className="w-full sm:w-auto">
             <h2 className="mb-7.5 text-custom-1 font-medium text-dark">
-              Account
+              Compte
             </h2>
 
             <ul className="flex flex-col gap-3.5">
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  My Account
+                  Mon compte
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Login / Register
+                  Connexion / Inscription
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Cart
+                  Panier
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Wishlist
+                  Favoris
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Shop
+                  Boutique
                 </a>
               </li>
             </ul>
@@ -232,28 +282,28 @@ const Footer = () => {
 
           <div className="w-full sm:w-auto">
             <h2 className="mb-7.5 text-custom-1 font-medium text-dark">
-              Quick Link
+              Liens rapides
             </h2>
 
             <ul className="flex flex-col gap-3">
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Privacy Policy
+                  Politique de confidentialité
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Refund Policy
+                  Politique de remboursement
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Terms of Use
+                  Conditions d'utilisation
                 </a>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  FAQ’s
+                  FAQ
                 </a>
               </li>
               <li>
@@ -266,11 +316,11 @@ const Footer = () => {
 
           <div className="w-full sm:w-auto">
             <h2 className="mb-7.5 text-custom-1 font-medium text-dark lg:text-right">
-              Download App
+              Télécharger l'application
             </h2>
 
             <p className="lg:text-right text-custom-sm mb-4">
-              Save $3 With App & New User only
+              Économisez avec l'application - Nouveaux utilisateurs uniquement
             </p>
 
             <ul className="flex flex-col lg:items-end gap-3">
@@ -295,7 +345,7 @@ const Footer = () => {
 
                   <div>
                     <span className="block text-custom-xs">
-                      Download on the
+                      Télécharger sur
                     </span>
                     <p className="font-medium">App Store</p>
                   </div>
@@ -322,7 +372,7 @@ const Footer = () => {
                   </svg>
 
                   <div>
-                    <span className="block text-custom-xs"> Get in On </span>
+                    <span className="block text-custom-xs"> Disponible sur </span>
                     <p className="font-medium">Google Play</p>
                   </div>
                 </a>
@@ -338,11 +388,11 @@ const Footer = () => {
         <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
           <div className="flex gap-5 flex-wrap items-center justify-between">
             <p className="text-dark font-medium">
-              &copy; {year}. All rights reserved by PimjoLabs.
+              &copy; {year}. {settings.copyright}
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <p className="font-medium">We Accept:</p>
+              <p className="font-medium">Nous acceptons :</p>
 
               <div className="flex flex-wrap items-center gap-6">
                 <a href="#" aria-label="payment system with visa card">

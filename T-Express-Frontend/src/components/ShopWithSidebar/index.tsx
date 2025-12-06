@@ -3,15 +3,14 @@ import React, { useState, useEffect } from "react";
 import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import CategoryDropdown from "./CategoryDropdown";
-import GenderDropdown from "./GenderDropdown";
-import SizeDropdown from "./SizeDropdown";
-import ColorsDropdwon from "./ColorsDropdwon";
 import PriceDropdown from "./PriceDropdown";
 import SingleGridItem from "../Shop/SingleGridItem";
 import SingleListItem from "../Shop/SingleListItem";
 import { catalogueService } from "@/services/catalogue.service";
 import { categorieService } from "@/services/categorie.service";
 import { adaptProduitsToProducts } from "@/types/adapters";
+import { apiClient } from "@/lib/api-client";
+import { API_CONFIG } from "@/config/api.config";
 import type { Product } from "@/types/product";
 import type { Categorie } from "@/types/api.types";
 
@@ -50,10 +49,10 @@ const ShopWithSidebar = () => {
   };
 
   const options = [
-    { label: "Latest Products", value: "created_at:desc" },
-    { label: "Best Selling", value: "nombre_ventes:desc" },
-    { label: "Price: Low to High", value: "prix:asc" },
-    { label: "Price: High to Low", value: "prix:desc" },
+    { label: "Produits récents", value: "created_at:desc" },
+    { label: "Meilleures ventes", value: "nombre_ventes:desc" },
+    { label: "Prix : Croissant", value: "prix:asc" },
+    { label: "Prix : Décroissant", value: "prix:desc" },
   ];
 
   // Charger les catégories et produits au montage
@@ -65,9 +64,23 @@ const ShopWithSidebar = () => {
   // Recharger les produits quand les filtres changent
   useEffect(() => {
     if (!loading) {
+      // Réinitialiser à la page 1 quand les filtres changent
+      setPagination(prev => {
+        if (prev.currentPage !== 1) {
+          return { ...prev, currentPage: 1 };
+        }
+        return prev;
+      });
       loadProducts();
     }
-  }, [filters, pagination.currentPage]);
+  }, [filters]);
+
+  // Recharger les produits quand la page change
+  useEffect(() => {
+    if (!loading && pagination.currentPage > 0) {
+      loadProducts();
+    }
+  }, [pagination.currentPage]);
 
   const loadCategories = async () => {
     try {
@@ -87,19 +100,46 @@ const ShopWithSidebar = () => {
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const response = await catalogueService.rechercher({
-        ...filters,
+      const filtersToSend: any = {
         per_page: pagination.perPage
-      });
+      };
       
-      const adaptedProducts = adaptProduitsToProducts(response.data);
+      if (filters.mot_cle) filtersToSend.mot_cle = filters.mot_cle;
+      if (filters.categorie_id) filtersToSend.categorie_id = filters.categorie_id;
+      if (filters.marque && filters.marque.length > 0) filtersToSend.marque = filters.marque;
+      if (filters.prix_min !== null) filtersToSend.prix_min = filters.prix_min;
+      if (filters.prix_max !== null) filtersToSend.prix_max = filters.prix_max;
+      if (filters.tri) {
+        const triMap: Record<string, { tri: string; direction: string }> = {
+          'prix_asc': { tri: 'prix', direction: 'asc' },
+          'prix_desc': { tri: 'prix', direction: 'desc' },
+          'nom_asc': { tri: 'nom', direction: 'asc' },
+          'nom_desc': { tri: 'nom', direction: 'desc' },
+          'recent': { tri: 'created_at', direction: 'desc' },
+          'populaire': { tri: 'nombre_ventes', direction: 'desc' }
+        };
+        const sort = triMap[filters.tri] || { tri: 'created_at', direction: 'desc' };
+        filtersToSend.tri = sort.tri;
+        filtersToSend.direction = sort.direction;
+      }
+      
+      // Ajouter le paramètre page pour la pagination Laravel (dans le body pour POST)
+      filtersToSend.page = pagination.currentPage;
+      
+      const response = await apiClient.post(
+        API_CONFIG.endpoints.catalogue.rechercher,
+        filtersToSend
+      );
+      
+      // Laravel paginate() retourne directement current_page, data, last_page, etc.
+      const adaptedProducts = adaptProduitsToProducts(response.data || []);
       setProducts(adaptedProducts);
       
       setPagination({
-        currentPage: response.meta.current_page,
-        totalPages: response.meta.last_page,
-        total: response.meta.total,
-        perPage: response.meta.per_page
+        currentPage: response.current_page || 1,
+        totalPages: response.last_page || 1,
+        total: response.total || 0,
+        perPage: response.per_page || pagination.perPage
       });
     } catch (error) {
       console.error("Erreur chargement produits:", error);
@@ -116,14 +156,17 @@ const ShopWithSidebar = () => {
       'nom:asc': 'nom_asc',
       'nom:desc': 'nom_desc',
       'created_at:desc': 'recent',
-      'vues:desc': 'populaire'
+      'nombre_ventes:desc': 'populaire'
     };
     const tri = triMap[value] || 'recent';
     setFilters(prev => ({ ...prev, tri }));
   };
 
-  const handleCategoryFilter = (categoryId: number) => {
-    setFilters(prev => ({ ...prev, categorie_id: categoryId }));
+  const handleCategoryFilter = (categoryId: number | null) => {
+    setFilters(prev => ({ 
+      ...prev, 
+      categorie_id: prev.categorie_id === categoryId ? null : categoryId 
+    }));
   };
 
   const handlePriceFilter = (min: number | null, max: number | null) => {
@@ -141,20 +184,6 @@ const ShopWithSidebar = () => {
     });
   };
 
-  const genders = [
-    {
-      name: "Men",
-      products: 10,
-    },
-    {
-      name: "Women",
-      products: 23,
-    },
-    {
-      name: "Unisex",
-      products: 8,
-    },
-  ];
 
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
@@ -178,8 +207,8 @@ const ShopWithSidebar = () => {
   return (
     <>
       <Breadcrumb
-        title={"Explore All Products"}
-        pages={["shop", "/", "shop with sidebar"]}
+        title={"Explorer tous les produits"}
+        pages={["boutique", "/", "boutique avec barre latérale"]}
       />
       <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28 bg-[#f3f4f6]">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
@@ -240,19 +269,19 @@ const ShopWithSidebar = () => {
                   </div>
 
                   {/* <!-- category box --> */}
-                  <CategoryDropdown categories={categories} />
+                  <CategoryDropdown 
+                    categories={categories} 
+                    selectedCategoryId={filters.categorie_id}
+                    onCategoryChange={handleCategoryFilter}
+                  />
 
-                  {/* <!-- gender box --> */}
-                  <GenderDropdown genders={genders} />
-
-                  {/* // <!-- size box --> */}
-                  <SizeDropdown />
-
-                  {/* // <!-- color box --> */}
-                  <ColorsDropdwon />
 
                   {/* // <!-- price range box --> */}
-                  <PriceDropdown />
+                  <PriceDropdown 
+                    minPrice={filters.prix_min}
+                    maxPrice={filters.prix_max}
+                    onPriceChange={handlePriceFilter}
+                  />
                 </div>
               </form>
             </div>

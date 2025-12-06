@@ -105,10 +105,9 @@ export interface Produit {
 }
 
 export interface Stock {
-  id: number;
+  id?: number;
   produit_id: number;
-  quantite_disponible: number;
-  seuil_alerte: number;
+  quantite: number;
   created_at: string;
   updated_at: string;
 }
@@ -396,7 +395,6 @@ export interface AdminProduitData {
   nouveau?: boolean;
   actif?: boolean;
   quantite_stock?: number;
-  seuil_alerte?: number;
 }
 
 export interface AdminCategorieData {

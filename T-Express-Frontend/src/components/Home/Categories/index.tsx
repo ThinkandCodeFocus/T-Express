@@ -24,8 +24,66 @@ const Categories = () => {
       setLoading(true);
       const data = await categorieService.getListe();
       setCategories(data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des catégories', error);
+    } catch (error: any) {
+      // Extract error information with better handling
+      let errorMessage = 'Erreur inconnue lors du chargement des catégories';
+      let errorStatus: number | string = 'N/A';
+      let errorDetails: any = {};
+
+      // Handle different error types
+      if (error) {
+        // If error is a string
+        if (typeof error === 'string') {
+          errorMessage = error;
+        }
+        // If error is an object
+        else if (typeof error === 'object') {
+          errorMessage = error.message || errorMessage;
+          errorStatus = error.status || errorStatus;
+          errorDetails = {
+            ...error,
+            name: error.name,
+            stack: error.stack,
+            errors: error.errors,
+          };
+        }
+        // If error is an Error instance
+        else if (error instanceof Error) {
+          errorMessage = error.message;
+          errorDetails = {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          };
+        }
+      }
+
+      // Log detailed error information
+      console.error('Erreur lors du chargement des catégories', {
+        message: errorMessage,
+        status: errorStatus,
+        error: error,
+        details: errorDetails,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Check for network errors
+      if (
+        errorStatus === 0 ||
+        errorMessage?.includes('Failed to fetch') ||
+        errorMessage?.includes('NetworkError') ||
+        errorMessage?.includes('fetch')
+      ) {
+        console.error(
+          'Erreur de connexion: Impossible de se connecter au serveur backend. ' +
+          'Vérifiez que le serveur Laravel est démarré et accessible.'
+        );
+      }
+
+      // Log additional validation errors if available
+      if (error?.errors && typeof error.errors === 'object') {
+        console.error('Erreurs de validation:', error.errors);
+      }
     } finally {
       setLoading(false);
     }

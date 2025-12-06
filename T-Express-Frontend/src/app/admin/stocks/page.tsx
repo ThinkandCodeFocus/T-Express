@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { stockService } from "@/services/stock.service";
 import { produitService } from "@/services/produit.service";
@@ -9,7 +10,7 @@ export default function AdminStocks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editStock, setEditStock] = useState<Stock | null>(null);
-  const [form, setForm] = useState({ quantite_disponible: "" });
+  const [form, setForm] = useState({ quantite: "" });
   const [saving, setSaving] = useState(false);
 
   // Charger stocks et produits
@@ -37,13 +38,13 @@ export default function AdminStocks() {
   // Ouvrir le modal pour modifier
   const openModal = (stock: Stock) => {
     setEditStock(stock);
-    setForm({ quantite_disponible: stock.quantite_disponible.toString() });
+    setForm({ quantite: stock.quantite.toString() });
   };
 
   // Fermer le modal
   const closeModal = () => {
     setEditStock(null);
-    setForm({ quantite_disponible: "" });
+    setForm({ quantite: "" });
   };
 
   // Gérer le formulaire
@@ -58,7 +59,7 @@ export default function AdminStocks() {
     if (!editStock) return;
     setSaving(true);
     try {
-      await stockService.update(editStock.id, parseInt(form.quantite_disponible));
+      await stockService.update(editStock.id, parseInt(form.quantite));
       closeModal();
       fetchData();
     } catch (e: any) {
@@ -101,7 +102,7 @@ export default function AdminStocks() {
                   <tr key={stock.id}>
                     <td className="py-2 px-3">{stock.id}</td>
                     <td className="py-2 px-3">{getProduitNom(stock.produit_id)}</td>
-                    <td className="py-2 px-3">{stock.quantite_disponible}</td>
+                    <td className="py-2 px-3">{stock.quantite}</td>
                     <td className="py-2 px-3">
                       <button
                         className="text-blue-600 hover:underline mr-2"
@@ -134,8 +135,8 @@ export default function AdminStocks() {
                 <label className="block mb-1 font-medium">Quantité disponible</label>
                 <input
                   type="number"
-                  name="quantite_disponible"
-                  value={form.quantite_disponible}
+                  name="quantite"
+                  value={form.quantite}
                   onChange={handleChange}
                   required
                   className="w-full border rounded px-3 py-2"

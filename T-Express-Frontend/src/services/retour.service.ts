@@ -1,63 +1,67 @@
 /**
- * Service Retours
+ * Service Retours (Admin)
  */
 
 import { apiClient } from '@/lib/api-client';
 import { API_CONFIG } from '@/config/api.config';
-import type { DemanderRetourData, RetourCommande } from '@/types/api.types';
+import type { RetourCommande } from '@/types/api.types';
 
 export const retourService = {
   /**
-   * Demander un retour de commande
+   * Récupérer la liste des retours
    */
-  async demander(data: DemanderRetourData): Promise<RetourCommande> {
-    const response = await apiClient.post<{ message: string; retour: RetourCommande }>(
-      API_CONFIG.endpoints.retour.demander,
-      data,
+  async getListe(page: number = 1, perPage: number = 20, statut?: string): Promise<any> {
+    return apiClient.post(
+      API_CONFIG.endpoints.admin.retours.liste,
+      { page, per_page: perPage, statut },
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Récupérer le détail d'un retour
+   */
+  async getDetail(id: number): Promise<RetourCommande> {
+    const response = await apiClient.post<{ retour: RetourCommande }>(
+      API_CONFIG.endpoints.admin.retours.detail,
+      { retour_id: id },
       { requiresAuth: true }
     );
     return response.retour;
   },
 
   /**
-   * Liste des retours (admin)
+   * Approuver un retour
    */
-  async getListe(): Promise<RetourCommande[]> {
-    const response = await apiClient.get<{ retours: RetourCommande[] }>(
-      API_CONFIG.endpoints.admin.retours.liste
-    );
-    return response.retours;
-  },
-
-  /**
-   * Valider un retour (admin)
-   */
-  async valider(id: number): Promise<RetourCommande> {
+  async approuver(id: number): Promise<RetourCommande> {
     const response = await apiClient.post<{ retour: RetourCommande }>(
-      API_CONFIG.endpoints.admin.retours.valider,
-      { id }
+      API_CONFIG.endpoints.admin.retours.approuver,
+      { retour_id: id },
+      { requiresAuth: true }
     );
     return response.retour;
   },
 
   /**
-   * Refuser un retour (admin)
+   * Refuser un retour
    */
-  async refuser(id: number): Promise<RetourCommande> {
+  async refuser(id: number, raison?: string): Promise<RetourCommande> {
     const response = await apiClient.post<{ retour: RetourCommande }>(
       API_CONFIG.endpoints.admin.retours.refuser,
-      { id }
+      { retour_id: id, raison },
+      { requiresAuth: true }
     );
     return response.retour;
   },
 
   /**
-   * Supprimer un retour (admin)
+   * Supprimer un retour
    */
   async supprimer(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.retours.supprimer,
-      { id }
+      { retour_id: id },
+      { requiresAuth: true }
     );
   },
 };

@@ -74,7 +74,22 @@ class ApiClient {
    * Construit l'URL avec les paramètres de query
    */
   private buildUrl(endpoint: string, params?: Record<string, any>): string {
-    const url = new URL(endpoint, this.baseURL);
+    // Si l'endpoint commence par /, on le concatène avec baseURL
+    // Sinon, on utilise new URL qui gère les chemins relatifs
+    let fullUrl: string;
+    if (endpoint.startsWith('/')) {
+      // Concaténer avec baseURL en préservant le pathname
+      const baseUrlObj = new URL(this.baseURL);
+      const basePath = baseUrlObj.pathname.endsWith('/') 
+        ? baseUrlObj.pathname.slice(0, -1) 
+        : baseUrlObj.pathname;
+      fullUrl = `${baseUrlObj.origin}${basePath}${endpoint}`;
+    } else {
+      // Chemin relatif, utiliser new URL
+      fullUrl = new URL(endpoint, this.baseURL).toString();
+    }
+
+    const url = new URL(fullUrl);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -86,6 +101,11 @@ class ApiClient {
           }
         }
       });
+    }
+
+    // Log pour débogage (à retirer en production)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API] Request URL:', url.toString());
     }
 
     return url.toString();
@@ -154,8 +174,15 @@ class ApiClient {
           status: 408,
         };
       }
+      // Vérifier si c'est une erreur réseau (backend non accessible)
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        throw {
+          message: `Impossible de se connecter au serveur. Vérifiez que le backend est démarré sur ${this.baseURL}`,
+          status: 0,
+        };
+      }
       throw {
-        message: 'Erreur de connexion. Vérifiez votre connexion internet.',
+        message: error.message || 'Erreur de connexion. Vérifiez votre connexion internet.',
         status: 0,
       };
     } finally {

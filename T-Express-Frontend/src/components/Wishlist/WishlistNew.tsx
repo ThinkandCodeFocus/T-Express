@@ -17,8 +17,8 @@ const adaptProduitToWishlistItem = (produit: Produit) => ({
   },
   discountedPrice: produit.prix_promo || produit.prix,
   regularPrice: produit.prix,
-  stock: produit.stock?.quantite_disponible || 0,
-  inStock: (produit.stock?.quantite_disponible || 0) > 0
+  stock: produit.stock?.quantite || 0,
+  inStock: (produit.stock?.quantite || 0) > 0
 });
 
 export const WishlistNew = () => {

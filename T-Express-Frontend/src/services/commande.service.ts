@@ -50,18 +50,22 @@ export const commandeService = {
    * Liste des commandes (admin)
    */
   async getListe(): Promise<Commande[]> {
-    const response = await apiClient.get<{ commandes: Commande[] }>(
-      API_CONFIG.endpoints.admin.commandes.liste
+    const response = await apiClient.post<{ commandes: Commande[] }>(
+      API_CONFIG.endpoints.admin.commandes.liste,
+      {},
+      { requiresAuth: true }
     );
-    return response.commandes;
+    return response.commandes || [];
   },
 
   /**
    * Détail d'une commande (admin)
    */
   async getDetailAdmin(id: number): Promise<Commande> {
-    const response = await apiClient.get<{ commande: Commande }>(
-      `${API_CONFIG.endpoints.admin.commandes.detail}/${id}`
+    const response = await apiClient.post<{ commande: Commande }>(
+      API_CONFIG.endpoints.admin.commandes.detail,
+      { commande_id: id },
+      { requiresAuth: true }
     );
     return response.commande;
   },
@@ -72,7 +76,8 @@ export const commandeService = {
   async updateStatus(id: number, statut: string): Promise<Commande> {
     const response = await apiClient.post<{ commande: Commande }>(
       API_CONFIG.endpoints.admin.commandes.updateStatus,
-      { id, statut }
+      { commande_id: id, statut },
+      { requiresAuth: true }
     );
     return response.commande;
   },

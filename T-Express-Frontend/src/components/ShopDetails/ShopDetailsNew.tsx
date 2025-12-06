@@ -201,144 +201,84 @@ const ShopDetailsNew = () => {
 
               {/* Stock */}
               <div className="mb-8">
-                {product.stock && product.stock.quantite_disponible > 0 ? (
-                  <span className="inline-flex items-center gap-2 text-green-600">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                {product.stock && product.stock.quantite > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-green">
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M13.3337 4.66667L6.00033 12L2.66699 8.66667"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
-                    En stock ({product.stock.quantite_disponible} disponibles)
+                    En stock ({product.stock.quantite} disponibles)
                   </span>
                 ) : (
-                  <span className="text-red-600">Rupture de stock</span>
+                  <span className="inline-flex items-center gap-1 text-red">
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12.6663 3.33301L3.33301 12.6663"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Rupture de stock
+                  </span>
                 )}
               </div>
 
               {/* Quantité et Panier */}
-              {product.stock && product.stock.quantite_disponible > 0 && (
-                <div className="flex flex-wrap items-center gap-4.5 mb-8">
-                  <div className="flex items-center rounded-md border border-gray-3">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue"
-                    >
-                      <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20">
-                        <path d="M3.33301 10.0001C3.33301 9.53984 3.7061 9.16675 4.16634 9.16675H15.833C16.2932 9.16675 16.6663 9.53984 16.6663 10.0001C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10.0001Z" />
-                      </svg>
-                    </button>
-                    <span className="flex items-center justify-center w-16 h-11.5 border-x border-gray-4">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => setQuantity(Math.min(product.stock?.quantite_disponible || 1, quantity + 1))}
-                      className="flex items-center justify-center w-11.5 h-11.5 ease-out duration-200 hover:text-blue"
-                    >
-                      <svg className="fill-current" width="20" height="20" viewBox="0 0 20 20">
-                        <path d="M3.33301 10C3.33301 9.5398 3.7061 9.16671 4.16634 9.16671H15.833C16.2932 9.16671 16.6663 9.5398 16.6663 10C16.6663 10.4603 16.2932 10.8334 15.833 10.8334H4.16634C3.7061 10.8334 3.33301 10.4603 3.33301 10Z" />
-                        <path d="M9.99967 16.6667C9.53944 16.6667 9.16634 16.2936 9.16634 15.8334L9.16634 4.16671C9.16634 3.70647 9.53944 3.33337 9.99967 3.33337C10.4599 3.33337 10.833 3.70647 10.833 4.16671L10.833 15.8334C10.833 16.2936 10.4599 16.6667 9.99967 16.6667Z" />
-                      </svg>
-                    </button>
-                  </div>
-
+              {product.stock && product.stock.quantite > 0 && (
+                <div className="flex items-center gap-3">
                   <button
-                    onClick={handleAddToCart}
-                    disabled={panierLoading}
-                    className="flex-1 min-w-[200px] font-medium text-white bg-dark py-3 px-8 rounded-md ease-out duration-200 hover:bg-blue disabled:opacity-50"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-9 h-9 border border-gray-3 rounded-lg flex items-center justify-center text-xl"
+                    aria-label="button to decrease quantity"
                   >
-                    {panierLoading ? "Ajout..." : "Ajouter au panier"}
+                    -
                   </button>
-
+                  <span className="text-lg font-semibold w-10 text-center">
+                    {quantity}
+                  </span>
                   <button
-                    onClick={handleAddToWishlist}
-                    className="flex items-center justify-center w-11.5 h-11.5 rounded-md border border-gray-3 ease-out duration-200 hover:border-blue hover:text-blue"
+                    onClick={() => setQuantity(Math.min(product.stock?.quantite || 1, quantity + 1))}
+                    className="w-9 h-9 border border-gray-3 rounded-lg flex items-center justify-center text-xl"
+                    aria-label="button to increase quantity"
                   >
-                    <svg className="fill-current" width="22" height="22" viewBox="0 0 22 22">
-                      <path d="M11.5313 17.6198C11.3875 17.6836 11.2203 17.7179 11.0531 17.7179C10.8859 17.7179 10.7188 17.6836 10.575 17.6198C8.22656 16.5823 0.6875 12.3948 0.6875 6.73105C0.6875 4.3123 2.61406 2.38574 5.03281 2.38574C6.89219 2.38574 8.54844 3.48324 9.37656 5.06886C9.44531 5.20261 9.58594 5.27824 9.72656 5.27824H12.3453C12.4859 5.27824 12.6266 5.20261 12.6953 5.06886C13.5234 3.48324 15.1797 2.38574 17.0391 2.38574C19.4578 2.38574 21.3844 4.3123 21.3844 6.73105C21.3844 12.3948 13.8797 16.5823 11.5313 17.6198Z" />
-                    </svg>
+                    +
                   </button>
                 </div>
               )}
 
-              {/* Tabs */}
-              <div className="border-t border-gray-3 pt-8">
-                <div className="flex gap-6 mb-6 border-b border-gray-3">
-                  {[
-                    { id: "description", label: "Description" },
-                    { id: "info", label: "Informations" },
-                    { id: "avis", label: `Avis (${product.nombre_avis})` }
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`pb-3 font-medium ease-out duration-200 ${
-                        activeTab === tab.id
-                          ? "text-blue border-b-2 border-blue"
-                          : "text-dark-4 hover:text-dark"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
+              <button
+                onClick={handleAddToCart}
+                disabled={panierLoading}
+                className="flex-1 min-w-[200px] font-medium text-white bg-dark py-3 px-8 rounded-md ease-out duration-200 hover:bg-blue disabled:opacity-50"
+              >
+                {panierLoading ? "Ajout..." : "Ajouter au panier"}
+              </button>
 
-                <div className="py-4">
-                  {activeTab === "description" && (
-                    <div className="text-dark-5">
-                      {product.description || "Aucune description disponible"}
-                    </div>
-                  )}
-                  {activeTab === "info" && (
-                    <div className="space-y-2">
-                      {product.marque && (
-                        <div className="flex">
-                          <span className="font-medium text-dark w-32">Marque:</span>
-                          <span className="text-dark-5">{product.marque}</span>
-                        </div>
-                      )}
-                      {product.reference && (
-                        <div className="flex">
-                          <span className="font-medium text-dark w-32">Référence:</span>
-                          <span className="text-dark-5">{product.reference}</span>
-                        </div>
-                      )}
-                      <div className="flex">
-                        <span className="font-medium text-dark w-32">Catégorie:</span>
-                        <span className="text-dark-5">{product.categorie?.nom}</span>
-                      </div>
-                    </div>
-                  )}
-                  {activeTab === "avis" && (
-                    <div className="text-dark-5">
-                      {product.avis && product.avis.length > 0 ? (
-                        <div className="space-y-4">
-                          {product.avis.map((avis: any, index: number) => (
-                            <div key={index} className="border-b border-gray-3 pb-4">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="flex">
-                                  {[...Array(5)].map((_, i) => (
-                                    <svg
-                                      key={i}
-                                      className={`w-4 h-4 ${
-                                        i < avis.note ? "text-yellow-400" : "text-gray-300"
-                                      } fill-current`}
-                                      viewBox="0 0 20 20"
-                                    >
-                                      <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                    </svg>
-                                  ))}
-                                </div>
-                                <span className="text-sm font-medium">{avis.client?.nom}</span>
-                              </div>
-                              <p className="text-sm">{avis.commentaire}</p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p>Aucun avis pour le moment</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <button
+                onClick={handleAddToWishlist}
+                className="flex items-center justify-center w-11.5 h-11.5 rounded-md border border-gray-3 ease-out duration-200 hover:border-blue hover:text-blue"
+              >
+                <svg className="fill-current" width="22" height="22" viewBox="0 0 22 22">
+                  <path d="M11.5313 17.6198C11.3875 17.6836 11.2203 17.7179 11.0531 17.7179C10.8859 17.7179 10.7188 17.6836 10.575 17.6198C8.22656 16.5823 0.6875 12.3948 0.6875 6.73105C0.6875 4.3123 2.61406 2.38574 5.03281 2.38574C6.89219 2.38574 8.54844 3.48324 9.37656 5.06886C9.44531 5.20261 9.58594 5.27824 9.72656 5.27824H12.3453C12.4859 5.27824 12.6266 5.20261 12.6953 5.06886C13.5234 3.48324 15.1797 2.38574 17.0391 2.38574C19.4578 2.38574 21.3844 4.3123 21.3844 6.73105C21.3844 12.3948 13.8797 16.5823 11.5313 17.6198Z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>

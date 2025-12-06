@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { favoriService } from "@/services/favori.service";
 import type { Favori } from "@/types/api.types";

@@ -12,9 +12,10 @@ export const categorieService = {
    */
   async getListe(): Promise<Categorie[]> {
     const response = await apiClient.post<{ categories: Categorie[] }>(
-      API_CONFIG.endpoints.categories.liste
+      API_CONFIG.endpoints.categories.liste,
+      {}
     );
-    return response.categories;
+    return response.categories || [];
   },
 
   /**
@@ -29,34 +30,37 @@ export const categorieService = {
   },
 
   /**
-   * Créer une catégorie
+   * Créer une catégorie (Admin)
    */
   async creer(data: Partial<Categorie>): Promise<Categorie> {
     const response = await apiClient.post<{ categorie: Categorie }>(
       API_CONFIG.endpoints.admin.categories.creer,
-      data
+      data,
+      { requiresAuth: true }
     );
     return response.categorie;
   },
 
   /**
-   * Modifier une catégorie
+   * Modifier une catégorie (Admin)
    */
   async modifier(id: number, data: Partial<Categorie>): Promise<Categorie> {
     const response = await apiClient.post<{ categorie: Categorie }>(
       API_CONFIG.endpoints.admin.categories.modifier,
-      { id, ...data }
+      { categorie_id: id, ...data },
+      { requiresAuth: true }
     );
     return response.categorie;
   },
 
   /**
-   * Supprimer une catégorie
+   * Supprimer une catégorie (Admin)
    */
   async supprimer(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.categories.supprimer,
-      { id }
+      { categorie_id: id },
+      { requiresAuth: true }
     );
   },
 };

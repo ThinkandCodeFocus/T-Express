@@ -16,15 +16,24 @@ export const authService = {
    * Inscription d'un nouveau client
    */
   async register(data: RegisterData): Promise<AuthResponse> {
+    // Adapter le payload pour correspondre exactement à ce que le backend attend
+    const registerPayload = {
+      nom: data.nom,
+      prenom: data.prenom,
+      email: data.email,
+      password: data.mot_de_passe,
+      password_confirmation: data.mot_de_passe_confirmation,
+      telephone: data.telephone,
+    };
     const response = await apiClient.post<AuthResponse>(
       API_CONFIG.endpoints.auth.register,
-      data
+      registerPayload
     );
 
     // Sauvegarder le token
     if (response.token) {
       apiClient.setAuthToken(response.token);
-      this.saveUserData(response.client);
+      authService.saveUserData(response.client);
     }
 
     return response;
@@ -34,15 +43,20 @@ export const authService = {
    * Connexion d'un client
    */
   async login(data: LoginData): Promise<AuthResponse> {
+    // Adapter le payload pour correspondre exactement à ce que le backend attend
+    const loginPayload = {
+      email: data.email,
+      mot_de_passe: data.mot_de_passe,
+    };
     const response = await apiClient.post<AuthResponse>(
       API_CONFIG.endpoints.auth.login,
-      data
+      loginPayload
     );
 
     // Sauvegarder le token
     if (response.token) {
       apiClient.setAuthToken(response.token);
-      this.saveUserData(response.client);
+      authService.saveUserData(response.client);
     }
 
     return response;
@@ -60,8 +74,8 @@ export const authService = {
       );
     } finally {
       // Même en cas d'erreur, nettoyer les données locales
-      apiClient.clearAuthToken();
-      this.clearUserData();
+  apiClient.clearAuthToken();
+  authService.clearUserData();
     }
   },
 

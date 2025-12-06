@@ -2,14 +2,13 @@
 
 import { useState } from "react";
 
-const CategoryItem = ({ category }) => {
-  const [selected, setSelected] = useState(false);
+const CategoryItem = ({ category, selected, onToggle }) => {
   return (
     <button
       className={`${
         selected && "text-blue"
       } group flex items-center justify-between ease-out duration-200 hover:text-blue `}
-      onClick={() => setSelected(!selected)}
+      onClick={() => onToggle(category.id)}
     >
       <div className="flex items-center gap-2">
         <div
@@ -49,7 +48,7 @@ const CategoryItem = ({ category }) => {
   );
 };
 
-const CategoryDropdown = ({ categories }) => {
+const CategoryDropdown = ({ categories, selectedCategoryId, onCategoryChange }) => {
   const [toggleDropdown, setToggleDropdown] = useState(true);
 
   return (
@@ -63,7 +62,7 @@ const CategoryDropdown = ({ categories }) => {
           toggleDropdown && "shadow-filter"
         }`}
       >
-        <p className="text-dark">Category</p>
+        <p className="text-dark">Catégorie</p>
         <button
           aria-label="button for category dropdown"
           className={`text-dark ease-out duration-200 ${
@@ -96,7 +95,12 @@ const CategoryDropdown = ({ categories }) => {
         }`}
       >
         {categories.map((category, key) => (
-          <CategoryItem key={key} category={category} />
+          <CategoryItem 
+            key={key} 
+            category={category} 
+            selected={selectedCategoryId === category.id}
+            onToggle={onCategoryChange}
+          />
         ))}
       </div>
     </div>

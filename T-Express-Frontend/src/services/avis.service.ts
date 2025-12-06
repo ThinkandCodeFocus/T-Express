@@ -1,41 +1,59 @@
 /**
- * Service Avis/Reviews
+ * Service Avis (Admin)
  */
 
 import { apiClient } from '@/lib/api-client';
 import { API_CONFIG } from '@/config/api.config';
-import type { SoumettreAvisData, Avis } from '@/types/api.types';
+import type { Avis } from '@/types/api.types';
 
 export const avisService = {
   /**
-   * Soumettre un avis sur un produit
+   * Récupérer la liste des avis
    */
-  async soumettre(data: SoumettreAvisData): Promise<Avis> {
-    const response = await apiClient.post<{ message: string; avis: Avis }>(
-      API_CONFIG.endpoints.avis.soumettre,
-      data,
+  async getListe(page: number = 1, perPage: number = 20, filters?: {
+    produit_id?: number;
+    client_id?: number;
+    note?: number;
+  }): Promise<any> {
+    return apiClient.post(
+      API_CONFIG.endpoints.admin.avis.liste,
+      { page, per_page: perPage, ...filters },
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Récupérer le détail d'un avis
+   */
+  async getDetail(id: number): Promise<Avis> {
+    const response = await apiClient.post<{ avis: Avis }>(
+      API_CONFIG.endpoints.admin.avis.detail,
+      { avis_id: id },
       { requiresAuth: true }
     );
     return response.avis;
   },
 
   /**
-   * Liste des avis (admin)
+   * Modifier un avis
    */
-  async getListe(): Promise<Avis[]> {
-    const response = await apiClient.get<{ avis: Avis[] }>(
-      API_CONFIG.endpoints.admin.avis.liste
+  async modifier(id: number, data: Partial<Avis>): Promise<Avis> {
+    const response = await apiClient.post<{ avis: Avis }>(
+      API_CONFIG.endpoints.admin.avis.modifier,
+      { avis_id: id, ...data },
+      { requiresAuth: true }
     );
     return response.avis;
   },
 
   /**
-   * Supprimer un avis (admin)
+   * Supprimer un avis
    */
   async supprimer(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.avis.supprimer,
-      { id }
+      { avis_id: id },
+      { requiresAuth: true }
     );
   },
 };

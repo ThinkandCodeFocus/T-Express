@@ -14,11 +14,11 @@ export function adaptProduitToProduct(produit: Produit): Product {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
   const storagePath = `${baseUrl}/storage/`;
   
+  const fallback = '/images/products/product-1-bg-1.png';
   const images = produit.images ? JSON.parse(produit.images as any) : [];
   const thumbnails = images.length > 0 
     ? images.map((img: string) => `${storagePath}${img}`)
-    : ['/images/products/default.png'];
-    
+    : [fallback];
   const previews = thumbnails; // Utiliser les mêmes images pour les previews
   
   // Si on a une image principale, l'utiliser en premier

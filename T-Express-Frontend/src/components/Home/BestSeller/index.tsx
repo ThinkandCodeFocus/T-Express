@@ -22,8 +22,49 @@ const BestSeller = () => {
       const produits = await catalogueService.getFeatured(6);
       const adaptedProducts = adaptProduitsToProducts(produits);
       setProducts(adaptedProducts);
-    } catch (error) {
-      console.error('Erreur lors du chargement des best sellers', error);
+    } catch (error: any) {
+      // Extract error information with better handling
+      let errorMessage = 'Erreur inconnue lors du chargement des best sellers';
+      let errorStatus: number | string = 'N/A';
+      let errorDetails: any = {};
+
+      if (!error) {
+        errorMessage = 'Erreur inconnue: aucun détail d\'erreur disponible';
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (typeof error === 'object') {
+        const errorKeys = Object.keys(error);
+        if (errorKeys.length === 0) {
+          errorMessage = 'Erreur inconnue: objet d\'erreur vide. Vérifiez la connexion au serveur.';
+        } else {
+          errorMessage = error.message || errorMessage;
+          errorStatus = error.status || errorStatus;
+          errorDetails = {
+            ...error,
+            name: error.name,
+            stack: error.stack,
+            errors: error.errors,
+          };
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message || 'Erreur lors du chargement des best sellers';
+        errorDetails = {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        };
+      }
+
+      console.error('Erreur lors du chargement des best sellers', {
+        message: errorMessage,
+        status: errorStatus,
+        error: error,
+        errorType: typeof error,
+        errorStringified: JSON.stringify(error),
+        errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
+        details: errorDetails,
+        timestamp: new Date().toISOString(),
+      });
     } finally {
       setLoading(false);
     }
@@ -59,10 +100,10 @@ const BestSeller = () => {
                 width={17}
                 height={17}
               />
-              This Month
+              Ce mois-ci
             </span>
             <h2 className="font-semibold text-xl xl:text-heading-5 text-dark">
-              Best Sellers
+              Meilleures ventes
             </h2>
           </div>
         </div>
@@ -79,7 +120,7 @@ const BestSeller = () => {
             href="/shop-without-sidebar"
             className="inline-flex font-medium text-custom-sm py-3 px-7 sm:px-12.5 rounded-md border-gray-3 border bg-gray-1 text-dark ease-out duration-200 hover:bg-dark hover:text-white hover:border-transparent"
           >
-            View All
+            Voir tout
           </Link>
         </div>
       </div>

@@ -1,6 +1,9 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { clientService } from "@/services/client.service";
 import type { Client } from "@/types/api.types";
+import { LOCALE_CONFIG } from "@/config/api.config";
+import toast from "react-hot-toast";
 
 export default function AdminClients() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -8,30 +11,39 @@ export default function AdminClients() {
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
-  const [form, setForm] = useState({ nom: "", prenom: "", email: "", telephone: "" });
   const [saving, setSaving] = useState(false);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [recherche, setRecherche] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Charger les clients
-  const fetchClients = async () => {
+  const [form, setForm] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    password: "",
+    telephone: "",
+    date_naissance: "",
+  });
+
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await clientService.getListe();
-      setClients(data);
+      const response = await clientService.getListe(currentPage, 20, recherche || undefined);
+      setClients(response.data || []);
+      setTotalPages(response.meta?.last_page || 1);
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des clients.");
+      toast.error(e.message || "Erreur lors du chargement");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchClients();
-  }, []);
+    fetchData();
+  }, [currentPage, recherche]);
 
-  // Ouvrir le modal pour ajouter/modifier
   const openModal = (client?: Client) => {
     if (client) {
       setEditClient(client);
@@ -39,198 +51,333 @@ export default function AdminClients() {
         nom: client.nom,
         prenom: client.prenom,
         email: client.email,
+        password: "",
         telephone: client.telephone || "",
+        date_naissance: client.date_naissance || "",
       });
     } else {
       setEditClient(null);
-      setForm({ nom: "", prenom: "", email: "", telephone: "" });
+      setForm({
+        nom: "",
+        prenom: "",
+        email: "",
+        password: "",
+        telephone: "",
+        date_naissance: "",
+      });
     }
     setShowModal(true);
   };
 
-  // Fermer le modal
   const closeModal = () => {
     setShowModal(false);
     setEditClient(null);
-    setForm({ nom: "", prenom: "", email: "", telephone: "" });
   };
 
-  // Gérer le formulaire
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Sauvegarder (ajout ou modification)
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      const data: any = {
+        nom: form.nom,
+        prenom: form.prenom,
+        email: form.email,
+        telephone: form.telephone || undefined,
+        date_naissance: form.date_naissance || undefined,
+      };
+      if (form.password) {
+        data.password = form.password;
+      }
       if (editClient) {
-        await clientService.modifier(editClient.id, form);
+        await clientService.modifier(editClient.id, data);
+        toast.success("Client modifié avec succès");
       } else {
-        await clientService.creer(form);
+        if (!form.password) {
+          toast.error("Le mot de passe est requis pour créer un client");
+          setSaving(false);
+          return;
+        }
+        await clientService.creer(data);
+        toast.success("Client créé avec succès");
       }
       closeModal();
-      fetchClients();
+      fetchData();
     } catch (e: any) {
-      setError(e.message || "Erreur lors de l'enregistrement.");
+      toast.error(e.message || "Erreur lors de l'enregistrement.");
     } finally {
       setSaving(false);
     }
   };
 
-  // Supprimer un client
   const handleDelete = async (id: number) => {
     if (!window.confirm("Confirmer la suppression de ce client ?")) return;
-    setDeleteId(id);
-    setDeleteLoading(true);
     try {
       await clientService.supprimer(id);
-      fetchClients();
+      toast.success("Client supprimé avec succès");
+      fetchData();
     } catch (e: any) {
-      setError(e.message || "Erreur lors de la suppression.");
-    } finally {
-      setDeleteId(null);
-      setDeleteLoading(false);
+      toast.error(e.message || "Erreur lors de la suppression.");
     }
   };
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Gestion des clients</h1>
-      <div className="mb-4 flex justify-end">
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition"
-          onClick={() => openModal()}
-        >
-          Ajouter un client
-        </button>
+    <div className="p-6 lg:p-8">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-dark mb-2">Gestion des clients</h1>
+            <p className="text-dark-4">Gérez vos clients et leurs informations</p>
+          </div>
+          <button
+            onClick={() => openModal()}
+            className="bg-gradient-to-r from-blue to-blue-dark text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Ajouter un client
+          </button>
+        </div>
+
+        {/* Recherche */}
+        <div className="mb-6">
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="Rechercher un client..."
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+              className="w-full border border-gray-3 rounded-lg px-4 py-3 pl-10 focus:ring-2 focus:ring-blue focus:border-transparent"
+            />
+            <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-dark-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
       </div>
-      <div className="bg-white rounded shadow p-6">
+
+      <div className="bg-white rounded-xl shadow-2 border border-gray-3 overflow-hidden">
         {loading ? (
-          <div>Chargement...</div>
+          <div className="flex items-center justify-center py-20">
+            <div className="w-16 h-16 border-4 border-blue-light-5 border-t-blue rounded-full animate-spin"></div>
+          </div>
         ) : error ? (
-          <div className="text-red-600 mb-4">{error}</div>
+          <div className="bg-red-light-6 border-2 border-red-light-3 rounded-xl p-6 m-6">
+            <div className="flex items-start gap-4">
+              <div className="bg-red p-3 rounded-xl text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-red-dark mb-2">Erreur</h3>
+                <p className="text-red-dark mb-4">{error}</p>
+                <button
+                  onClick={fetchData}
+                  className="bg-red text-white px-4 py-2 rounded-lg font-medium hover:bg-red-dark transition-colors"
+                >
+                  Réessayer
+                </button>
+              </div>
+            </div>
+          </div>
         ) : (
-          <table className="w-full text-left">
-            <thead>
-              <tr>
-                <th className="py-2 px-3">ID</th>
-                <th className="py-2 px-3">Nom</th>
-                <th className="py-2 px-3">Prénom</th>
-                <th className="py-2 px-3">Email</th>
-                <th className="py-2 px-3">Téléphone</th>
-                <th className="py-2 px-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clients.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-4">Aucun client trouvé.</td>
-                </tr>
-              ) : (
-                clients.map((client) => (
-                  <tr key={client.id}>
-                    <td className="py-2 px-3">{client.id}</td>
-                    <td className="py-2 px-3">{client.nom}</td>
-                    <td className="py-2 px-3">{client.prenom}</td>
-                    <td className="py-2 px-3">{client.email}</td>
-                    <td className="py-2 px-3">{client.telephone}</td>
-                    <td className="py-2 px-3">
-                      <button
-                        className="text-blue-600 hover:underline mr-2"
-                        onClick={() => openModal(client)}
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        className="text-red-600 hover:underline"
-                        disabled={deleteLoading && deleteId === client.id}
-                        onClick={() => handleDelete(client.id)}
-                      >
-                        {deleteLoading && deleteId === client.id ? "Suppression..." : "Supprimer"}
-                      </button>
-                    </td>
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-1 border-b border-gray-3">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Nom complet</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Email</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Téléphone</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Date d'inscription</th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-dark-4 uppercase">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-y divide-gray-3">
+                  {clients.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center">
+                          <svg className="w-16 h-16 text-gray-4 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          <p className="text-dark-4 text-lg">Aucun client trouvé</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    clients.map((client) => (
+                      <tr key={client.id} className="hover:bg-gray-1 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-dark">{client.id}</td>
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-semibold text-dark">{client.prenom} {client.nom}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-dark">{client.email}</td>
+                        <td className="px-6 py-4 text-dark-4">{client.telephone || "-"}</td>
+                        <td className="px-6 py-4 text-dark-4">
+                          {LOCALE_CONFIG.formatDate(client.created_at)}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => openModal(client)}
+                              className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
+                              title="Modifier"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(client.id)}
+                              className="p-2 text-red hover:bg-red-light-6 rounded-lg transition-colors"
+                              title="Supprimer"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div className="px-6 py-4 border-t border-gray-3 flex items-center justify-between">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border border-gray-3 hover:bg-gray-1 disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                <span className="text-dark-4">Page {currentPage} sur {totalPages}</span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border border-gray-3 hover:bg-gray-1 disabled:opacity-50"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Modal d'ajout/modification */}
+      {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow-lg p-8 w-full max-w-md relative">
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-              onClick={closeModal}
-            >
-              ×
-            </button>
-            <h2 className="text-xl font-semibold mb-4">
-              {editClient ? "Modifier le client" : "Ajouter un client"}
-            </h2>
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block mb-1 font-medium">Nom</label>
-                <input
-                  type="text"
-                  name="nom"
-                  value={form.nom}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded px-3 py-2"
-                />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-3 w-full max-w-2xl relative">
+            <div className="sticky top-0 bg-white border-b border-gray-3 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-dark">
+                {editClient ? "Modifier le client" : "Ajouter un client"}
+              </h2>
+              <button onClick={closeModal} className="p-2 hover:bg-gray-1 rounded-lg">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Nom *</label>
+                  <input
+                    type="text"
+                    name="nom"
+                    value={form.nom}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Prénom *</label>
+                  <input
+                    type="text"
+                    name="prenom"
+                    value={form.prenom}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Email *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">
+                    Mot de passe {!editClient && '*'}
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    required={!editClient}
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                    placeholder={editClient ? "Laisser vide pour ne pas changer" : ""}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Téléphone</label>
+                  <input
+                    type="tel"
+                    name="telephone"
+                    value={form.telephone}
+                    onChange={handleChange}
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-dark mb-2">Date de naissance</label>
+                  <input
+                    type="date"
+                    name="date_naissance"
+                    value={form.date_naissance}
+                    onChange={handleChange}
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block mb-1 font-medium">Prénom</label>
-                <input
-                  type="text"
-                  name="prenom"
-                  value={form.prenom}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 font-medium">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block mb-1 font-medium">Téléphone</label>
-                <input
-                  type="text"
-                  name="telephone"
-                  value={form.telephone}
-                  onChange={handleChange}
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-3">
                 <button
                   type="button"
-                  className="px-4 py-2 rounded border"
                   onClick={closeModal}
+                  className="px-6 py-3 border border-gray-3 rounded-lg font-medium hover:bg-gray-1"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition"
                   disabled={saving}
+                  className="px-6 py-3 bg-gradient-to-r from-blue to-blue-dark text-white rounded-lg font-semibold hover:shadow-lg disabled:opacity-50 flex items-center gap-2"
                 >
-                  {saving ? "Enregistrement..." : "Enregistrer"}
+                  {saving ? "Enregistrement..." : editClient ? "Modifier" : "Créer"}
                 </button>
               </div>
             </form>

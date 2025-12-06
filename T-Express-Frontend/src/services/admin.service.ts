@@ -90,6 +90,9 @@ export const adminService = {
         value.forEach((item) => {
           formData.append(`${key}[]`, item.toString());
         });
+      } else if (typeof value === 'boolean') {
+        // Convertir les booléens en "1" ou "0" pour Laravel
+        formData.append(key, value ? '1' : '0');
       } else {
         formData.append(key, value.toString());
       }
@@ -122,6 +125,9 @@ export const adminService = {
       if (value !== undefined && value !== null) {
         if (value instanceof File) {
           formData.append(key, value);
+        } else if (typeof value === 'boolean') {
+          // Convertir les booléens en "1" ou "0" pour Laravel
+          formData.append(key, value ? '1' : '0');
         } else {
           formData.append(key, value.toString());
         }
@@ -148,6 +154,9 @@ export const adminService = {
       if (value !== undefined && value !== null) {
         if (value instanceof File) {
           formData.append(key, value);
+        } else if (typeof value === 'boolean') {
+          // Convertir les booléens en "1" ou "0" pour Laravel
+          formData.append(key, value ? '1' : '0');
         } else {
           formData.append(key, value.toString());
         }
@@ -249,12 +258,114 @@ export const adminService = {
    * Récupérer les statistiques du dashboard
    */
   async getDashboardStats(): Promise<DashboardStats> {
-    // TODO: Endpoint à créer côté backend
     const response = await apiClient.post<{ stats: DashboardStats }>(
-      '/admin/dashboard/stats',
+      API_CONFIG.endpoints.admin.dashboard.stats,
       {},
       { requiresAuth: true }
     );
     return response.stats;
+  },
+
+  // ========== Sections Hero ==========
+  
+  /**
+   * Récupérer la liste des sections hero
+   */
+  async getHeroSections(): Promise<any[]> {
+    const response = await apiClient.post<{ sections: any[] }>(
+      API_CONFIG.endpoints.admin.hero.liste,
+      {},
+      { requiresAuth: true }
+    );
+    return response.sections;
+  },
+
+  /**
+   * Créer une section hero
+   */
+  async creerHeroSection(data: any): Promise<any> {
+    const formData = new FormData();
+    
+    // Le type est toujours requis - l'ajouter en premier
+    formData.append('type', data.type || 'carousel');
+    
+    // Ajouter tous les autres champs au FormData
+    Object.keys(data).forEach((key) => {
+      if ((key === 'image' || key === 'image_fond' || key === 'image_produit') && data[key] instanceof File) {
+        formData.append(key, data[key]);
+      } else if (key === 'type') {
+        // Déjà ajouté ci-dessus, mais on peut le réécraser si nécessaire
+        return;
+      } else if (key === 'actif') {
+        // Convertir boolean en string pour FormData
+        formData.append(key, data[key] ? '1' : '0');
+      } else if (key === 'ordre') {
+        // Toujours envoyer l'ordre, même si 0
+        formData.append(key, String(data[key] || 0));
+      } else if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+        // Convertir en string pour FormData
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    const response = await apiClient.upload<{ message: string; section: any }>(
+      API_CONFIG.endpoints.admin.hero.creer,
+      formData,
+      { requiresAuth: true }
+    );
+    
+    return response.section;
+  },
+
+  /**
+   * Modifier une section hero
+   */
+  async modifierHeroSection(id: number, data: any): Promise<any> {
+    const formData = new FormData();
+    formData.append('hero_section_id', id.toString());
+    
+    // Ajouter tous les champs au FormData
+    Object.keys(data).forEach((key) => {
+      if ((key === 'image' || key === 'image_fond' || key === 'image_produit') && data[key] instanceof File) {
+        formData.append(key, data[key]);
+      } else if (key === 'actif') {
+        // Convertir boolean en string pour FormData
+        formData.append(key, data[key] ? '1' : '0');
+      } else if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+        // Convertir en string pour FormData
+        formData.append(key, String(data[key]));
+      }
+    });
+
+    const response = await apiClient.upload<{ message: string; section: any }>(
+      API_CONFIG.endpoints.admin.hero.modifier,
+      formData,
+      { requiresAuth: true }
+    );
+    
+    return response.section;
+  },
+
+  /**
+   * Supprimer une section hero
+   */
+  async supprimerHeroSection(id: number): Promise<void> {
+    await apiClient.post(
+      API_CONFIG.endpoints.admin.hero.supprimer,
+      { hero_section_id: id },
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Activer/Désactiver une section hero
+   */
+  async toggleHeroSectionActif(id: number): Promise<any> {
+    const response = await apiClient.post<{ message: string; section: any }>(
+      API_CONFIG.endpoints.admin.hero.toggleActif,
+      { hero_section_id: id },
+      { requiresAuth: true }
+    );
+    return response.section;
   },
 };

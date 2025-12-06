@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
@@ -21,6 +21,23 @@ const QuickViewModal = () => {
   const product = useAppSelector((state) => state.quickViewReducer.value);
 
   const [activePreview, setActivePreview] = useState(0);
+  const fallbackImage = "/images/products/product-1-bg-1.png";
+
+  const thumbnails = useMemo(() => {
+    const source = product?.imgs?.thumbnails;
+    if (Array.isArray(source) && source.length > 0) {
+      return source;
+    }
+    return [fallbackImage];
+  }, [product?.imgs?.thumbnails]);
+
+  const previews = useMemo(() => {
+    const source = product?.imgs?.previews;
+    if (Array.isArray(source) && source.length > 0) {
+      return source;
+    }
+    return [fallbackImage];
+  }, [product?.imgs?.previews]);
 
   // preview modal
   const handlePreviewSlider = () => {
@@ -60,6 +77,16 @@ const QuickViewModal = () => {
     };
   }, [isModalOpen, closeModal]);
 
+  useEffect(() => {
+    setActivePreview(0);
+  }, [product]);
+
+  useEffect(() => {
+    if (activePreview >= previews.length) {
+      setActivePreview(0);
+    }
+  }, [previews, activePreview]);
+
   return (
     <div
       className={`${
@@ -94,7 +121,7 @@ const QuickViewModal = () => {
             <div className="max-w-[526px] w-full">
               <div className="flex gap-5">
                 <div className="flex flex-col gap-5">
-                  {product.imgs.thumbnails?.map((img, key) => (
+                  {thumbnails.map((img, key) => (
                     <button
                       onClick={() => setActivePreview(key)}
                       key={key}
@@ -103,7 +130,7 @@ const QuickViewModal = () => {
                       }`}
                     >
                       <Image
-                        src={img || ""}
+                        src={img || fallbackImage}
                         alt="thumbnail"
                         width={61}
                         height={61}
@@ -138,7 +165,7 @@ const QuickViewModal = () => {
                     </button>
 
                     <Image
-                      src={product?.imgs?.previews?.[activePreview]}
+                      src={previews[activePreview] || fallbackImage}
                       alt="products-details"
                       width={400}
                       height={400}

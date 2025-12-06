@@ -8,23 +8,58 @@ import type { Livraison } from '@/types/api.types';
 
 export const livraisonService = {
   /**
-   * Liste des livraisons (admin)
+   * Récupérer la liste des livraisons
    */
-  async getListe(): Promise<Livraison[]> {
-    const response = await apiClient.get<{ livraisons: Livraison[] }>(
-      API_CONFIG.endpoints.admin.livraisons.liste
+  async getListe(page: number = 1, perPage: number = 20, statut?: string): Promise<any> {
+    return apiClient.post(
+      API_CONFIG.endpoints.admin.livraisons.liste,
+      { page, per_page: perPage, statut },
+      { requiresAuth: true }
     );
-    return response.livraisons;
   },
 
   /**
-   * Modifier le statut d'une livraison (admin)
+   * Récupérer le détail d'une livraison
    */
-  async update(id: number, statut: string): Promise<Livraison> {
+  async getDetail(id: number): Promise<Livraison> {
     const response = await apiClient.post<{ livraison: Livraison }>(
-      API_CONFIG.endpoints.admin.livraisons.update,
-      { id, statut }
+      API_CONFIG.endpoints.admin.livraisons.detail,
+      { livraison_id: id },
+      { requiresAuth: true }
     );
     return response.livraison;
+  },
+
+  /**
+   * Modifier le statut d'une livraison
+   */
+  async modifierStatut(
+    id: number,
+    statut: string,
+    numeroSuivi?: string,
+    dateLivraisonPrevue?: string
+  ): Promise<Livraison> {
+    const response = await apiClient.post<{ livraison: Livraison }>(
+      API_CONFIG.endpoints.admin.livraisons.modifierStatut,
+      {
+        livraison_id: id,
+        statut,
+        numero_suivi: numeroSuivi,
+        date_livraison_prevue: dateLivraisonPrevue,
+      },
+      { requiresAuth: true }
+    );
+    return response.livraison;
+  },
+
+  /**
+   * Supprimer une livraison
+   */
+  async supprimer(id: number): Promise<{ message: string }> {
+    return apiClient.post<{ message: string }>(
+      API_CONFIG.endpoints.admin.livraisons.supprimer,
+      { livraison_id: id },
+      { requiresAuth: true }
+    );
   },
 };

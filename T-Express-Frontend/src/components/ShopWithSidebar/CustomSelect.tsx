@@ -3,12 +3,24 @@ import React, { useState, useEffect, useRef } from "react";
 interface CustomSelectProps {
   options: Array<{ label: string; value: string }>;
   onChange?: (value: string) => void;
+  value?: string;
 }
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, onChange }) => {
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, onChange, value }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(options[0]);
+  const selectedOptionFromValue = value ? options.find(opt => opt.value === value) || options[0] : options[0];
+  const [selectedOption, setSelectedOption] = useState(selectedOptionFromValue);
   const selectRef = useRef(null);
+
+  // Mettre à jour la sélection si la valeur change
+  useEffect(() => {
+    if (value) {
+      const option = options.find(opt => opt.value === value);
+      if (option) {
+        setSelectedOption(option);
+      }
+    }
+  }, [value, options]);
 
   // Function to close the dropdown when a click occurs outside the component
   const handleClickOutside = (event) => {

@@ -3,17 +3,20 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { AppDispatch, useAppSelector } from "@/redux/store";
-import { addItemToCart } from "@/redux/features/cart-slice";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
+import { formatPrice } from "@/lib/utils";
+import { usePanierContext } from "@/context/PanierContext";
+import toast from "react-hot-toast";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
   const { openPreviewModal } = usePreviewSlider();
   const [quantity, setQuantity] = useState(1);
+  const { ajouter } = usePanierContext();
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -47,15 +50,18 @@ const QuickViewModal = () => {
   };
 
   // add to cart
-  const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...product,
-        quantity,
-      })
-    );
-
-    closeModal();
+  const handleAddToCart = async () => {
+    if (product?.id) {
+      try {
+        await ajouter({
+          produit_id: product.id,
+          quantite: quantity,
+        });
+        closeModal();
+      } catch (error: any) {
+        toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+      }
+    }
   };
 
   useEffect(() => {
@@ -337,15 +343,15 @@ const QuickViewModal = () => {
               <div className="flex flex-wrap justify-between gap-5 mt-6 mb-7.5">
                 <div>
                   <h4 className="font-semibold text-lg text-dark mb-3.5">
-                    Price
+                    Prix
                   </h4>
 
                   <span className="flex items-center gap-2">
                     <span className="font-semibold text-dark text-xl xl:text-heading-4">
-                      ${product.discountedPrice}
+                      {formatPrice(product.discountedPrice)}
                     </span>
                     <span className="font-medium text-dark-4 text-lg xl:text-2xl line-through">
-                      ${product.price}
+                      {formatPrice(product.price)}
                     </span>
                   </span>
                 </div>

@@ -34,8 +34,10 @@ export const favoriService = {
    * Liste des favoris (admin)
    */
   async getListeAdmin(): Promise<Favori[]> {
-    const response = await apiClient.get<{ favoris: Favori[] }>(
-      API_CONFIG.endpoints.admin.favoris.liste
+    const response = await apiClient.post<{ favoris: Favori[] }>(
+      API_CONFIG.endpoints.admin.favoris.liste,
+      {},
+      { requiresAuth: true }
     );
     return response.favoris;
   },
@@ -46,7 +48,8 @@ export const favoriService = {
   async supprimerAdmin(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.favoris.supprimer,
-      { id }
+      { id },
+      { requiresAuth: true }
     );
   },
 };

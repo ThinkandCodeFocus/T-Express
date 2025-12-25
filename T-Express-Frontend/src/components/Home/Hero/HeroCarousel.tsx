@@ -1,85 +1,28 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
-import { useEffect, useState } from "react";
 
 // Import Swiper styles
 import "swiper/css/pagination";
 import "swiper/css";
 
 import Image from "next/image";
-import React from "react";
-import { heroService, type HeroSection } from "@/services/hero.service";
+import React, { useMemo } from "react";
+import { useHeroContext } from "@/context/HeroContext";
+import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
 
 const HeroCarousal = () => {
-  const [slides, setSlides] = useState<HeroSection[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useHeroContext();
 
-  useEffect(() => {
-    loadSlides();
-  }, []);
-
-  const loadSlides = async () => {
-    try {
-      setLoading(true);
-      const response = await heroService.getListe();
-      const carouselSlides = response.grouped.carousel || [];
-      // Trier par ordre pour conserver la position
-      const sortedSlides = [...carouselSlides].sort((a, b) => {
-        return (a.ordre || 0) - (b.ordre || 0);
-      });
-      setSlides(sortedSlides);
-    } catch (error: any) {
-      // Extract error information with better handling
-      let errorMessage = 'Erreur inconnue lors du chargement du carousel hero';
-      let errorStatus: number | string = 'N/A';
-      let errorDetails: any = {};
-
-      if (!error) {
-        errorMessage = 'Erreur inconnue: aucun détail d\'erreur disponible';
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (typeof error === 'object') {
-        const errorKeys = Object.keys(error);
-        if (errorKeys.length === 0) {
-          errorMessage = 'Erreur inconnue: objet d\'erreur vide. Vérifiez la connexion au serveur.';
-        } else {
-          errorMessage = error.message || errorMessage;
-          errorStatus = error.status || errorStatus;
-          errorDetails = {
-            ...error,
-            name: error.name,
-            stack: error.stack,
-            errors: error.errors,
-          };
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message || 'Erreur lors du chargement du carousel hero';
-        errorDetails = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        };
-      }
-
-      console.error('Erreur lors du chargement du carousel hero', {
-        message: errorMessage,
-        status: errorStatus,
-        error: error,
-        errorType: typeof error,
-        errorStringified: JSON.stringify(error),
-        errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
-        details: errorDetails,
-        timestamp: new Date().toISOString(),
-      });
-
-      // En cas d'erreur, utiliser des données par défaut
-      setSlides([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Extraire et trier les slides du carousel depuis le contexte
+  const slides = useMemo(() => {
+    if (!data) return [];
+    const carouselSlides = data.grouped.carousel || [];
+    return [...carouselSlides].sort((a, b) => {
+      return (a.ordre || 0) - (b.ordre || 0);
+    });
+  }, [data]);
 
   const getImageUrl = (imagePath: string | null) => {
     if (!imagePath) return "/images/hero/hero-01.png";
@@ -141,19 +84,19 @@ const HeroCarousal = () => {
                     ))
                   ) : (
                     <>
-                      Sale
+                      Promotion
                       <br />
-                      Off
+                      En cours
                     </>
                   )}
                 </span>
               </div>
 
               <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-                {slide.lien_url ? (
+                {slide.lien_url && slide.lien_url.startsWith('/') ? (
                   <a href={slide.lien_url}>{slide.titre || "True Wireless Noise Cancelling Headphone"}</a>
                 ) : (
-                  <a href="#">{slide.titre || "True Wireless Noise Cancelling Headphone"}</a>
+                  <span>{slide.titre || "True Wireless Noise Cancelling Headphone"}</span>
                 )}
               </h1>
 
@@ -162,10 +105,10 @@ const HeroCarousal = () => {
               </p>
 
               <a
-                href={slide.lien_url || "#"}
+                href={slide.lien_url && slide.lien_url.startsWith('/') ? slide.lien_url : "#"}
                 className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
               >
-                {slide.texte_bouton || "Shop Now"}
+                {slide.texte_bouton || "Acheter maintenant"}
               </a>
             </div>
 

@@ -65,6 +65,18 @@ const BestSeller = () => {
         details: errorDetails,
         timestamp: new Date().toISOString(),
       });
+
+      // Check for timeout errors
+      if (errorStatus === 408 || errorMessage?.includes('expiré') || errorMessage?.includes('timeout')) {
+        console.warn(
+          '⚠️ Timeout: Le backend ne répond pas assez rapidement. ' +
+          'L\'application fonctionne en mode hors ligne. ' +
+          'Vérifiez que le serveur Laravel est démarré sur http://localhost:8000'
+        );
+      }
+
+      // En cas d'erreur, utiliser un tableau vide pour que l'application continue de fonctionner
+      setProducts([]);
     } finally {
       setLoading(false);
     }

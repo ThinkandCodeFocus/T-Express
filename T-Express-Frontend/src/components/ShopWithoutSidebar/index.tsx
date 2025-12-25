@@ -18,6 +18,7 @@ const ShopWithoutSidebar = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [perPage] = useState(12);
+  const [mounted, setMounted] = useState(false);
 
   const options = [
     { label: "Latest Products", value: "0" },
@@ -25,9 +26,16 @@ const ShopWithoutSidebar = () => {
     { label: "Old Products", value: "2" },
   ];
 
+  // Vérifier que le composant est monté côté client
   useEffect(() => {
-    loadProducts();
-  }, [selectedSort, currentPage]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      loadProducts();
+    }
+  }, [selectedSort, currentPage, mounted]);
 
   const loadProducts = async () => {
     try {
@@ -182,7 +190,7 @@ const ShopWithoutSidebar = () => {
               </div>
 
               {/* <!-- Products Grid Tab Content Start --> */}
-              {loading ? (
+              {!mounted || loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7.5 gap-y-9">
                   {[...Array(8)].map((_, i) => (
                     <div key={i} className="animate-pulse">

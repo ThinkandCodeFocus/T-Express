@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { adresseService } from "@/services/adresse.service";
 import type { Adresse } from "@/types/api.types";

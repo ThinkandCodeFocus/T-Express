@@ -12,7 +12,9 @@ export const stockService = {
    */
   async getListe(): Promise<Stock[]> {
     const response = await apiClient.post<{ stock: Stock[] }>(
-      API_CONFIG.endpoints.admin.stock.liste
+      API_CONFIG.endpoints.admin.stock.liste,
+      {},
+      { requiresAuth: true }
     );
     return response.stock;
   },
@@ -21,9 +23,13 @@ export const stockService = {
    * Modifier un stock (admin)
    */
   async update(produitId: number, quantite: number): Promise<Stock> {
-    return apiClient.post<Stock>(API_CONFIG.endpoints.admin.stock.update, {
-      produit_id: produitId,
-      quantite,
-    });
+    return apiClient.post<Stock>(
+      API_CONFIG.endpoints.admin.stock.update,
+      {
+        produit_id: produitId,
+        quantite,
+      },
+      { requiresAuth: true }
+    );
   },
 };

@@ -1,84 +1,22 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { heroService, type HeroSection } from "@/services/hero.service";
+import { useHeroContext } from "@/context/HeroContext";
+import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
 
 const CounDown = () => {
-  const [countdownSection, setCountdownSection] = useState<HeroSection | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useHeroContext();
   const [days, setDays] = useState(0);
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
 
-  useEffect(() => {
-    loadCountdownSection();
-  }, []);
-
-  const loadCountdownSection = async () => {
-    try {
-      setLoading(true);
-      const response = await heroService.getListe();
-      const countdown = response.grouped.countdown?.[0] || null;
-      setCountdownSection(countdown);
-      
-      // Utiliser la date de la base ou une date par défaut
-      const deadline = countdown?.date_fin_countdown 
-        ? new Date(countdown.date_fin_countdown).toISOString()
-        : "December, 31, 2024";
-      
-      getTime(deadline);
-    } catch (error: any) {
-      // Extract error information with better handling
-      let errorMessage = 'Erreur inconnue lors du chargement de la section countdown';
-      let errorStatus: number | string = 'N/A';
-      let errorDetails: any = {};
-
-      if (!error) {
-        errorMessage = 'Erreur inconnue: aucun détail d\'erreur disponible';
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (typeof error === 'object') {
-        const errorKeys = Object.keys(error);
-        if (errorKeys.length === 0) {
-          errorMessage = 'Erreur inconnue: objet d\'erreur vide. Vérifiez la connexion au serveur.';
-        } else {
-          errorMessage = error.message || errorMessage;
-          errorStatus = error.status || errorStatus;
-          errorDetails = {
-            ...error,
-            name: error.name,
-            stack: error.stack,
-            errors: error.errors,
-          };
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message || 'Erreur lors du chargement de la section countdown';
-        errorDetails = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        };
-      }
-
-      console.error('Erreur lors du chargement de la section countdown', {
-        message: errorMessage,
-        status: errorStatus,
-        error: error,
-        errorType: typeof error,
-        errorStringified: JSON.stringify(error),
-        errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
-        details: errorDetails,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Utiliser une date par défaut en cas d'erreur
-      getTime("December, 31, 2024");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Extraire la section countdown depuis le contexte
+  const countdownSection = useMemo(() => {
+    if (!data) return null;
+    return data.grouped.countdown?.[0] || null;
+  }, [data]);
 
   const getTime = (deadline: string) => {
     const time = Date.parse(deadline) - Date.now();
@@ -90,15 +28,14 @@ const CounDown = () => {
   };
 
   useEffect(() => {
-    if (countdownSection?.date_fin_countdown) {
-      const deadline = new Date(countdownSection.date_fin_countdown).toISOString();
-      const interval = setInterval(() => getTime(deadline), 1000);
-      return () => clearInterval(interval);
-    } else {
-      const deadline = "December, 31, 2024";
-      const interval = setInterval(() => getTime(deadline), 1000);
-      return () => clearInterval(interval);
-    }
+    // Utiliser la date de la base ou une date par défaut
+    const deadline = countdownSection?.date_fin_countdown 
+      ? new Date(countdownSection.date_fin_countdown).toISOString()
+      : "December, 31, 2024";
+    
+    getTime(deadline);
+    const interval = setInterval(() => getTime(deadline), 1000);
+    return () => clearInterval(interval);
   }, [countdownSection]);
 
   const getImageUrl = (imagePath: string | null, defaultPath: string) => {
@@ -108,11 +45,11 @@ const CounDown = () => {
   };
 
   // Utiliser les données de la base ou les valeurs par défaut
-  const sousTitre = countdownSection?.sous_titre || "Don't Miss!!";
-  const titre = countdownSection?.titre || "Enhance Your Music Experience";
-  const description = countdownSection?.description || "The Havit H206d is a wired PC headphone.";
-  const texteBouton = countdownSection?.texte_bouton || "Check it Out!";
-  const lienUrl = countdownSection?.lien_url || "#";
+  const sousTitre = countdownSection?.sous_titre || "Ne manquez pas !!";
+  const titre = countdownSection?.titre || "Améliorez votre expérience musicale";
+  const description = countdownSection?.description || "Découvrez nos produits audio de qualité supérieure pour une expérience d'écoute exceptionnelle.";
+  const texteBouton = countdownSection?.texte_bouton || "Découvrir maintenant";
+  const lienUrl = (countdownSection?.lien_url && countdownSection.lien_url.startsWith('/')) ? countdownSection.lien_url : "#";
   const imageFond = countdownSection?.image_fond;
   const imageProduit = countdownSection?.image_produit;
 
@@ -139,7 +76,7 @@ const CounDown = () => {
                   {days < 10 ? "0" + days : days}
                 </span>
                 <span className="block text-custom-sm text-dark text-center">
-                  Days
+                  Jours
                 </span>
               </div>
 
@@ -149,7 +86,7 @@ const CounDown = () => {
                   {hours < 10 ? "0" + hours : hours}
                 </span>
                 <span className="block text-custom-sm text-dark text-center">
-                  Hours
+                  Heures
                 </span>
               </div>
 
@@ -169,7 +106,7 @@ const CounDown = () => {
                   {seconds < 10 ? "0" + seconds : seconds}
                 </span>
                 <span className="block text-custom-sm text-dark text-center">
-                  Seconds
+                  Secondes
                 </span>
               </div>
             </div>

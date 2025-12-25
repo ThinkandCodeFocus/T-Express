@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const menu = [
   { 
@@ -136,8 +137,14 @@ export default function AdminSidebar() {
             </svg>
           </div>
           <div>
-            <h2 className="text-xl font-bold text-dark">T-Express</h2>
-            <p className="text-xs text-dark-4">Administration</p>
+            <Image
+              src="/images/logo/logo.png"
+              alt="T-Express Logo"
+              width={150}
+              height={50}
+              className="h-auto w-auto max-h-12 object-contain"
+            />
+            <p className="text-xs text-dark-4 mt-2">Administration</p>
           </div>
         </div>
       </div>

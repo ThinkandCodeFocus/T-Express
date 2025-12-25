@@ -6,6 +6,7 @@ import Newsletter from "../Common/Newsletter";
 import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
+import { formatPrice } from "@/lib/utils";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
@@ -317,11 +318,11 @@ const ShopDetails = () => {
 
                   <h3 className="font-medium text-custom-1 mb-4.5">
                     <span className="text-sm sm:text-base text-dark">
-                      Price: ${product.price}
+                      Prix : {formatPrice(product.price)}
                     </span>
                     <span className="line-through">
                       {" "}
-                      ${product.discountedPrice}{" "}
+                      {formatPrice(product.discountedPrice)}{" "}
                     </span>
                   </h3>
 

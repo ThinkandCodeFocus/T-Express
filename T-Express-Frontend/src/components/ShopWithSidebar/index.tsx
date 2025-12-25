@@ -18,6 +18,7 @@ const ShopWithSidebar = () => {
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
   // États pour les données
   const [products, setProducts] = useState<Product[]>([]);
@@ -55,15 +56,22 @@ const ShopWithSidebar = () => {
     { label: "Prix : Décroissant", value: "prix:desc" },
   ];
 
+  // Vérifier que le composant est monté côté client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Charger les catégories et produits au montage
   useEffect(() => {
-    loadCategories();
-    loadProducts();
-  }, []);
+    if (mounted) {
+      loadCategories();
+      loadProducts();
+    }
+  }, [mounted]);
 
   // Recharger les produits quand les filtres changent
   useEffect(() => {
-    if (!loading) {
+    if (mounted && !loading) {
       // Réinitialiser à la page 1 quand les filtres changent
       setPagination(prev => {
         if (prev.currentPage !== 1) {
@@ -73,14 +81,14 @@ const ShopWithSidebar = () => {
       });
       loadProducts();
     }
-  }, [filters]);
+  }, [filters, mounted]);
 
   // Recharger les produits quand la page change
   useEffect(() => {
-    if (!loading && pagination.currentPage > 0) {
+    if (mounted && !loading && pagination.currentPage > 0) {
       loadProducts();
     }
-  }, [pagination.currentPage]);
+  }, [pagination.currentPage, mounted]);
 
   const loadCategories = async () => {
     try {
@@ -386,7 +394,7 @@ const ShopWithSidebar = () => {
               </div>
 
               {/* <!-- Products Grid Tab Content Start --> */}
-              {loading ? (
+              {!mounted || loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-7.5 gap-y-9">
                   {[...Array(9)].map((_, i) => (
                     <div key={i} className="animate-pulse">

@@ -9,6 +9,16 @@ const nextConfig = {
         pathname: "/storage/**",
       },
     ],
+    // Disable image optimization in development to avoid timeout issues
+    // Images will be served directly without optimization, which is faster for development
+    unoptimized: process.env.NODE_ENV === 'development',
+    // Increase cache TTL
+    minimumCacheTTL: 60,
+    // Add device sizes and image sizes
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Add formats
+    formats: ['image/avif', 'image/webp'],
   },
 };
 

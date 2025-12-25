@@ -16,6 +16,8 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import PreLoader from "@/components/Common/PreLoader";
 import { AuthProvider } from "@/context/AuthContext";
+import { PanierProvider } from "@/context/PanierContext";
+import { HeroProvider } from "@/context/HeroContext";
 
 export default function RootLayout({
   children,
@@ -29,19 +31,20 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body>
-        {loading ? (
-          <PreLoader />
-        ) : (
-          <>
-            <ReduxProvider>
-              <AuthProvider>
-                <CartModalProvider>
-                  <ModalProvider>
-                    <PreviewSliderProvider>
-                      <Header />
-                      {children}
+    <>
+      {loading ? (
+        <PreLoader />
+      ) : (
+        <>
+          <ReduxProvider>
+            <AuthProvider>
+              <PanierProvider>
+                <HeroProvider>
+                  <CartModalProvider>
+                    <ModalProvider>
+                      <PreviewSliderProvider>
+                        <Header />
+                        {children}
 
                       <QuickViewModal />
                       <CartSidebarModal />
@@ -49,13 +52,14 @@ export default function RootLayout({
                     </PreviewSliderProvider>
                   </ModalProvider>
                 </CartModalProvider>
-              </AuthProvider>
-            </ReduxProvider>
-            <ScrollToTop />
-            <Footer />
-          </>
-        )}
-      </body>
-    </html>
+                </HeroProvider>
+              </PanierProvider>
+            </AuthProvider>
+          </ReduxProvider>
+          <ScrollToTop />
+          <Footer />
+        </>
+      )}
+    </>
   );
 }

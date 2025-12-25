@@ -56,7 +56,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
               <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                 <div className="w-full">
                   <label htmlFor="name" className="block mb-2.5">
-                    Name
+                    Nom
                   </label>
 
                   <input
@@ -69,7 +69,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
 
                 <div className="w-full">
                   <label htmlFor="email" className="block mb-2.5">
-                    Email
+                    E-mail
                   </label>
 
                   <input
@@ -84,7 +84,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
               <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                 <div className="w-full">
                   <label htmlFor="phone" className="block mb-2.5">
-                    Phone
+                    Téléphone
                   </label>
 
                   <input
@@ -97,7 +97,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
 
                 <div className="w-full">
                   <label htmlFor="address" className="block mb-2.5">
-                    Address
+                    Adresse
                   </label>
 
                   <input
@@ -113,7 +113,7 @@ const AddressModal = ({ isOpen, closeModal }) => {
                 type="submit"
                 className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
               >
-                Save Changes
+                Enregistrer les modifications
               </button>
             </form>
           </div>

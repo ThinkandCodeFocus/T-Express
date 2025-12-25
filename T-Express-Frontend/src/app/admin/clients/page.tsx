@@ -4,6 +4,7 @@ import { clientService } from "@/services/client.service";
 import type { Client } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
+import PhoneInput from "@/components/Common/PhoneInput";
 
 export default function AdminClients() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -343,13 +344,12 @@ export default function AdminClients() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-dark mb-2">Téléphone</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
                     name="telephone"
                     value={form.telephone}
-                    onChange={handleChange}
-                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                    onChange={(value) => setForm({...form, telephone: value})}
+                    label="Téléphone"
+                    className="w-full border border-gray-3 rounded-lg px-4 py-3"
                   />
                 </div>
                 <div>

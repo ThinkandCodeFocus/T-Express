@@ -22,8 +22,10 @@ const NewArrival = () => {
       const produits = await catalogueService.getNew(8);
       const adaptedProducts = adaptProduitsToProducts(produits);
       setProducts(adaptedProducts);
-    } catch (error) {
-      console.error('Erreur lors du chargement des nouveaux produits', error);
+    } catch (error: any) {
+      console.warn('⚠️ Impossible de charger les nouveaux produits. Mode hors ligne activé.', error);
+      // Utiliser un tableau vide pour que l'application continue de fonctionner
+      setProducts([]);
     } finally {
       setLoading(false);
     }

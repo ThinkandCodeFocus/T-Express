@@ -1061,6 +1061,47 @@ export default function AdminHero() {
                 </div>
               )}
 
+              {/* Section: Promotion - Pour carousel */}
+              {form.type === 'carousel' && (
+                <div className="bg-orange-light-6 rounded-lg p-4 border border-orange-light-3">
+                  <h3 className="text-lg font-bold text-dark mb-3 flex items-center gap-2">
+                    <svg className="w-5 h-5 text-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Promotion (Pourcentage et texte de réduction)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-dark mb-2">Pourcentage de réduction</label>
+                      <input
+                        type="number"
+                        name="pourcentage_reduction"
+                        value={form.pourcentage_reduction}
+                        onChange={handleChange}
+                        min="0"
+                        max="100"
+                        className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                        placeholder="30"
+                      />
+                      <p className="text-xs text-dark-4 mt-1">Ex: 30 pour afficher "30%" (le grand nombre bleu à gauche)</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-dark mb-2">Texte de réduction</label>
+                      <input
+                        type="text"
+                        name="texte_reduction"
+                        value={form.texte_reduction}
+                        onChange={handleChange}
+                        className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
+                        placeholder="Sale\nOff"
+                      />
+                      <p className="text-xs text-dark-4 mt-1">Le texte qui apparaît à côté du pourcentage (ex: "Sale\nOff" pour deux lignes, ou "20% off")</p>
+                      <p className="text-xs text-orange mt-1">💡 Utilisez \n pour créer un saut de ligne (ex: "Sale\nOff")</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Section: Promotion et Prix - Uniquement pour side_card */}
               {form.type === 'side_card' && (
                 <div className="bg-orange-light-6 rounded-lg p-4 border border-orange-light-3">

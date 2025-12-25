@@ -63,7 +63,14 @@ const Header = () => {
           {/* <!-- header haut gauche --> */}
           <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
             <Link className="flex-shrink-0" href="/">
-              <span className="text-3xl font-extrabold tracking-tight text-blue-600 drop-shadow-lg select-none" style={{fontFamily: 'Montserrat, sans-serif', letterSpacing: '0.05em'}}>T-Express</span>
+              <Image
+                src="/images/logo/logo.png"
+                alt="T-Express Logo"
+                width={180}
+                height={60}
+                className="h-auto w-auto max-h-16 object-contain"
+                priority
+              />
             </Link>
 
             <div className="max-w-[475px] w-full">

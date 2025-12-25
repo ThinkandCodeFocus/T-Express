@@ -39,7 +39,8 @@ const Footer = () => {
           setSettings(response.footer);
         }
       } catch (error) {
-        console.error('Erreur lors du chargement des paramètres du footer', error);
+        console.warn('⚠️ Impossible de charger les paramètres du footer. Utilisation des valeurs par défaut.', error);
+        // L'application continue avec les valeurs par défaut définies dans le state initial
       }
     };
 

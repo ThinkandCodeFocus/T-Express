@@ -75,8 +75,10 @@ export const adresseService = {
    * Liste des adresses (admin)
    */
   async getListeAdmin(): Promise<Adresse[]> {
-    const response = await apiClient.get<{ adresses: Adresse[] }>(
-      API_CONFIG.endpoints.admin.adresses.liste
+    const response = await apiClient.post<{ adresses: Adresse[] }>(
+      API_CONFIG.endpoints.admin.adresses.liste,
+      {},
+      { requiresAuth: true }
     );
     return response.adresses;
   },
@@ -87,7 +89,8 @@ export const adresseService = {
   async supprimerAdmin(id: number): Promise<{ message: string }> {
     return apiClient.post<{ message: string }>(
       API_CONFIG.endpoints.admin.adresses.supprimer,
-      { id }
+      { id },
+      { requiresAuth: true }
     );
   },
 };

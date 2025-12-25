@@ -8,6 +8,9 @@ import { commandeService } from "@/services/commande.service";
 import { useRouter } from "next/navigation";
 import type { Adresse } from "@/types/api.types";
 import Image from "next/image";
+import PhoneInput from "@/components/Common/PhoneInput";
+import { validatePhone } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 const CheckoutNew = () => {
   const router = useRouter();
@@ -105,6 +108,13 @@ const CheckoutNew = () => {
       // Créer une nouvelle adresse si nécessaire
       let adresseId = selectedAdresseId;
       if (showNewAddress && newAddress.adresse_ligne_1) {
+        // Valider le téléphone si fourni
+        if (newAddress.telephone && !validatePhone(newAddress.telephone)) {
+          toast.error("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
+          setProcessing(false);
+          return;
+        }
+        
         const nouvelleAdresse = await adresseService.ajouter(newAddress);
         adresseId = nouvelleAdresse.id;
       }
@@ -314,17 +324,13 @@ const CheckoutNew = () => {
                         </div>
 
                         <div className="mb-5">
-                          <label htmlFor="telephone" className="block mb-2.5">
-                            Téléphone <span className="text-red">*</span>
-                          </label>
-                          <input
-                            type="tel"
+                          <PhoneInput
                             id="telephone"
                             value={newAddress.telephone}
-                            onChange={(e) => setNewAddress({...newAddress, telephone: e.target.value})}
+                            onChange={(value) => setNewAddress({...newAddress, telephone: value})}
                             placeholder="+221 XX XXX XX XX"
-                            className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                             required={showNewAddress}
+                            label="Téléphone"
                           />
                         </div>
                       </>

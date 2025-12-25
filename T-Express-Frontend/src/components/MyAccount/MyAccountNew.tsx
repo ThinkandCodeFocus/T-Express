@@ -8,6 +8,8 @@ import { adresseService } from "@/services/adresse.service";
 import { clientService } from "@/services/client.service";
 import type { Adresse, UpdateClientData } from "@/types/api.types";
 import { useRouter } from "next/navigation";
+import PhoneInput from "@/components/Common/PhoneInput";
+import { validatePhone } from "@/lib/utils";
 
 const MyAccountNew = () => {
   const router = useRouter();
@@ -55,6 +57,12 @@ const MyAccountNew = () => {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Valider le téléphone si fourni
+    if (profileData.telephone && !validatePhone(profileData.telephone)) {
+      alert("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
+      return;
+    }
 
     try {
       await clientService.updateProfil(profileData);
@@ -356,17 +364,13 @@ const MyAccountNew = () => {
                   </div>
 
                   <div className="mb-5">
-                    <label htmlFor="telephone" className="block mb-2.5">
-                      Téléphone
-                    </label>
-                    <input
-                      type="tel"
+                    <PhoneInput
                       id="telephone"
-                      value={profileData.telephone}
-                      onChange={(e) => setProfileData({...profileData, telephone: e.target.value})}
+                      value={profileData.telephone || ""}
+                      onChange={(value) => setProfileData({...profileData, telephone: value})}
                       disabled={!editingProfile}
                       placeholder="+221 XX XXX XX XX"
-                      className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 disabled:opacity-50"
+                      label="Téléphone"
                     />
                   </div>
 

@@ -5,7 +5,7 @@
 
 export const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
-  timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '30000'),
+  timeout: parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || '5000'), // Réduit à 5s pour des erreurs très rapides
   
   endpoints: {
     // Authentification

@@ -4,6 +4,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import PhoneInput from "@/components/Common/PhoneInput";
+import { validatePhone } from "@/lib/utils";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -29,6 +31,13 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    // Valider le téléphone
+    if (formData.telephone && !validatePhone(formData.telephone)) {
+      setError("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
+      return;
+    }
+    
     // Adapter les noms de champs pour l'API Laravel
     const data = {
       nom: formData.nom,
@@ -121,18 +130,14 @@ const Signup = () => {
                 </div>
 
                 <div className="mb-5">
-                  <label htmlFor="telephone" className="block mb-2.5">
-                    Téléphone
-                  </label>
-                  <input
-                    type="tel"
-                    name="telephone"
+                  <PhoneInput
                     id="telephone"
-                    placeholder="+221 77 123 45 67"
+                    name="telephone"
                     value={formData.telephone}
-                    onChange={handleChange}
+                    onChange={(value) => setFormData({...formData, telephone: value})}
+                    placeholder="+221 77 123 45 67"
                     required
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    label="Téléphone"
                   />
                 </div>
 

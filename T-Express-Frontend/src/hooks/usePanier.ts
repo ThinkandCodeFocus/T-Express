@@ -6,24 +6,69 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { panierService } from '@/services/panier.service';
+import { authService } from '@/services/auth.service';
 import type { PanierContenu, AjouterPanierData } from '@/types/api.types';
 import { useMutation } from './useApi';
 import toast from 'react-hot-toast';
 
 export function usePanier() {
-  const [panier, setPanier] = useState<PanierContenu | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Initialiser avec un panier vide pour éviter les problèmes de null
+  const [panier, setPanier] = useState<PanierContenu | null>({ lignes: [], total: 0, nombre_articles: 0 });
+  const [loading, setLoading] = useState(true); // Commencer en loading
 
   // Charger le panier
   const loadPanier = useCallback(async () => {
+    // Vérifier l'authentification avant de charger
+    if (!authService.isAuthenticated()) {
+      console.log('Utilisateur non authentifié, panier vide');
+      setPanier({ lignes: [], total: 0, nombre_articles: 0 });
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
+      console.log('Chargement du panier...');
       const data = await panierService.getContenu();
-      setPanier(data);
+      console.log('Panier chargé (données brutes):', JSON.stringify(data, null, 2));
+      console.log('Type de données:', typeof data);
+      console.log('Lignes:', data?.lignes);
+      console.log('Nombre de lignes:', data?.lignes?.length);
+      console.log('Total:', data?.total);
+      console.log('Nombre articles:', data?.nombre_articles);
+      
+      // Vérifier que les données sont dans le bon format
+      if (!data || typeof data !== 'object') {
+        console.error('Données invalides reçues:', data);
+        setPanier({ lignes: [], total: 0, nombre_articles: 0 });
+        return;
+      }
+      
+      // S'assurer que les lignes sont un tableau
+      const lignes = Array.isArray(data.lignes) ? data.lignes : [];
+      const total = typeof data.total === 'number' ? data.total : 0;
+      const nombre_articles = typeof data.nombre_articles === 'number' ? data.nombre_articles : lignes.reduce((sum, l) => sum + (l.quantite || 0), 0);
+      
+      const panierFormate = {
+        lignes,
+        total,
+        nombre_articles,
+      };
+      
+      console.log('Panier formaté:', panierFormate);
+      setPanier(panierFormate);
     } catch (error: any) {
-      console.error('Erreur lors du chargement du panier', error);
       // Si non authentifié, initialiser un panier vide
       if (error.status === 401) {
+        console.log('Utilisateur non authentifié, panier vide');
+        setPanier({ lignes: [], total: 0, nombre_articles: 0 });
+      } else if (error.status === 408 || error.status === 0) {
+        // Timeout ou erreur réseau - mode hors ligne
+        console.warn('⚠️ Backend non accessible. Panier initialisé vide en mode hors ligne.');
+        setPanier({ lignes: [], total: 0, nombre_articles: 0 });
+      } else {
+        // En cas d'autre erreur, initialiser aussi un panier vide pour éviter les erreurs
+        console.warn('⚠️ Erreur lors du chargement du panier. Initialisation panier vide.', error.status);
         setPanier({ lignes: [], total: 0, nombre_articles: 0 });
       }
     } finally {

@@ -62,6 +62,7 @@ export interface Client {
   nom: string;
   prenom: string;
   email: string;
+  role?: 'admin' | 'client';
   telephone?: string;
   date_naissance?: string;
   created_at: string;

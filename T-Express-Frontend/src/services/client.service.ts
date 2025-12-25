@@ -8,6 +8,18 @@ import type { Client } from '@/types/api.types';
 
 export const clientService = {
   /**
+   * Récupérer le profil du client connecté
+   */
+  async getProfil(): Promise<Client> {
+    const response = await apiClient.post<{ client: Client }>(
+      API_CONFIG.endpoints.client.profile,
+      {},
+      { requiresAuth: true }
+    );
+    return response.client;
+  },
+
+  /**
    * Récupérer la liste des clients
    */
   async getListe(page: number = 1, perPage: number = 20, recherche?: string): Promise<any> {

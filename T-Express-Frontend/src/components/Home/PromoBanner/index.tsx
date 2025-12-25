@@ -1,85 +1,31 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
-import { heroService, type HeroSection } from "@/services/hero.service";
+import { useHeroContext } from "@/context/HeroContext";
+import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
 
 const PromoBanner = () => {
-  const [promoBanners, setPromoBanners] = useState<HeroSection[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useHeroContext();
 
-  useEffect(() => {
-    loadPromoBanners();
-  }, []);
-
-  const loadPromoBanners = async () => {
-    try {
-      setLoading(true);
-      const response = await heroService.getListe();
-      const banners = response.grouped.promo_banners || [];
-      // Trier par position (promo_1, promo_2, promo_3) puis par ordre pour conserver la position
-      const sortedBanners = [...banners].sort((a, b) => {
-        // Si les deux ont une position, trier par position
-        if (a.position && b.position) {
-          return a.position.localeCompare(b.position);
-        }
-        // Si seulement a a une position, a vient en premier
-        if (a.position) return -1;
-        // Si seulement b a une position, b vient en premier
-        if (b.position) return 1;
-        // Sinon trier par ordre
-        return (a.ordre || 0) - (b.ordre || 0);
-      });
-      setPromoBanners(sortedBanners);
-    } catch (error: any) {
-      // Extract error information with better handling
-      let errorMessage = 'Erreur inconnue lors du chargement des bannières promo';
-      let errorStatus: number | string = 'N/A';
-      let errorDetails: any = {};
-
-      if (!error) {
-        errorMessage = 'Erreur inconnue: aucun détail d\'erreur disponible';
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (typeof error === 'object') {
-        const errorKeys = Object.keys(error);
-        if (errorKeys.length === 0) {
-          errorMessage = 'Erreur inconnue: objet d\'erreur vide. Vérifiez la connexion au serveur.';
-        } else {
-          errorMessage = error.message || errorMessage;
-          errorStatus = error.status || errorStatus;
-          errorDetails = {
-            ...error,
-            name: error.name,
-            stack: error.stack,
-            errors: error.errors,
-          };
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message || 'Erreur lors du chargement des bannières promo';
-        errorDetails = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        };
+  // Extraire et trier les bannières promo depuis le contexte
+  const promoBanners = useMemo(() => {
+    if (!data) return [];
+    const banners = data.grouped.promo_banners || [];
+    // Trier par position (promo_1, promo_2, promo_3) puis par ordre pour conserver la position
+    return [...banners].sort((a, b) => {
+      // Si les deux ont une position, trier par position
+      if (a.position && b.position) {
+        return a.position.localeCompare(b.position);
       }
-
-      console.error('Erreur lors du chargement des bannières promo', {
-        message: errorMessage,
-        status: errorStatus,
-        error: error,
-        errorType: typeof error,
-        errorStringified: JSON.stringify(error),
-        errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
-        details: errorDetails,
-        timestamp: new Date().toISOString(),
-      });
-
-      setPromoBanners([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Si seulement a a une position, a vient en premier
+      if (a.position) return -1;
+      // Si seulement b a une position, b vient en premier
+      if (b.position) return 1;
+      // Sinon trier par ordre
+      return (a.ordre || 0) - (b.ordre || 0);
+    });
+  }, [data]);
 
   const getImageUrl = (imagePath: string | null, defaultPath: string) => {
     if (!imagePath) return defaultPath;
@@ -129,7 +75,7 @@ const PromoBanner = () => {
             className="relative z-1 overflow-hidden rounded-lg py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5"
             style={{ backgroundColor: getBackgroundColor(mainBanner.couleur_fond, '#F5F5F7') }}
           >
-            <div className="max-w-[550px] w-full">
+            <div className="max-w-[550px] w-full relative z-10">
               {mainBanner.sous_titre && (
                 <span className="block font-medium text-xl text-dark mb-3">
                   {mainBanner.sous_titre}
@@ -146,7 +92,7 @@ const PromoBanner = () => {
                 <p>{mainBanner.description}</p>
               )}
 
-              {mainBanner.lien_url && mainBanner.texte_bouton && (
+              {mainBanner.lien_url && mainBanner.lien_url.startsWith('/') && mainBanner.texte_bouton && (
                 <a
                   href={mainBanner.lien_url}
                   className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
@@ -160,7 +106,7 @@ const PromoBanner = () => {
               <Image
                 src={getImageUrl(mainBanner.image, "/images/promo/promo-01.png")}
                 alt={mainBanner.titre || "promo img"}
-                className="absolute bottom-0 right-4 lg:right-26 -z-1"
+                className="absolute bottom-0 right-4 lg:right-26 z-0"
                 width={274}
                 height={350}
               />
@@ -209,7 +155,7 @@ const PromoBanner = () => {
             >
               {banner.image && (
                 <div 
-                  className={`absolute top-1/2 -translate-y-1/2 -z-1 ${index === 0 ? 'left-3 sm:left-10' : 'right-3 sm:right-8.5'}`}
+                  className={`absolute top-1/2 -translate-y-1/2 z-0 ${index === 0 ? 'left-3 sm:left-10' : 'right-3 sm:right-8.5'}`}
                   style={{
                     width: index === 0 ? '241px' : '200px',
                     height: index === 0 ? '241px' : '200px',
@@ -225,7 +171,7 @@ const PromoBanner = () => {
                 </div>
               )}
 
-              <div className={index === 0 ? "text-right" : ""}>
+              <div className={`relative z-10 ${index === 0 ? "text-right ml-auto" : "text-left mr-auto"}`} style={{ maxWidth: index === 0 ? 'calc(100% - 260px)' : 'calc(100% - 220px)' }}>
                 {banner.sous_titre && (
                   <span className="block text-lg text-dark mb-1.5">
                     {banner.sous_titre}
@@ -251,12 +197,12 @@ const PromoBanner = () => {
                 )}
 
                 {banner.description && (
-                  <p className={`max-w-[285px] text-custom-sm ${index === 0 ? '' : ''}`}>
+                  <p className={`max-w-[285px] text-custom-sm ${index === 0 ? 'ml-auto' : ''}`}>
                     {banner.description}
                   </p>
                 )}
 
-                {banner.lien_url && banner.texte_bouton && (
+                {banner.lien_url && banner.lien_url.startsWith('/') && banner.texte_bouton && (
                   <a
                     href={banner.lien_url}
                     className={`inline-flex font-medium text-custom-sm text-white py-2.5 px-8.5 rounded-md ease-out duration-200 mt-${index === 0 ? '9' : '7.5'} ${
@@ -279,7 +225,7 @@ const PromoBanner = () => {
                 >
                   {smallBanners[0].image && (
                     <div 
-                      className="absolute top-1/2 -translate-y-1/2 left-3 sm:left-10 -z-1"
+                      className="absolute top-1/2 -translate-y-1/2 left-3 sm:left-10 z-0"
                       style={{ width: '241px', height: '241px' }}
                     >
                       <Image
@@ -292,7 +238,7 @@ const PromoBanner = () => {
                     </div>
                   )}
 
-                  <div className="text-right">
+                  <div className="text-right relative z-10 ml-auto" style={{ maxWidth: 'calc(100% - 260px)' }}>
                     {smallBanners[0].sous_titre && (
                       <span className="block text-lg text-dark mb-1.5">
                         {smallBanners[0].sous_titre}
@@ -311,7 +257,7 @@ const PromoBanner = () => {
                       </p>
                     )}
 
-                    {smallBanners[0].lien_url && smallBanners[0].texte_bouton && (
+                    {smallBanners[0].lien_url && smallBanners[0].lien_url.startsWith('/') && smallBanners[0].texte_bouton && (
                       <a
                         href={smallBanners[0].lien_url}
                         className="inline-flex font-medium text-custom-sm text-white bg-teal py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-teal-dark mt-9"
@@ -326,12 +272,12 @@ const PromoBanner = () => {
                   <Image
                     src="/images/promo/promo-02.png"
                     alt="promo img"
-                    className="absolute top-1/2 -translate-y-1/2 left-3 sm:left-10 -z-1"
+                    className="absolute top-1/2 -translate-y-1/2 left-3 sm:left-10 z-0"
                     width={241}
                     height={241}
                   />
 
-                  <div className="text-right">
+                  <div className="text-right relative z-10 ml-auto" style={{ maxWidth: 'calc(100% - 260px)' }}>
                     <span className="block text-lg text-dark mb-1.5">
                       Foldable Motorised Treadmill
                     </span>
@@ -361,7 +307,7 @@ const PromoBanner = () => {
                 >
                   {smallBanners[1].image && (
                     <div 
-                      className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-8.5 -z-1"
+                      className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-8.5 z-0"
                       style={{ width: '200px', height: '200px' }}
                     >
                       <Image
@@ -374,7 +320,7 @@ const PromoBanner = () => {
                     </div>
                   )}
 
-                  <div>
+                  <div className="relative z-10 mr-auto" style={{ maxWidth: 'calc(100% - 220px)' }}>
                     {smallBanners[1].sous_titre && (
                       <span className="block text-lg text-dark mb-1.5">
                         {smallBanners[1].sous_titre}
@@ -399,7 +345,7 @@ const PromoBanner = () => {
                       </p>
                     )}
 
-                    {smallBanners[1].lien_url && smallBanners[1].texte_bouton && (
+                    {smallBanners[1].lien_url && smallBanners[1].lien_url.startsWith('/') && smallBanners[1].texte_bouton && (
                       <a
                         href={smallBanners[1].lien_url}
                         className="inline-flex font-medium text-custom-sm text-white bg-orange py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-orange-dark mt-7.5"
@@ -414,12 +360,12 @@ const PromoBanner = () => {
                   <Image
                     src="/images/promo/promo-03.png"
                     alt="promo img"
-                    className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-8.5 -z-1"
+                    className="absolute top-1/2 -translate-y-1/2 right-3 sm:right-8.5 z-0"
                     width={200}
                     height={200}
                   />
 
-                  <div>
+                  <div className="relative z-10 mr-auto" style={{ maxWidth: 'calc(100% - 220px)' }}>
                     <span className="block text-lg text-dark mb-1.5">
                       Apple Watch Ultra
                     </span>

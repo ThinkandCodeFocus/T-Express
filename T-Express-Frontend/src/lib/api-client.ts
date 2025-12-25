@@ -23,6 +23,15 @@ class ApiClient {
   constructor() {
     this.baseURL = API_CONFIG.baseURL;
     this.timeout = API_CONFIG.timeout;
+    
+    // Log pour debug en développement
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('[API Client] Configuration:', {
+        baseURL: this.baseURL,
+        timeout: this.timeout,
+        timeoutSeconds: this.timeout / 1000,
+      });
+    }
   }
 
   /**
@@ -152,42 +161,125 @@ class ApiClient {
   }
 
   /**
-   * Effectue une requête avec timeout
+   * Retry avec backoff exponentiel
+   */
+  private async retryWithBackoff<T>(
+    fn: () => Promise<T>,
+    maxRetries: number = 2,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: any;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error: any) {
+        lastError = error;
+        
+        // Ne pas retry pour les erreurs 4xx (sauf 408 timeout)
+        if (error.status && error.status >= 400 && error.status < 500 && error.status !== 408) {
+          throw error;
+        }
+        
+        // Si c'est le dernier essai, throw l'erreur
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        // Attendre avant de réessayer (backoff exponentiel)
+        const delay = baseDelay * Math.pow(2, attempt);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    throw lastError;
+  }
+
+  /**
+   * Effectue une requête avec timeout et retry
    */
   private async fetchWithTimeout(
     url: string,
-    options: RequestInit
+    options: RequestInit,
+    retry: boolean = true
   ): Promise<Response> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const fetchFn = async (): Promise<Response> => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
-      return response;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
+      try {
+        const startTime = Date.now();
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        
+        // Si la réponse n'est pas OK mais n'est pas une erreur réseau, ne pas retry
+        if (!response.ok && response.status >= 400 && response.status < 500 && response.status !== 408) {
+          clearTimeout(timeoutId);
+          return response;
+        }
+        
+        return response;
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        
+        // Gérer les erreurs d'abandon (timeout)
+        if (
+          error.name === 'AbortError' || 
+          error.name === 'TimeoutError' ||
+          error.code === 23 || // TIMEOUT_ERR
+          error.message?.includes('timeout') ||
+          error.message?.includes('aborted')
+        ) {
+          // Vérifier si c'est vraiment un timeout ou si le backend n'est pas accessible
+          const isNetworkError = error.message?.includes('Failed to fetch') || 
+                                 error.message?.includes('NetworkError') ||
+                                 error.message?.includes('Network request failed');
+          
+          if (isNetworkError) {
+            throw {
+              message: `Impossible de se connecter au serveur backend sur ${this.baseURL}. Vérifiez que le serveur Laravel est démarré (php artisan serve).`,
+              status: 0,
+              originalError: error,
+            };
+          }
+          
+          throw {
+            message: `La requête a expiré après ${this.timeout}ms (${this.timeout / 1000}s). Le backend ne répond pas assez rapidement. Vérifiez que le serveur Laravel est démarré et fonctionne correctement.`,
+            status: 408,
+            originalError: error,
+          };
+        }
+        
+        // Vérifier si c'est une erreur réseau (backend non accessible)
+        if (
+          error.message?.includes('Failed to fetch') || 
+          error.message?.includes('NetworkError') ||
+          error.message?.includes('Network request failed')
+        ) {
+          throw {
+            message: `Impossible de se connecter au serveur backend sur ${this.baseURL}. Vérifiez que le serveur Laravel est démarré (php artisan serve).`,
+            status: 0,
+            originalError: error,
+          };
+        }
+        
         throw {
-          message: 'La requête a expiré. Veuillez réessayer.',
-          status: 408,
-        };
-      }
-      // Vérifier si c'est une erreur réseau (backend non accessible)
-      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-        throw {
-          message: `Impossible de se connecter au serveur. Vérifiez que le backend est démarré sur ${this.baseURL}`,
+          message: error.message || 'Erreur de connexion. Vérifiez votre connexion internet.',
           status: 0,
+          originalError: error,
         };
       }
-      throw {
-        message: error.message || 'Erreur de connexion. Vérifiez votre connexion internet.',
-        status: 0,
-      };
-    } finally {
-      clearTimeout(timeoutId);
+    };
+
+    // Utiliser retry uniquement pour les requêtes GET et POST (pas pour DELETE/PUT)
+    if (retry && (options.method === 'GET' || options.method === 'POST' || !options.method)) {
+      return this.retryWithBackoff(fetchFn, 2, 1000);
     }
+    
+    return fetchFn();
   }
 
   /**

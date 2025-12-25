@@ -67,6 +67,14 @@ const Categories = () => {
         timestamp: new Date().toISOString(),
       });
 
+      // Check for timeout errors
+      if (errorStatus === 408 || errorMessage?.includes('expiré') || errorMessage?.includes('timeout')) {
+        console.error(
+          'Erreur de timeout: La requête a pris trop de temps. ' +
+          'Vérifiez votre connexion internet et réessayez.'
+        );
+      }
+      
       // Check for network errors
       if (
         errorStatus === 0 ||
@@ -74,9 +82,9 @@ const Categories = () => {
         errorMessage?.includes('NetworkError') ||
         errorMessage?.includes('fetch')
       ) {
-        console.error(
-          'Erreur de connexion: Impossible de se connecter au serveur backend. ' +
-          'Vérifiez que le serveur Laravel est démarré et accessible.'
+        console.warn(
+          '⚠️ Backend non accessible. L\'application fonctionne en mode hors ligne. ' +
+          'Vérifiez que le serveur Laravel est démarré sur http://localhost:8000'
         );
       }
 
@@ -84,6 +92,9 @@ const Categories = () => {
       if (error?.errors && typeof error.errors === 'object') {
         console.error('Erreurs de validation:', error.errors);
       }
+
+      // En cas d'erreur, utiliser un tableau vide pour que l'application continue de fonctionner
+      setCategories([]);
     } finally {
       setLoading(false);
     }

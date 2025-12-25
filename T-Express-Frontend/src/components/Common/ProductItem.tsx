@@ -4,16 +4,18 @@ import Image from "next/image";
 import { Product } from "@/types/product";
 import { useModalContext } from "@/app/context/QuickViewModalContext";
 import { updateQuickView } from "@/redux/features/quickView-slice";
-import { addItemToCart } from "@/redux/features/cart-slice";
 import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import Link from "next/link";
+import { formatPrice } from "@/lib/utils";
+import { usePanierContext } from "@/context/PanierContext";
+import toast from "react-hot-toast";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
-
+  const { ajouter } = usePanierContext();
   const dispatch = useDispatch<AppDispatch>();
 
   // update the QuickView state
@@ -22,13 +24,15 @@ const ProductItem = ({ item }: { item: Product }) => {
   };
 
   // add to cart
-  const handleAddToCart = () => {
-    dispatch(
-      addItemToCart({
-        ...item,
-        quantity: 1,
-      })
-    );
+  const handleAddToCart = async () => {
+    try {
+      await ajouter({
+        produit_id: item.id,
+        quantite: 1,
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+    }
   };
 
   const handleItemToWishList = () => {
@@ -156,12 +160,12 @@ const ProductItem = ({ item }: { item: Product }) => {
         className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5"
         onClick={() => handleProductDetails()}
       >
-        <Link href="/shop-details"> {item.title} </Link>
+        <Link href={`/shop-details?id=${item.id}`}> {item.title} </Link>
       </h3>
 
       <span className="flex items-center gap-2 font-medium text-lg">
-        <span className="text-dark">${item.discountedPrice}</span>
-        <span className="text-dark-4 line-through">${item.price}</span>
+        <span className="text-dark">{formatPrice(item.discountedPrice)}</span>
+        <span className="text-dark-4 line-through">{formatPrice(item.price)}</span>
       </span>
     </div>
   );

@@ -1,87 +1,33 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import HeroCarousel from "./HeroCarousel";
 import HeroFeature from "./HeroFeature";
 import Image from "next/image";
-import { heroService, type HeroSection } from "@/services/hero.service";
+import { useHeroContext } from "@/context/HeroContext";
+import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
 
 const Hero = () => {
-  const [sideCards, setSideCards] = useState<HeroSection[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useHeroContext();
 
-  useEffect(() => {
-    loadSideCards();
-  }, []);
-
-  const loadSideCards = async () => {
-    try {
-      setLoading(true);
-      const response = await heroService.getListe();
-      const cards = response.grouped.side_cards || [];
-      // Trier par position (side_1, side_2) puis par ordre pour conserver la position
-      const sortedCards = [...cards].sort((a, b) => {
-        // Si les deux ont une position, trier par position
-        if (a.position && b.position) {
-          return a.position.localeCompare(b.position);
-        }
-        // Si seulement a a une position, a vient en premier
-        if (a.position) return -1;
-        // Si seulement b a une position, b vient en premier
-        if (b.position) return 1;
-        // Sinon trier par ordre
-        return (a.ordre || 0) - (b.ordre || 0);
-      });
-      setSideCards(sortedCards);
-    } catch (error: any) {
-      // Extract error information with better handling
-      let errorMessage = 'Erreur inconnue lors du chargement des side cards';
-      let errorStatus: number | string = 'N/A';
-      let errorDetails: any = {};
-
-      if (!error) {
-        errorMessage = 'Erreur inconnue: aucun détail d\'erreur disponible';
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (typeof error === 'object') {
-        const errorKeys = Object.keys(error);
-        if (errorKeys.length === 0) {
-          errorMessage = 'Erreur inconnue: objet d\'erreur vide. Vérifiez la connexion au serveur.';
-        } else {
-          errorMessage = error.message || errorMessage;
-          errorStatus = error.status || errorStatus;
-          errorDetails = {
-            ...error,
-            name: error.name,
-            stack: error.stack,
-            errors: error.errors,
-          };
-        }
-      } else if (error instanceof Error) {
-        errorMessage = error.message || 'Erreur lors du chargement des side cards';
-        errorDetails = {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        };
+  // Extraire et trier les side cards depuis le contexte
+  const sideCards = useMemo(() => {
+    if (!data) return [];
+    const cards = data.grouped.side_cards || [];
+    // Trier par position (side_1, side_2) puis par ordre pour conserver la position
+    return [...cards].sort((a, b) => {
+      // Si les deux ont une position, trier par position
+      if (a.position && b.position) {
+        return a.position.localeCompare(b.position);
       }
-
-      console.error('Erreur lors du chargement des side cards', {
-        message: errorMessage,
-        status: errorStatus,
-        error: error,
-        errorType: typeof error,
-        errorStringified: JSON.stringify(error),
-        errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
-        details: errorDetails,
-        timestamp: new Date().toISOString(),
-      });
-
-      setSideCards([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      // Si seulement a a une position, a vient en premier
+      if (a.position) return -1;
+      // Si seulement b a une position, b vient en premier
+      if (b.position) return 1;
+      // Sinon trier par ordre
+      return (a.ordre || 0) - (b.ordre || 0);
+    });
+  }, [data]);
 
   const getImageUrl = (imagePath: string | null) => {
     if (!imagePath) return "/images/hero/hero-02.png";
@@ -126,7 +72,7 @@ const Hero = () => {
                       <div className="flex items-center gap-14">
                         <div>
                           <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                            {sideCards[0].lien_url ? (
+                            {sideCards[0].lien_url && sideCards[0].lien_url.startsWith('/') ? (
                               <a href={sideCards[0].lien_url}>{sideCards[0].titre || "iPhone 14 Plus & 14 Pro Max"}</a>
                             ) : (
                               <span>{sideCards[0].titre || "iPhone 14 Plus & 14 Pro Max"}</span>
@@ -199,7 +145,7 @@ const Hero = () => {
                       <div className="flex items-center gap-14">
                         <div>
                           <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-20">
-                            {sideCards[1].lien_url ? (
+                            {sideCards[1].lien_url && sideCards[1].lien_url.startsWith('/') ? (
                               <a href={sideCards[1].lien_url}>{sideCards[1].titre || "Casque sans fil"}</a>
                             ) : (
                               <span>{sideCards[1].titre || "Casque sans fil"}</span>

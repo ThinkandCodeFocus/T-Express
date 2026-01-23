@@ -91,6 +91,7 @@ export function useQuery<T, P extends any[] = []>(
     if (enabled) {
       api.execute(...args);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, ...args]);
 
   return api;
@@ -144,6 +145,7 @@ export function usePagination<T>(
 
   useEffect(() => {
     api.execute(page, perPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

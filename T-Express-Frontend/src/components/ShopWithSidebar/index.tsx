@@ -67,6 +67,7 @@ const ShopWithSidebar = () => {
       loadCategories();
       loadProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
   // Recharger les produits quand les filtres changent
@@ -81,6 +82,7 @@ const ShopWithSidebar = () => {
       });
       loadProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, mounted]);
 
   // Recharger les produits quand la page change
@@ -88,6 +90,7 @@ const ShopWithSidebar = () => {
     if (mounted && !loading && pagination.currentPage > 0) {
       loadProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.currentPage, mounted]);
 
   const loadCategories = async () => {

@@ -35,6 +35,7 @@ const ShopWithoutSidebar = () => {
     if (mounted) {
       loadProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSort, currentPage, mounted]);
 
   const loadProducts = async () => {

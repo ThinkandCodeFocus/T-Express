@@ -330,7 +330,7 @@ const CheckoutNew = () => {
 
                         <div className="mb-5">
                           <label htmlFor="ligne2" className="block mb-2.5">
-                            Complément d'adresse
+                            Complément d&apos;adresse
                           </label>
                           <input
                             type="text"

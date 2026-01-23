@@ -124,7 +124,7 @@ const PromoBanner = () => {
               </h2>
 
               <p>
-                iPhone 14 has the same superspeedy chip that's in iPhone 13 Pro,
+                iPhone 14 has the same superspeedy chip that&apos;s in iPhone 13 Pro,
                 A15 Bionic, with a 5‑core GPU, powers all the latest features.
               </p>
 

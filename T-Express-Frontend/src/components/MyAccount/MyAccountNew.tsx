@@ -382,7 +382,7 @@ const MyAccountNew = () => {
                       disabled
                       className="rounded-md border border-gray-3 bg-gray-2 w-full py-2.5 px-5 opacity-50"
                     />
-                    <p className="text-xs text-gray-5 mt-1">L'email ne peut pas être modifié</p>
+                    <p className="text-xs text-gray-5 mt-1">L&apos;email ne peut pas être modifié</p>
                   </div>
 
                   {editingProfile ? (

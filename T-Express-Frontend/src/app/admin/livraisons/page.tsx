@@ -44,6 +44,7 @@ export default function AdminLivraisons() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, filters]);
 
   const openEditModal = (livraison: Livraison) => {

@@ -1138,7 +1138,7 @@ export default function AdminHero() {
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                         placeholder="600000"
                       />
-                      <p className="text-xs text-dark-4 mt-1">L'ancien prix barré pour montrer la réduction</p>
+                      <p className="text-xs text-dark-4 mt-1">L&apos;ancien prix barré pour montrer la réduction</p>
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-dark mb-2">Pourcentage de réduction</label>
@@ -1152,7 +1152,7 @@ export default function AdminHero() {
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                         placeholder="30"
                       />
-                      <p className="text-xs text-dark-4 mt-1">Ex: 30 pour afficher "30%"</p>
+                      <p className="text-xs text-dark-4 mt-1">Ex: 30 pour afficher &quot;30%&quot;</p>
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-dark mb-2">Texte au-dessus du prix</label>
@@ -1190,7 +1190,7 @@ export default function AdminHero() {
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                         placeholder="Ex: Flat 20% off"
                       />
-                      <p className="text-xs text-dark-4 mt-1">Le texte de réduction qui apparaît (ex: "Flat 20% off")</p>
+                      <p className="text-xs text-dark-4 mt-1">Le texte de réduction qui apparaît (ex: &quot;Flat 20% off&quot;)</p>
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-dark mb-2">Pourcentage de réduction</label>
@@ -1204,7 +1204,7 @@ export default function AdminHero() {
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                         placeholder="20"
                       />
-                      <p className="text-xs text-dark-4 mt-1">Ex: 20 pour afficher "20%" (optionnel si vous utilisez le texte de réduction)</p>
+                      <p className="text-xs text-dark-4 mt-1">Ex: 20 pour afficher &quot;20%&quot; (optionnel si vous utilisez le texte de réduction)</p>
                     </div>
                   </div>
                 </div>
@@ -1319,7 +1319,7 @@ export default function AdminHero() {
                     </div>
                   )}
                   <div>
-                    <label className="block text-sm font-semibold text-dark mb-2">Ordre d'affichage</label>
+                    <label className="block text-sm font-semibold text-dark mb-2">Ordre d&apos;affichage</label>
                     <input
                       type="number"
                       name="ordre"

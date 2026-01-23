@@ -74,7 +74,7 @@ export default function AdminDashboard() {
               Tableau de bord
             </h1>
             <p className="text-blue-light-4 text-lg">
-              Bienvenue dans votre espace d'administration T-Express
+              Bienvenue dans votre espace d&apos;administration T-Express
             </p>
           </div>
         </div>

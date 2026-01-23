@@ -3,6 +3,7 @@ import { usePanierContext } from "@/context/PanierContext";
 import type { LignePanier } from "@/types/api.types";
 import Image from "next/image";
 import Link from "next/link";
+import { API_CONFIG } from "@/config/api.config";
 
 interface SingleItemNewProps {
   item: LignePanier;
@@ -25,19 +26,60 @@ const SingleItemNew = ({ item }: SingleItemNewProps) => {
     }).format(price);
   };
 
+  // Construire l'URL de l'image
+  const getImageUrl = () => {
+    if (!item.produit) {
+      return '/images/products/default-product.jpg';
+    }
+
+    // Construire l'URL de base sans /api pour les images
+    const imageBaseURL = API_CONFIG.baseURL.replace('/api', '');
+
+    // Si l'image principale existe, l'utiliser
+    if (item.produit.image_principale) {
+      return `${imageBaseURL}/storage/${item.produit.image_principale}`;
+    }
+
+    // Sinon, essayer avec les images (peuvent être un tableau ou une chaîne JSON)
+    if (item.produit.images) {
+      let images = [];
+      if (typeof item.produit.images === 'string') {
+        try {
+          images = JSON.parse(item.produit.images);
+        } catch (e) {
+          // Si ce n'est pas du JSON valide, traiter comme une seule image
+          images = [item.produit.images];
+        }
+      } else if (Array.isArray(item.produit.images)) {
+        images = item.produit.images;
+      }
+
+      if (images.length > 0 && images[0]) {
+        // Si l'image commence déjà par http, l'utiliser telle quelle
+        if (images[0].startsWith('http')) {
+          return images[0];
+        }
+        return `${imageBaseURL}/storage/${images[0]}`;
+      }
+    }
+
+    return '/images/products/default-product.jpg';
+  };
+
   return (
     <div className="flex items-center justify-between gap-5">
       <div className="w-full flex items-center gap-6">
         <Link 
           href={`/shop-details?id=${item.produit_id}`}
-          className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5"
+          className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5 overflow-hidden"
         >
           <Image
-            src={item.produit?.images?.[0] || '/images/products/default-product.jpg'}
+            src={getImageUrl()}
             alt={item.produit?.nom || 'Produit'}
             width={100}
             height={100}
-            className="object-cover"
+            className="object-cover w-full h-full"
+            unoptimized={getImageUrl().includes(API_CONFIG.baseURL)}
           />
         </Link>
 

@@ -201,7 +201,7 @@ export interface Adresse {
 }
 
 export interface AjouterAdresseData {
-  type: 'facturation' | 'livraison';
+  type: 'Facturation' | 'Livraison' | 'Principale';  // Backend Laravel attend ces valeurs avec majuscule
   nom_complet: string;
   telephone: string;
   adresse_ligne_1: string;
@@ -232,6 +232,7 @@ export interface Commande {
   livraison?: Livraison;
   adresse_livraison?: Adresse;
   adresse_facturation?: Adresse;
+  client?: Client;
   created_at: string;
   updated_at: string;
 }
@@ -263,10 +264,20 @@ export interface Paiement {
   id: number;
   commande_id: number;
   montant: number;
-  mode_paiement: 'wave' | 'orange_money' | 'cash' | 'carte';
-  statut: 'en_attente' | 'complete' | 'echoue' | 'rembourse';
-  transaction_id?: string;
-  donnees_paiement?: Record<string, any>;
+  methode: string;
+  statut: string;
+  reference_transaction?: string;
+  wave_session_id?: string;
+  temp_transaction_id?: string;
+  client_reference?: string;
+  frais_service?: number;
+  montant_total?: number;
+  code_acces?: string;
+  duree?: number;
+  unite_duree?: string;
+  statut_label?: string;
+  methode_display?: string;
+  commande?: Commande;
   created_at: string;
   updated_at: string;
 }

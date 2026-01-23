@@ -83,3 +83,18 @@ unoptimized: false, // or remove this line
 
 However, you'll need to ensure your backend responds quickly to avoid timeout errors.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

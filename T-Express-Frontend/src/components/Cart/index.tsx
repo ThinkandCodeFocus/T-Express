@@ -11,21 +11,10 @@ const Cart = () => {
   const { panier, loading, vider, refresh } = usePanierContext();
 
   useEffect(() => {
+    // Rafraîchir le panier au montage du composant
     refresh();
-  }, [refresh]);
-
-  useEffect(() => {
-    console.log('=== DEBUG PANIER ===');
-    console.log('Panier complet:', panier);
-    console.log('Type de panier:', typeof panier);
-    console.log('Panier est null?', panier === null);
-    console.log('Panier.lignes:', panier?.lignes);
-    console.log('Type de lignes:', typeof panier?.lignes);
-    console.log('Lignes est un array?', Array.isArray(panier?.lignes));
-    console.log('Nombre de lignes:', panier?.lignes?.length);
-    console.log('Loading:', loading);
-    console.log('===================');
-  }, [panier, loading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Charger une seule fois au montage
 
   const handleClearCart = async () => {
     if (confirm("Êtes-vous sûr de vouloir vider votre panier ?")) {
@@ -34,10 +23,6 @@ const Cart = () => {
   };
 
   const cartItems = Array.isArray(panier?.lignes) ? panier.lignes : [];
-  
-  console.log('cartItems:', cartItems);
-  console.log('cartItems.length:', cartItems.length);
-  console.log('Affichage vide?', cartItems.length === 0);
 
   return (
     <>

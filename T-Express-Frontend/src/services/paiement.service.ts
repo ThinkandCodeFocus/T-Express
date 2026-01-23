@@ -55,4 +55,105 @@ export const paiementService = {
       { requiresAuth: true }
     );
   },
+
+  /**
+   * Initier un paiement Wave
+   */
+  async initierWave(data: {
+    commande_id: number;
+    mode_paiement?: string;
+    telephone?: string;
+    return_url?: string;
+    cancel_url?: string;
+  }): Promise<{
+    message: string;
+    wave_launch_url?: string;
+    payment_url?: string;
+    ussd_code?: string;
+    transaction_id?: string;
+    client_reference?: string;
+    paiement_id?: number;
+    montant_base?: number;
+    frais_service?: number;
+    montant_total?: number;
+    devise?: string;
+  }> {
+    return apiClient.post(
+      '/wave/initier',
+      data,
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Vérifier le statut d'un paiement Wave
+   */
+  async verifierStatut(commandeId: number): Promise<{
+    message: string;
+    statut_paiement: string;
+    statut_commande: string;
+    wave_status?: string;
+  }> {
+    return apiClient.post(
+      '/wave/verifier',
+      { commande_id: commandeId },
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Initier un paiement Orange Money
+   */
+  async initierOrangeMoney(data: {
+    commande_id: number;
+    mode_paiement: string;
+    telephone?: string;
+    return_url?: string;
+    cancel_url?: string;
+  }): Promise<{
+    success: boolean;
+    message?: string;
+    payment_url?: string;
+    ussd_code?: string;
+    transaction_id?: string;
+  }> {
+    return apiClient.post(
+      '/api/orange-money/initier',
+      data,
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Vérifier le statut d'un paiement
+   */
+  async verifierStatut(transactionId: string): Promise<{
+    success: boolean;
+    statut: string;
+    message?: string;
+  }> {
+    return apiClient.post(
+      '/api/wave/verifier',
+      { transaction_id: transactionId },
+      { requiresAuth: true }
+    );
+  },
+
+  /**
+   * Récupérer les statistiques des paiements (admin)
+   */
+  async getStats(): Promise<{
+    total_paiements: number;
+    paiements_reussis: number;
+    paiements_en_attente: number;
+    paiements_echoues: number;
+    montant_total: number;
+    frais_total: number;
+  }> {
+    return apiClient.post(
+      API_CONFIG.endpoints.admin.paiements.stats,
+      {},
+      { requiresAuth: true }
+    );
+  },
 };

@@ -22,7 +22,7 @@ const SingleItem = ({ item }: { item: Product }) => {
     dispatch(updateQuickView({ ...item }));
   };
 
-  // add to cart
+  // ajouter au panier
   const handleAddToCart = async () => {
     try {
       await ajouter({
@@ -134,7 +134,7 @@ const SingleItem = ({ item }: { item: Product }) => {
 
           <button
             onClick={() => handleAddToCart()}
-            aria-label="button for add to cart"
+            aria-label="bouton pour ajouter au panier"
             id="addCartOne"
             className="flex items-center justify-center w-9 h-9 rounded-[5px] shadow-1 ease-out duration-200 text-dark bg-white hover:text-white hover:bg-blue"
           >

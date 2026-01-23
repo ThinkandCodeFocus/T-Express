@@ -22,7 +22,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
     dispatch(updateQuickView({ ...item }));
   };
 
-  // add to cart
+  // ajouter au panier
   const handleAddToCart = async () => {
     try {
       await ajouter({
@@ -86,7 +86,7 @@ const SingleGridItem = ({ item }: { item: Product }) => {
             onClick={() => handleAddToCart()}
             className="inline-flex font-medium text-custom-sm py-[7px] px-5 rounded-[5px] bg-blue text-white ease-out duration-200 hover:bg-blue-dark"
           >
-            Add to cart
+            Ajouter au panier
           </button>
 
           <button
@@ -157,7 +157,9 @@ const SingleGridItem = ({ item }: { item: Product }) => {
 
       <span className="flex items-center gap-2 font-medium text-lg">
         <span className="text-dark">{formatPrice(item.discountedPrice)}</span>
-        <span className="text-dark-4 line-through">{formatPrice(item.price)}</span>
+        {item.discountedPrice < item.price && (
+          <span className="text-dark-4 line-through">{formatPrice(item.price)}</span>
+        )}
       </span>
     </div>
   );

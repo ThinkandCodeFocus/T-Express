@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import type { ApiError } from '@/lib/api-client';
 
 // ========== Hook générique pour les appels API ==========
@@ -23,6 +23,12 @@ export function useApi<T, P extends any[] = []>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
 
+  // Utiliser useRef pour stocker les callbacks et éviter les re-renders
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
   const execute = useCallback(
     async (...args: P) => {
       try {
@@ -30,7 +36,7 @@ export function useApi<T, P extends any[] = []>(
         setError(null);
         const result = await apiFunction(...args);
         setData(result);
-        options.onSuccess?.(result);
+        optionsRef.current.onSuccess?.(result);
         return result;
       } catch (err: any) {
         const apiError: ApiError = {
@@ -39,13 +45,13 @@ export function useApi<T, P extends any[] = []>(
           status: err.status,
         };
         setError(apiError);
-        options.onError?.(apiError);
+        optionsRef.current.onError?.(apiError);
         throw apiError;
       } finally {
         setLoading(false);
       }
     },
-    [apiFunction, options]
+    [apiFunction]
   );
 
   return {

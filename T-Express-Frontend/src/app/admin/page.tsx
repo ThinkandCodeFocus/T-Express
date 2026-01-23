@@ -83,7 +83,7 @@ export default function AdminDashboard() {
       {/* Stats Cards - Grid moderne */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          title="Commandes totales"
+          title="Commandes payées"
           value={stats.total_commandes}
           icon={
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
         <AlertCard
           title="Commandes en attente"
           value={stats.commandes_en_attente}
-          description="Nécessitent votre attention"
+          description="Commandes payées à traiter"
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -219,11 +219,11 @@ export default function AdminDashboard() {
                   return (
                     <div
                       key={commande.id}
-                      className="p-4 bg-gray-1 rounded-lg hover:bg-gray-2 transition-colors duration-200 border-l-4 border-blue"
+                      className="p-4 bg-gray-1 rounded-lg hover:bg-gray-2 transition-colors duration-200 border-l-4 border-green"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-semibold text-dark text-sm">#{commande.numero_commande}</p>
+                          <p className="font-semibold text-dark text-sm">#{commande.numero_commande || commande.id}</p>
                           <p className="text-xs text-dark-4 mt-1">{formatRelativeTime(commande.created_at)}</p>
                         </div>
                         <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${status.bgColor} ${status.color}`}>
@@ -231,8 +231,15 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                       <div className="mt-3 pt-3 border-t border-gray-3">
-                        <p className="text-xs text-dark-4 mb-1">Client #{commande.client_id}</p>
-                        <p className="font-bold text-dark text-lg">{formatPrice(commande.montant_total)}</p>
+                        <p className="text-xs text-dark-4 mb-1">
+                          {commande.client ? `${commande.client.prenom} ${commande.client.nom}` : `Client #${commande.client_id}`}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-dark text-lg">{formatPrice(commande.montant_total)}</p>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ✓ Payé
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -242,7 +249,7 @@ export default function AdminDashboard() {
                   <svg className="w-16 h-16 mx-auto mb-4 text-gray-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
-                  <p>Aucune commande récente</p>
+                  <p>Aucune commande payée récente</p>
                 </div>
               )}
             </div>

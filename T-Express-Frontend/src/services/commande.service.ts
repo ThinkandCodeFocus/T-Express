@@ -14,13 +14,23 @@ export const commandeService = {
   /**
    * Créer une nouvelle commande (checkout)
    */
-  async creer(data: CreerCommandeData): Promise<Commande> {
-    const response = await apiClient.post<{ message: string; commande: Commande }>(
+  async creer(data: CreerCommandeData): Promise<{ id: number; montant_total: number; numero_commande?: string }> {
+    const response = await apiClient.post<{ 
+      message: string; 
+      commande_id: number; 
+      montant: number;
+    }>(
       API_CONFIG.endpoints.commande.creer,
       data,
       { requiresAuth: true }
     );
-    return response.commande;
+    
+    // Le backend retourne commande_id et montant, pas l'objet commande complet
+    return {
+      id: response.commande_id,
+      montant_total: response.montant,
+      numero_commande: `CMD-${response.commande_id}`, // Générer temporairement
+    };
   },
 
   /**
@@ -50,12 +60,12 @@ export const commandeService = {
    * Liste des commandes (admin)
    */
   async getListe(): Promise<Commande[]> {
-    const response = await apiClient.post<{ commandes: Commande[] }>(
+    const response = await apiClient.post<{ data: Commande[]; meta?: any }>(
       API_CONFIG.endpoints.admin.commandes.liste,
       {},
       { requiresAuth: true }
     );
-    return response.commandes || [];
+    return response.data || [];
   },
 
   /**

@@ -27,9 +27,17 @@ export function formatPhone(phone: string): string {
 
 /**
  * Valider un numéro de téléphone sénégalais
+ * Accepte n'importe quel format avec espaces, tirets, etc.
  */
 export function validatePhone(phone: string): boolean {
-  return LOCALE_CONFIG.phonePattern.test(phone);
+  // Nettoyer le numéro (enlever espaces, tirets, parenthèses)
+  const cleaned = phone.replace(/[\s\-\(\)\.]/g, '');
+  
+  // Vérifier le format nettoyé
+  // Doit être : +221XXXXXXXXX (12 chars) ou 00221XXXXXXXXX (14 chars) ou XXXXXXXXX (9 chars)
+  const pattern = /^(\+221|00221)\d{9}$|^\d{9}$/;
+  
+  return pattern.test(cleaned);
 }
 
 /**

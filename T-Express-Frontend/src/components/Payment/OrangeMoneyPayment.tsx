@@ -13,6 +13,7 @@ import { validatePhone, normalizePhone } from '@/lib/utils';
 interface OrangeMoneyPaymentProps {
   commandeId: number;
   montant: number;
+  telephone?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -20,37 +21,43 @@ interface OrangeMoneyPaymentProps {
 export default function OrangeMoneyPayment({
   commandeId,
   montant,
+  telephone: telephoneProp = '',
   onSuccess,
   onCancel,
 }: OrangeMoneyPaymentProps) {
-  const [telephone, setTelephone] = useState('');
+  const [telephone, setTelephone] = useState(telephoneProp);
   const [loading, setLoading] = useState(false);
+  const [autoInitiated, setAutoInitiated] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validation
-    if (!validatePhone(telephone)) {
-      toast.error('Numéro de téléphone invalide');
-      return;
+  // Si le téléphone est fourni, initier automatiquement le paiement
+  React.useEffect(() => {
+    if (telephoneProp && !autoInitiated && validatePhone(telephoneProp)) {
+      setAutoInitiated(true);
+      initierPaiement(telephoneProp);
     }
+  }, [telephoneProp, autoInitiated]);
+
+  const initierPaiement = async (tel: string) => {
+    setLoading(true);
 
     try {
-      setLoading(true);
-
       const data: InitierPaiementData = {
         commande_id: commandeId,
         mode_paiement: 'orange_money',
-        telephone: normalizePhone(telephone),
-        return_url: `${window.location.origin}/commande/success`,
+        telephone: normalizePhone(tel),
+        return_url: `${window.location.origin}/payment-success?commande_id=${commandeId}`,
         cancel_url: `${window.location.origin}/checkout`,
       };
 
+      console.log('🍊 Initiation paiement Orange Money:', data);
       const response = await paiementService.initierOrangeMoney(data);
+
+      console.log('🍊 Réponse Orange Money:', response);
 
       if (response.success) {
         // Si on a une URL de paiement, rediriger
         if (response.payment_url) {
+          toast.success('Redirection vers Orange Money...');
           window.location.href = response.payment_url;
         }
         // Si on a un code USSD, l'afficher
@@ -66,11 +73,39 @@ export default function OrangeMoneyPayment({
         toast.error(response.message || 'Erreur lors de l\'initialisation du paiement');
       }
     } catch (error: any) {
+      console.error('❌ Erreur paiement Orange Money:', error);
       toast.error(error.message || 'Erreur lors du paiement Orange Money');
-    } finally {
       setLoading(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!validatePhone(telephone)) {
+      toast.error('Numéro de téléphone invalide');
+      return;
+    }
+
+    await initierPaiement(telephone);
+  };
+
+  // Si chargement automatique, afficher un loader
+  if (loading && autoInitiated) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Initialisation du paiement...</h2>
+            <p className="text-gray-600 text-center">Redirection vers Orange Money en cours...</p>
+            <p className="text-sm text-gray-500 mt-2">Téléphone: {telephone}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto">

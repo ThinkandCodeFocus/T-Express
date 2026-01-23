@@ -32,7 +32,7 @@ const CheckoutNew = () => {
     code_postal: "",
     pays: "Sénégal",
     telephone: "",
-    type: "livraison" as "facturation" | "livraison"
+    type: "Livraison" as "Facturation" | "Livraison" | "Principale"  // Backend attend "Livraison" avec majuscule
   });
   
   // States pour la commande
@@ -78,70 +78,119 @@ const CheckoutNew = () => {
     loadAdresses();
   }, [user]);
 
-  // Calculer les frais de livraison
-  const shippingCost = shippingMethod === "express" ? 3000 : 1500;
+  // Calculer les frais de livraison - LIVRAISON GRATUITE
+  const shippingCost = 0;
   const totalWithShipping = (panier?.total || 0) + shippingCost;
 
   // Soumettre la commande
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log("🚀 handleSubmit appelé");
+    console.log("📦 Mode de paiement:", paymentMethod);
+    console.log("👤 User:", user);
+    console.log("🛒 Panier:", panier);
 
     if (!user) {
+      console.log("❌ Pas d'utilisateur connecté");
       alert("Vous devez être connecté pour passer commande");
       router.push("/signin");
       return;
     }
 
     if (!selectedAdresseId && !showNewAddress) {
+      console.log("❌ Pas d'adresse sélectionnée");
       alert("Veuillez sélectionner une adresse de livraison");
       return;
     }
 
     if (!panier || panier.lignes.length === 0) {
+      console.log("❌ Panier vide");
       alert("Votre panier est vide");
       return;
     }
 
     try {
       setProcessing(true);
+      console.log("⏳ Traitement en cours...");
 
       // Créer une nouvelle adresse si nécessaire
       let adresseId = selectedAdresseId;
       if (showNewAddress && newAddress.adresse_ligne_1) {
+        console.log("📍 Création d'une nouvelle adresse...");
+        console.log("📋 Données adresse:", newAddress);
+        
         // Valider le téléphone si fourni
         if (newAddress.telephone && !validatePhone(newAddress.telephone)) {
+          console.log("❌ Téléphone invalide:", newAddress.telephone);
           toast.error("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
           setProcessing(false);
           return;
         }
         
-        const nouvelleAdresse = await adresseService.ajouter(newAddress);
-        adresseId = nouvelleAdresse.id;
+        try {
+          const nouvelleAdresse = await adresseService.ajouter(newAddress);
+          adresseId = nouvelleAdresse.id;
+          console.log("✅ Adresse créée avec ID:", adresseId);
+        } catch (adresseError: any) {
+          console.error("❌ ERREUR création adresse:", adresseError);
+          console.error("❌ Message:", adresseError.message);
+          console.error("❌ Response:", adresseError.response);
+          toast.error("Erreur lors de la création de l'adresse: " + (adresseError.message || "Erreur inconnue"));
+          setProcessing(false);
+          return;
+        }
       }
 
       if (!adresseId) {
+        console.log("❌ Pas d'adresse ID");
         alert("Veuillez fournir une adresse de livraison");
+        setProcessing(false);
         return;
       }
 
       // Créer la commande
       const commandeData = {
         adresse_livraison_id: adresseId,
-        adresse_facturation_id: adresseId, // Utiliser la même adresse par défaut
+        adresse_facturation_id: adresseId,
         mode_paiement: (paymentMethod === "especes" ? "cash" : paymentMethod) as "wave" | "orange_money" | "cash" | "carte",
         notes: notes || undefined,
-        frais_livraison: shippingMethod === "express" ? 5000 : 2000 // Frais de livraison en FCFA
+        frais_livraison: shippingMethod === "express" ? 5000 : 2000
       };
 
+      console.log("📝 Données commande:", commandeData);
+      console.log("🔄 Appel API création commande...");
+      
       const commande = await commandeService.creer(commandeData);
       
-      alert(`Commande ${commande.numero_commande} créée avec succès !`);
-      router.push(`/my-account/orders`);
+      console.log("✅ Commande créée:", commande);
+      console.log("💰 Mode de paiement:", paymentMethod);
+      
+      // Si paiement en espèces, rediriger vers mes commandes
+      if (paymentMethod === "especes") {
+        console.log("💵 Paiement en espèces - Redirection vers mes commandes");
+        toast.success(`Commande ${commande.numero_commande} créée avec succès ! Paiement à la livraison.`);
+        router.push(`/my-account/orders`);
+        return;
+      }
+
+      // Sinon, rediriger vers la page de paiement avec l'ID de la commande
+      // Inclure le téléphone pour éviter de le redemander
+      const telephone = newAddress.telephone || user.telephone || '';
+      const paymentUrl = `/payment?commande_id=${commande.id}&mode=${paymentMethod}&montant=${totalWithShipping}&telephone=${encodeURIComponent(telephone)}`;
+      console.log("💳 Paiement électronique - Redirection vers:", paymentUrl);
+      console.log("📞 Téléphone transmis:", telephone);
+      toast.success(`Commande ${commande.numero_commande} créée ! Redirection vers le paiement...`);
+      
+      // Utiliser window.location pour forcer la navigation
+      window.location.href = paymentUrl;
     } catch (error: any) {
-      console.error("Erreur lors de la création de la commande:", error);
-      alert(error.message || "Erreur lors de la création de la commande");
+      console.error("❌ Erreur lors de la création de la commande:", error);
+      console.error("❌ Détails:", error.response || error.message);
+      toast.error(error.message || "Erreur lors de la création de la commande");
     } finally {
       setProcessing(false);
+      console.log("✅ Traitement terminé");
     }
   };
 
@@ -385,7 +434,7 @@ const CheckoutNew = () => {
 
                     <div className="flex items-center justify-between py-5 border-b border-gray-3">
                       <p className="text-dark">Frais de livraison</p>
-                      <p className="text-dark text-right">{formatPrice(shippingCost)}</p>
+                      <p className="text-green-600 font-semibold text-right">Gratuite ✓</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-5">
@@ -397,7 +446,7 @@ const CheckoutNew = () => {
                   </div>
                 </div>
 
-                {/* Méthode de livraison */}
+               {/* Méthode de livraison - Gratuite */}
                 <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
                   <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                     <h3 className="font-medium text-xl text-dark">Méthode de livraison</h3>
@@ -414,8 +463,8 @@ const CheckoutNew = () => {
                           onChange={(e) => setShippingMethod(e.target.value as "standard")}
                           className="w-4 h-4"
                         />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
-                          <p>Livraison Standard - {formatPrice(1500)} (3-5 jours)</p>
+                        <div className="flex-1 rounded-md border py-3.5 px-5 border-green-200 bg-green-50">
+                          <p className="text-green-700 font-medium">🚚 Livraison Standard - <span className="font-bold">Gratuite</span> (3-5 jours)</p>
                         </div>
                       </label>
 
@@ -428,8 +477,8 @@ const CheckoutNew = () => {
                           onChange={(e) => setShippingMethod(e.target.value as "express")}
                           className="w-4 h-4"
                         />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
-                          <p>Livraison Express - {formatPrice(3000)} (1-2 jours)</p>
+                        <div className="flex-1 rounded-md border py-3.5 px-5 border-green-200 bg-green-50">
+                          <p className="text-green-700 font-medium">⚡ Livraison Express - <span className="font-bold">Gratuite</span> (1-2 jours)</p>
                         </div>
                       </label>
                     </div>
@@ -458,6 +507,7 @@ const CheckoutNew = () => {
                         </div>
                       </label>
 
+                      {/* Option Orange Money - temporairement désactivée
                       <label className="flex cursor-pointer items-center gap-4">
                         <input
                           type="radio"
@@ -471,7 +521,9 @@ const CheckoutNew = () => {
                           <p>Orange Money</p>
                         </div>
                       </label>
+                      */}
 
+                      {/* Option Espèces - temporairement désactivée
                       <label className="flex cursor-pointer items-center gap-4">
                         <input
                           type="radio"
@@ -485,6 +537,7 @@ const CheckoutNew = () => {
                           <p>Paiement à la livraison (Espèces)</p>
                         </div>
                       </label>
+                      */}
                     </div>
                   </div>
                 </div>

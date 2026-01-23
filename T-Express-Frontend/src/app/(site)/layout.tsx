@@ -9,7 +9,7 @@ import { ModalProvider } from "../context/QuickViewModalContext";
 import { CartModalProvider } from "../context/CartSidebarModalContext";
 import { ReduxProvider } from "@/redux/provider";
 import QuickViewModal from "@/components/Common/QuickViewModal";
-import CartSidebarModal from "@/components/Common/CartSidebarModal";
+import CartSidebarModal from "@/components/Common/CartSidebarModal/CartSidebarModalNew";
 import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 

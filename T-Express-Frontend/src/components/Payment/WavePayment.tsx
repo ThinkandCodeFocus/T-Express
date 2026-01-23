@@ -13,6 +13,7 @@ import { formatPhone, validatePhone, normalizePhone } from '@/lib/utils';
 interface WavePaymentProps {
   commandeId: number;
   montant: number;
+  telephone?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -20,11 +21,84 @@ interface WavePaymentProps {
 export default function WavePayment({
   commandeId,
   montant,
+  telephone: telephoneProp = '',
   onSuccess,
   onCancel,
 }: WavePaymentProps) {
-  const [telephone, setTelephone] = useState('');
+  const [telephone, setTelephone] = useState(telephoneProp);
   const [loading, setLoading] = useState(false);
+  const [autoInitiated, setAutoInitiated] = useState(false);
+
+  // Si le téléphone est fourni, initier automatiquement le paiement
+  React.useEffect(() => {
+    if (telephoneProp && !autoInitiated && validatePhone(telephoneProp)) {
+      setAutoInitiated(true);
+      initierPaiement(telephoneProp);
+    }
+  }, [telephoneProp, autoInitiated]);
+
+  const initierPaiement = async (tel: string) => {
+    setLoading(true);
+
+    try {
+      const data: InitierPaiementData = {
+        commande_id: commandeId,
+        mode_paiement: 'wave',
+        telephone: normalizePhone(tel),
+        return_url: `${window.location.origin}/payment-success?commande_id=${commandeId}`,
+        cancel_url: `${window.location.origin}/checkout`,
+      };
+
+      console.log('📱 Initiation paiement Wave:', data);
+      const response = await paiementService.initierWave(data);
+
+      console.log('📱 Réponse Wave:', response);
+
+      // Le backend retourne wave_launch_url pour ouvrir l'app Wave
+      if (response.wave_launch_url) {
+        toast.success('Redirection vers Wave...');
+        // Redirection automatique vers l'application Wave
+        window.location.href = response.wave_launch_url;
+      } 
+      // Fallback: si on a payment_url (ancien format)
+      else if (response.payment_url) {
+        window.location.href = response.payment_url;
+      }
+      // Si on a un code USSD, l'afficher
+      else if (response.ussd_code) {
+        toast.success(`Composez: ${response.ussd_code}`);
+        setTimeout(() => {
+          onSuccess();
+        }, 5000);
+      } 
+      // Si aucune URL, afficher erreur
+      else {
+        toast.error(response.message || 'Aucune URL de paiement retournée');
+      }
+    } catch (error: any) {
+      console.error('❌ Erreur paiement Wave:', error);
+      
+      // Gestion améliorée des messages d'erreur
+      let errorMessage = 'Erreur lors du paiement Wave';
+      
+      if (error && typeof error === 'object') {
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error.errors) {
+          // Laravel validation errors
+          const firstError = Object.values(error.errors)[0];
+          if (Array.isArray(firstError)) {
+            errorMessage = firstError[0];
+          }
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      toast.error(errorMessage);
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,43 +109,24 @@ export default function WavePayment({
       return;
     }
 
-    try {
-      setLoading(true);
-
-      const data: InitierPaiementData = {
-        commande_id: commandeId,
-        mode_paiement: 'wave',
-        telephone: normalizePhone(telephone),
-        return_url: `${window.location.origin}/commande/success`,
-        cancel_url: `${window.location.origin}/checkout`,
-      };
-
-      const response = await paiementService.initierWave(data);
-
-      if (response.success) {
-        // Si on a une URL de paiement, rediriger
-        if (response.payment_url) {
-          window.location.href = response.payment_url;
-        }
-        // Si on a un code USSD, l'afficher
-        else if (response.ussd_code) {
-          toast.success(`Composez: ${response.ussd_code}`);
-          // Attendre un peu avant de vérifier le statut
-          setTimeout(() => {
-            onSuccess();
-          }, 5000);
-        } else {
-          onSuccess();
-        }
-      } else {
-        toast.error(response.message || 'Erreur lors de l\'initialisation du paiement');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Erreur lors du paiement Wave');
-    } finally {
-      setLoading(false);
-    }
+    await initierPaiement(telephone);
   };
+
+  // Si chargement automatique, afficher un loader
+  if (loading && autoInitiated) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Initialisation du paiement...</h2>
+            <p className="text-gray-600 text-center">Redirection vers Wave en cours...</p>
+            <p className="text-sm text-gray-500 mt-2">Téléphone: {telephone}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto">

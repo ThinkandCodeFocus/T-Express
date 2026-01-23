@@ -76,37 +76,80 @@ export function usePanier() {
     }
   }, []);
 
+  // Callbacks stables pour les mutations
+  const handleAjouterSuccess = useCallback((data: PanierContenu) => {
+    console.log('✅ Produit ajouté avec succès. Données reçues:', data);
+    
+    // Vérifier le format des données
+    if (!data || typeof data !== 'object') {
+      console.error('❌ Données invalides reçues après ajout:', data);
+      // Rafraîchir le panier pour obtenir les bonnes données
+      loadPanier();
+      return;
+    }
+    
+    // S'assurer que les lignes sont un tableau
+    const lignes = Array.isArray(data.lignes) ? data.lignes : [];
+    const total = typeof data.total === 'number' ? data.total : 0;
+    const nombre_articles = typeof data.nombre_articles === 'number' 
+      ? data.nombre_articles 
+      : lignes.reduce((sum, l) => sum + (l.quantite || 0), 0);
+    
+    const panierFormate = {
+      lignes,
+      total,
+      nombre_articles,
+    };
+    
+    console.log('📦 Panier formaté après ajout:', panierFormate);
+    setPanier(panierFormate);
+    toast.success('Produit ajouté au panier');
+    
+    // Rafraîchir le panier pour être sûr qu'il est à jour
+    setTimeout(() => {
+      loadPanier();
+    }, 500);
+  }, [loadPanier]);
+
+  const handleAjouterError = useCallback((error: any) => {
+    console.error('❌ Erreur lors de l\'ajout au panier:', error);
+    toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+  }, []);
+
+  const handleMettreAJourSuccess = useCallback((data: PanierContenu) => {
+    setPanier(data);
+    toast.success('Quantité mise à jour');
+  }, []);
+
+  const handleMettreAJourError = useCallback((error: any) => {
+    toast.error(error.message || 'Erreur lors de la mise à jour');
+  }, []);
+
+  const handleSupprimerSuccess = useCallback((data: PanierContenu) => {
+    setPanier(data);
+    toast.success('Produit retiré du panier');
+  }, []);
+
+  const handleSupprimerError = useCallback((error: any) => {
+    toast.error(error.message || 'Erreur lors de la suppression');
+  }, []);
+
   // Ajouter au panier
   const ajouterMutation = useMutation(panierService.ajouter, {
-    onSuccess: (data) => {
-      setPanier(data);
-      toast.success('Produit ajouté au panier');
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
-    },
+    onSuccess: handleAjouterSuccess,
+    onError: handleAjouterError,
   });
 
   // Mettre à jour la quantité
   const mettreAJourMutation = useMutation(panierService.mettreAJour, {
-    onSuccess: (data) => {
-      setPanier(data);
-      toast.success('Quantité mise à jour');
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Erreur lors de la mise à jour');
-    },
+    onSuccess: handleMettreAJourSuccess,
+    onError: handleMettreAJourError,
   });
 
   // Supprimer du panier
   const supprimerMutation = useMutation(panierService.supprimer, {
-    onSuccess: (data) => {
-      setPanier(data);
-      toast.success('Produit retiré du panier');
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Erreur lors de la suppression');
-    },
+    onSuccess: handleSupprimerSuccess,
+    onError: handleSupprimerError,
   });
 
   // Vider le panier
@@ -122,23 +165,50 @@ export function usePanier() {
 
   useEffect(() => {
     loadPanier();
-  }, [loadPanier]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Charger une seule fois au montage
 
+  // Utiliser directement les fonctions execute des mutations (elles sont stables maintenant)
   const ajouter = useCallback(
-    (data: AjouterPanierData) => ajouterMutation.execute(data),
-    [ajouterMutation]
+    async (data: AjouterPanierData) => {
+      // Vérifier l'authentification avant d'ajouter
+      if (!authService.isAuthenticated()) {
+        toast.error('Vous devez être connecté pour ajouter des produits au panier');
+        return;
+      }
+      
+      console.log('🛒 Tentative d\'ajout au panier:', data);
+      try {
+        const result = await ajouterMutation.execute(data);
+        console.log('✅ Résultat de l\'ajout:', result);
+        return result;
+      } catch (error: any) {
+        console.error('❌ Erreur dans ajouter:', error);
+        throw error;
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [] // execute est stable grâce à useRef dans useApi
   );
 
   const mettreAJour = useCallback(
     (lignePanierId: number, quantite: number) =>
       mettreAJourMutation.execute({ ligne_panier_id: lignePanierId, quantite }),
-    [mettreAJourMutation]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [] // execute est stable grâce à useRef dans useApi
   );
 
   const supprimer = useCallback(
     (lignePanierId: number) => supprimerMutation.execute(lignePanierId),
-    [supprimerMutation]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [] // execute est stable grâce à useRef dans useApi
   );
+
+  // Mémoriser refresh pour éviter les re-renders - loadPanier est stable (pas de dépendances)
+  const refresh = useCallback(() => {
+    return loadPanier();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // loadPanier n'a pas de dépendances, donc il est stable
 
   return {
     panier,
@@ -147,7 +217,7 @@ export function usePanier() {
     mettreAJour,
     supprimer,
     vider,
-    refresh: loadPanier,
+    refresh,
     ajoutLoading: ajouterMutation.loading,
     updateLoading: mettreAJourMutation.loading,
     deleteLoading: supprimerMutation.loading,

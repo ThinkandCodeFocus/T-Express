@@ -8,10 +8,32 @@ import EmptyCart from "./EmptyCart";
 
 const CartSidebarModalNew = () => {
   const { isCartModalOpen, closeCartModal } = useCartModalContext();
-  const { panier, loading } = usePanierContext();
+  const { panier, loading, refresh } = usePanierContext();
+
+  // Rafraîchir le panier quand le modal s'ouvre
+  React.useEffect(() => {
+    if (isCartModalOpen) {
+      console.log('🛒 Modal du panier ouvert, rafraîchissement du panier...');
+      refresh();
+    }
+  }, [isCartModalOpen, refresh]);
 
   const cartItems = panier?.lignes || [];
-  const totalPrice = cartItems.reduce((acc, item) => acc + (item.prix_unitaire * item.quantite), 0);
+  
+  // Log pour debug
+  React.useEffect(() => {
+    console.log('🛒 État du panier dans le modal:', {
+      panier,
+      loading,
+      cartItems,
+      cartItemsLength: cartItems.length,
+      nombreArticles: panier?.nombre_articles,
+      total: panier?.total
+    });
+  }, [panier, loading, cartItems]);
+
+  // Utiliser le total du panier si disponible, sinon calculer
+  const totalPrice = panier?.total || cartItems.reduce((acc, item) => acc + (parseFloat(item.prix_unitaire.toString()) * item.quantite), 0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-SN', {
@@ -92,7 +114,7 @@ const CartSidebarModalNew = () => {
               </div>
             ) : (
               <div className="flex flex-col gap-6">
-                {cartItems.length > 0 ? (
+                {cartItems.length > 0 && panier?.nombre_articles > 0 ? (
                   cartItems.map((item) => (
                     <SingleItemNew key={item.id} item={item} />
                   ))

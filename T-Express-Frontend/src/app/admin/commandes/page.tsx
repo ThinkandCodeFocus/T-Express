@@ -4,21 +4,11 @@ import { commandeService } from "@/services/commande.service";
 import type { Commande } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 
-const STATUTS = [
-  { value: "en_attente", label: "En attente" },
-  { value: "confirmee", label: "Confirmée" },
-  { value: "en_preparation", label: "En préparation" },
-  { value: "expediee", label: "Expédiée" },
-  { value: "livree", label: "Livrée" },
-  { value: "annulee", label: "Annulée" },
-];
-
 export default function AdminCommandes() {
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showDetail, setShowDetail] = useState<Commande | null>(null);
-  const [updating, setUpdating] = useState(false);
 
   // Charger les commandes
   const fetchCommandes = async () => {
@@ -51,28 +41,12 @@ export default function AdminCommandes() {
     }
   };
 
-  // Modifier le statut
-  const handleUpdateStatus = async (id: number, statut: string) => {
-    setUpdating(true);
-    try {
-      await commandeService.updateStatus(id, statut);
-      fetchCommandes();
-      if (showDetail && showDetail.id === id) {
-        handleShowDetail(id);
-      }
-    } catch (e: any) {
-      setError(e.message || "Erreur lors de la mise à jour du statut.");
-    } finally {
-      setUpdating(false);
-    }
-  };
-
   // Fermer le détail
   const closeDetail = () => setShowDetail(null);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Gestion des commandes</h1>
+      <h1 className="text-2xl font-bold mb-6">Gestion des commandes (Paiements réussis)</h1>
       <div className="bg-white rounded shadow p-6">
         {loading ? (
           <div>Chargement...</div>
@@ -86,33 +60,28 @@ export default function AdminCommandes() {
                 <th className="py-2 px-3">Client</th>
                 <th className="py-2 px-3">Date</th>
                 <th className="py-2 px-3">Montant</th>
-                <th className="py-2 px-3">Statut</th>
+                <th className="py-2 px-3">Paiement</th>
                 <th className="py-2 px-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {commandes.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-4">Aucune commande trouvée.</td>
+                  <td colSpan={6} className="text-center py-4">Aucune commande payée trouvée.</td>
                 </tr>
               ) : (
                 commandes.map((cmd) => (
                   <tr key={cmd.id}>
                     <td className="py-2 px-3">{cmd.id}</td>
-                    <td className="py-2 px-3">{cmd.client_id}</td>
+                    <td className="py-2 px-3">
+                      {cmd.client ? `${cmd.client.prenom} ${cmd.client.nom}` : `Client #${cmd.client_id}`}
+                    </td>
                     <td className="py-2 px-3">{LOCALE_CONFIG.formatDate(cmd.created_at)}</td>
                     <td className="py-2 px-3">{LOCALE_CONFIG.formatPrice(cmd.montant_total)}</td>
                     <td className="py-2 px-3">
-                      <select
-                        value={cmd.statut}
-                        onChange={(e) => handleUpdateStatus(cmd.id, e.target.value)}
-                        disabled={updating}
-                        className="border rounded px-2 py-1"
-                      >
-                        {STATUTS.map((s) => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        ✓ Payé
+                      </span>
                     </td>
                     <td className="py-2 px-3">
                       <button
@@ -141,10 +110,14 @@ export default function AdminCommandes() {
               ×
             </button>
             <h2 className="text-xl font-semibold mb-4">Détail de la commande #{showDetail.id}</h2>
-            <div className="mb-2">Client ID : {showDetail.client_id}</div>
+            <div className="mb-2">
+              Client : {showDetail.client ? `${showDetail.client.prenom} ${showDetail.client.nom}` : `ID #${showDetail.client_id}`}
+            </div>
             <div className="mb-2">Date : {LOCALE_CONFIG.formatDate(showDetail.created_at)}</div>
             <div className="mb-2">Montant : {LOCALE_CONFIG.formatPrice(showDetail.montant_total)}</div>
-            <div className="mb-2">Statut : {STATUTS.find(s => s.value === showDetail.statut)?.label || showDetail.statut}</div>
+            <div className="mb-2">
+              Paiement : <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">✓ Payé avec succès</span>
+            </div>
             <div className="mb-2">Adresse livraison : {showDetail.adresse_livraison?.adresse_ligne_1}</div>
             <div className="mb-2">Adresse facturation : {showDetail.adresse_facturation?.adresse_ligne_1}</div>
             <div className="mb-2">Détails :</div>

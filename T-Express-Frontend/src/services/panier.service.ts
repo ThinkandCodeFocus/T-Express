@@ -26,11 +26,20 @@ export const panierService = {
    * Ajouter un produit au panier
    */
   async ajouter(data: AjouterPanierData): Promise<PanierContenu> {
+    console.log('📤 Envoi de la requête d\'ajout au panier:', data);
     const response = await apiClient.post<{ message: string; panier: PanierContenu }>(
       API_CONFIG.endpoints.panier.ajouter,
       data,
       { requiresAuth: true }
     );
+    console.log('📥 Réponse complète de l\'API:', response);
+    console.log('📦 Panier extrait:', response.panier);
+    
+    if (!response || !response.panier) {
+      console.error('❌ Réponse invalide de l\'API:', response);
+      throw new Error('Réponse invalide de l\'API');
+    }
+    
     return response.panier;
   },
 

@@ -23,9 +23,23 @@ export const adresseService = {
    * Ajouter une nouvelle adresse
    */
   async ajouter(data: AjouterAdresseData): Promise<Adresse> {
+    // Transformer les noms de champs pour le backend Laravel
+    const backendData = {
+      type: data.type,
+      nom_complet: data.nom_complet,
+      telephone: data.telephone,
+      ligne1: data.adresse_ligne_1,  // Backend attend ligne1
+      ligne2: data.adresse_ligne_2,  // Backend attend ligne2
+      ville: data.ville,
+      region: data.region,
+      code_postal: data.code_postal,
+      pays: data.pays,
+      par_defaut: data.par_defaut,
+    };
+
     const response = await apiClient.post<{ message: string; adresse: Adresse }>(
       API_CONFIG.endpoints.adresses.ajouter,
-      data,
+      backendData,
       { requiresAuth: true }
     );
     return response.adresse;

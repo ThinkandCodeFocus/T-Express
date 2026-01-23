@@ -35,9 +35,5 @@ export function usePanierContext() {
     throw new Error('usePanierContext must be used within a PanierProvider');
   }
   
-  // Log pour déboguer
-  console.log('usePanierContext - panier:', context.panier);
-  console.log('usePanierContext - loading:', context.loading);
-  
   return context;
 }

@@ -10,6 +10,9 @@ import { resetQuickView } from "@/redux/features/quickView-slice";
 import { updateproductDetails } from "@/redux/features/product-details";
 import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
+import { catalogueService } from "@/services/catalogue.service";
+import { API_CONFIG } from "@/config/api.config";
+import type { Produit } from "@/types/api.types";
 import toast from "react-hot-toast";
 
 const QuickViewModal = () => {
@@ -20,41 +23,104 @@ const QuickViewModal = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  // get the product data
-  const product = useAppSelector((state) => state.quickViewReducer.value);
+  // get the product data from Redux (basic info)
+  const productRedux = useAppSelector((state) => state.quickViewReducer.value);
+  
+  // State pour les données complètes du produit depuis la BDD
+  const [product, setProduct] = useState<Produit | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const [activePreview, setActivePreview] = useState(0);
   const fallbackImage = "/images/products/product-1-bg-1.png";
 
+  // Charger les données complètes du produit depuis l'API quand le modal s'ouvre
+  useEffect(() => {
+    if (isModalOpen && productRedux?.id) {
+      loadProductDetails();
+    }
+  }, [isModalOpen, productRedux?.id]);
+
+  const loadProductDetails = async () => {
+    if (!productRedux?.id) return;
+    
+    try {
+      setLoading(true);
+      const produitComplet = await catalogueService.getDetail(productRedux.id);
+      setProduct(produitComplet);
+    } catch (error) {
+      console.error('Erreur lors du chargement des détails du produit:', error);
+      // En cas d'erreur, utiliser les données Redux de base
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Construire les URLs des images depuis les données de la BDD
+  const imageBaseURL = API_CONFIG.baseURL.replace('/api', '');
+  
   const thumbnails = useMemo(() => {
-    const source = product?.imgs?.thumbnails;
+    // Si on a les données complètes du produit depuis la BDD
+    if (product) {
+      const images: string[] = [];
+      
+      // Ajouter l'image principale en premier
+      if (product.image_principale) {
+        images.push(`${imageBaseURL}/storage/${product.image_principale}`);
+      }
+      
+      // Ajouter les autres images
+      if (product.images) {
+        let parsedImages: string[] = [];
+        if (typeof product.images === 'string') {
+          try {
+            parsedImages = JSON.parse(product.images);
+          } catch (e) {
+            parsedImages = [product.images];
+          }
+        } else if (Array.isArray(product.images)) {
+          parsedImages = product.images;
+        }
+        
+        parsedImages.forEach((img: string) => {
+          if (img && !images.includes(`${imageBaseURL}/storage/${img}`)) {
+            images.push(`${imageBaseURL}/storage/${img}`);
+          }
+        });
+      }
+      
+      return images.length > 0 ? images : [fallbackImage];
+    }
+    
+    // Sinon, utiliser les données Redux
+    const source = productRedux?.imgs?.thumbnails;
     if (Array.isArray(source) && source.length > 0) {
       return source;
     }
     return [fallbackImage];
-  }, [product?.imgs?.thumbnails]);
+  }, [product, productRedux?.imgs?.thumbnails]);
 
   const previews = useMemo(() => {
-    const source = product?.imgs?.previews;
-    if (Array.isArray(source) && source.length > 0) {
-      return source;
-    }
-    return [fallbackImage];
-  }, [product?.imgs?.previews]);
+    // Utiliser les mêmes images que les thumbnails
+    return thumbnails;
+  }, [thumbnails]);
 
   // preview modal
   const handlePreviewSlider = () => {
-    dispatch(updateproductDetails(product));
-
-    openPreviewModal();
+    // Utiliser les données complètes si disponibles, sinon les données Redux
+    const productToShow = product || productRedux;
+    if (productToShow) {
+      dispatch(updateproductDetails(productToShow));
+      openPreviewModal();
+    }
   };
 
-  // add to cart
+  // ajouter au panier
   const handleAddToCart = async () => {
-    if (product?.id) {
+    const productId = product?.id || productRedux?.id;
+    if (productId) {
       try {
         await ajouter({
-          produit_id: product.id,
+          produit_id: productId,
           quantite: quantity,
         });
         closeModal();
@@ -63,6 +129,30 @@ const QuickViewModal = () => {
       }
     }
   };
+
+  // Calculer le pourcentage de réduction
+  const discountPercentage = useMemo(() => {
+    const prix = product?.prix || productRedux?.price || 0;
+    const prixPromo = product?.prix_promo || productRedux?.discountedPrice || 0;
+    if (prixPromo < prix && prix > 0) {
+      return Math.round(((prix - prixPromo) / prix) * 100);
+    }
+    return 0;
+  }, [product, productRedux]);
+
+  // Notes fictives (bonnes notes) - toujours affichées comme dans le design original
+  const rating = 4.7; // Note fictive fixe
+  const reviewsCount = 5; // Nombre d'avis fictif fixe
+  
+  // Obtenir le nom du produit depuis la BDD
+  const productName = product?.nom || productRedux?.title || '';
+  
+  // Obtenir la description depuis la BDD
+  const description = product?.description || 'Aucune description disponible.';
+  
+  // Obtenir les prix depuis la BDD
+  const prix = product?.prix || productRedux?.price || 0;
+  const prixPromo = product?.prix_promo || productRedux?.discountedPrice || prix;
 
   useEffect(() => {
     // closing modal while clicking outside
@@ -85,7 +175,7 @@ const QuickViewModal = () => {
 
   useEffect(() => {
     setActivePreview(0);
-  }, [product]);
+  }, [product, productRedux]);
 
   useEffect(() => {
     if (activePreview >= previews.length) {
@@ -140,7 +230,8 @@ const QuickViewModal = () => {
                         alt="thumbnail"
                         width={61}
                         height={61}
-                        className="aspect-square"
+                        className="aspect-square object-cover"
+                        unoptimized={img?.includes(imageBaseURL)}
                       />
                     </button>
                   ))}
@@ -175,6 +266,8 @@ const QuickViewModal = () => {
                       alt="products-details"
                       width={400}
                       height={400}
+                      className="object-cover w-full h-full"
+                      unoptimized={previews[activePreview]?.includes(imageBaseURL)}
                     />
                   </div>
                 </div>
@@ -182,12 +275,19 @@ const QuickViewModal = () => {
             </div>
 
             <div className="max-w-[445px] w-full">
-              <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
-                SALE 20% OFF
-              </span>
+              {discountPercentage > 0 && (
+                <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
+                  SALE {discountPercentage}% OFF
+                </span>
+              )}
+              {discountPercentage === 0 && (
+                <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
+                  SALE 20% OFF
+                </span>
+              )}
 
               <h3 className="font-semibold text-xl xl:text-heading-5 text-dark mb-4">
-                {product.title}
+                {productName}
               </h3>
 
               <div className="flex flex-wrap items-center gap-5 mb-6">
@@ -258,7 +358,7 @@ const QuickViewModal = () => {
                     </svg>
 
                     <svg
-                      className="fill-gray-4"
+                      className="fill-[#FFA645]"
                       width="18"
                       height="18"
                       viewBox="0 0 18 18"
@@ -301,8 +401,8 @@ const QuickViewModal = () => {
                   </div>
 
                   <span>
-                    <span className="font-medium text-dark"> 4.7 Rating </span>
-                    <span className="text-dark-2"> (5 reviews) </span>
+                    <span className="font-medium text-dark"> {rating} Rating </span>
+                    <span className="text-dark-2"> ({reviewsCount} reviews) </span>
                   </span>
                 </div>
 
@@ -335,9 +435,8 @@ const QuickViewModal = () => {
                 </div>
               </div>
 
-              <p>
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has.
+              <p className="text-dark-5">
+                {description.length > 150 ? `${description.substring(0, 150)}...` : description}
               </p>
 
               <div className="flex flex-wrap justify-between gap-5 mt-6 mb-7.5">
@@ -348,11 +447,13 @@ const QuickViewModal = () => {
 
                   <span className="flex items-center gap-2">
                     <span className="font-semibold text-dark text-xl xl:text-heading-4">
-                      {formatPrice(product.discountedPrice)}
+                      {formatPrice(prixPromo)}
                     </span>
-                    <span className="font-medium text-dark-4 text-lg xl:text-2xl line-through">
-                      {formatPrice(product.price)}
-                    </span>
+                    {prixPromo < prix && (
+                      <span className="font-medium text-dark-4 text-lg xl:text-2xl line-through">
+                        {formatPrice(prix)}
+                      </span>
+                    )}
                   </span>
                 </div>
 
@@ -430,7 +531,7 @@ const QuickViewModal = () => {
                   className={`inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark
                   `}
                 >
-                  Add to Cart
+                  Ajouter au panier
                 </button>
 
                 <button

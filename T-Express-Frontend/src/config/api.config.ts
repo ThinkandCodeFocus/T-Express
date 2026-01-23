@@ -155,6 +155,7 @@ export const API_CONFIG = {
         detail: '/admin/paiements/detail',
         modifierStatut: '/admin/paiements/modifier-statut',
         supprimer: '/admin/paiements/supprimer',
+        stats: '/admin/paiements/stats',
       },
       livraisons: {
         liste: '/admin/livraisons/liste',
@@ -188,8 +189,9 @@ export const LOCALE_CONFIG = {
   currencySymbol: 'FCFA',
   phonePrefix: '+221',
   
-  // Format de téléphone sénégalais (9 chiffres après +221)
-  phonePattern: /^(\+221|00221)?[0-9]{9}$/,
+  // Format de téléphone sénégalais (9 chiffres après +221, avec ou sans espaces)
+  // Accepte: +221 77 333 98 35, +22177333983 5, 77 333 98 35, etc.
+  phonePattern: /^(\+221|00221)?\s*\d{2}\s*\d{3}\s*\d{2}\s*\d{2}$|^(\+221|00221)?\s*\d{9}$/,
   
   // Format de prix
   formatPrice: (amount: number): string => {

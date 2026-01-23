@@ -197,7 +197,7 @@ export default function AdminClients() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Nom complet</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Email</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Téléphone</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Date d'inscription</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-dark-4 uppercase">Date d&apos;inscription</th>
                     <th className="px-6 py-4 text-right text-xs font-semibold text-dark-4 uppercase">Actions</th>
                   </tr>
                 </thead>

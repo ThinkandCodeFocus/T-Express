@@ -496,7 +496,7 @@ export default function AdminArticles() {
                       onChange={handleChange}
                       className="w-5 h-5 text-blue rounded focus:ring-2 focus:ring-blue"
                     />
-                    <span className="text-dark">Publier l'article</span>
+                    <span className="text-dark">Publier l&apos;article</span>
                   </label>
                 </div>
               </div>

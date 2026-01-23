@@ -26,6 +26,7 @@ const BlogDetailsNew = () => {
       loadArticle();
       loadArticlesRecents();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const loadArticle = async () => {

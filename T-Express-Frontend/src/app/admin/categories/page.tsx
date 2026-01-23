@@ -329,7 +329,7 @@ export default function AdminCategories() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-dark mb-2">Ordre d'affichage</label>
+                  <label className="block text-sm font-semibold text-dark mb-2">Ordre d&apos;affichage</label>
                   <input
                     type="number"
                     name="ordre"

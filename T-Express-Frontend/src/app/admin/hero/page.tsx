@@ -463,7 +463,7 @@ export default function AdminHero() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-3xl font-bold text-dark mb-2">Gestion des sections Hero</h1>
-            <p className="text-dark-4">Gérez les images et contenus de la page d'accueil</p>
+            <p className="text-dark-4">Gérez les images et contenus de la page d&apos;accueil</p>
           </div>
           <button
             onClick={() => openModal()}
@@ -731,9 +731,9 @@ export default function AdminHero() {
                       <option value="carousel">🔄 Carousel Principal (Images qui défilent en haut)</option>
                       <option value="side_card">📱 Carte Latérale (Petites cartes à droite)</option>
                       <option value="promo_banner">🎯 Bannière Promo (Bannières promotionnelles)</option>
-                      <option value="countdown">⏰ Section Countdown (Don't Miss avec compte à rebours)</option>
+                      <option value="countdown">⏰ Section Countdown (Don&apos;t Miss avec compte à rebours)</option>
                     </select>
-                    <p className="text-xs text-dark-4 mt-1">Choisissez où cette section apparaîtra sur la page d'accueil</p>
+                    <p className="text-xs text-dark-4 mt-1">Choisissez où cette section apparaîtra sur la page d&apos;accueil</p>
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-dark mb-2">Position dans la liste</label>
@@ -840,7 +840,7 @@ export default function AdminHero() {
                     {imagePreview ? '📷 Changer l\'image' : '📷 Choisir une image'}
                   </label>
                   <p className="text-xs text-dark-4 mt-2 text-center">Formats acceptés: JPG, PNG, GIF, WebP (max 5MB)</p>
-                  <p className="text-xs text-blue mt-2 text-center font-semibold">💡 Si vous ajoutez une image, elle remplacera l'image par défaut</p>
+                  <p className="text-xs text-blue mt-2 text-center font-semibold">💡 Si vous ajoutez une image, elle remplacera l&apos;image par défaut</p>
                 </div>
               </div>
 
@@ -895,7 +895,7 @@ export default function AdminHero() {
                           {imageFondPreview ? 'Changer' : 'Choisir image de fond'}
                         </label>
                       </div>
-                      <p className="text-xs text-dark-4 mt-1">Image de fond décorative (remplace l'image par défaut si ajoutée)</p>
+                      <p className="text-xs text-dark-4 mt-1">Image de fond décorative (remplace l&apos;image par défaut si ajoutée)</p>
                     </div>
 
                     {/* Image produit */}
@@ -939,7 +939,7 @@ export default function AdminHero() {
                           {imageProduitPreview ? 'Changer' : 'Choisir image produit'}
                         </label>
                       </div>
-                      <p className="text-xs text-dark-4 mt-1">Image du produit (pour countdown, remplace l'image par défaut si ajoutée)</p>
+                      <p className="text-xs text-dark-4 mt-1">Image du produit (pour countdown, remplace l&apos;image par défaut si ajoutée)</p>
                     </div>
                   </div>
                 </div>
@@ -994,7 +994,7 @@ export default function AdminHero() {
                           className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                           placeholder={form.type === 'promo_banner' ? "Ex: Workout At Home" : "Ex: iPhone 14 Plus & 14 Pro Max"}
                         />
-                        <p className="text-xs text-dark-4 mt-1">Le titre principal qui s'affichera en grand</p>
+                        <p className="text-xs text-dark-4 mt-1">Le titre principal qui s&apos;affichera en grand</p>
                       </div>
                     )}
 

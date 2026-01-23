@@ -30,7 +30,8 @@ const CartSidebarModalNew = () => {
       nombreArticles: panier?.nombre_articles,
       total: panier?.total
     });
-  }, [panier, loading, cartItems]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panier, loading]);
 
   // Utiliser le total du panier si disponible, sinon calculer
   const totalPrice = panier?.total || cartItems.reduce((acc, item) => acc + (parseFloat(item.prix_unitaire.toString()) * item.quantite), 0);

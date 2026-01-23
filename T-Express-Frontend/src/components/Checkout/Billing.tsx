@@ -40,7 +40,7 @@ const Billing = () => {
 
         <div className="mb-5">
           <label htmlFor="companyName" className="block mb-2.5">
-            Nom de l'entreprise
+            Nom de l&apos;entreprise
           </label>
 
           <input

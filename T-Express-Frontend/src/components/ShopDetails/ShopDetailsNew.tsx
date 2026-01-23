@@ -56,7 +56,7 @@ const ShopDetailsNew = () => {
   };
 
   const images = product?.images ? JSON.parse(product.images as any) : [];
-  const imageUrl = (img: string) => `${API_CONFIG.baseURL}/storage/${img}`;
+  const imageUrl = (img: string) => `${API_CONFIG.baseURL.replace('/api', '')}/storage/${img}`;
 
   if (loading) {
     return (

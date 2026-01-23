@@ -38,6 +38,7 @@ const QuickViewModal = () => {
     if (isModalOpen && productRedux?.id) {
       loadProductDetails();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isModalOpen, productRedux?.id]);
 
   const loadProductDetails = async () => {
@@ -97,6 +98,7 @@ const QuickViewModal = () => {
       return source;
     }
     return [fallbackImage];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product, productRedux?.imgs?.thumbnails]);
 
   const previews = useMemo(() => {

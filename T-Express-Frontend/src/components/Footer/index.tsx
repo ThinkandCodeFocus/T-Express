@@ -299,7 +299,7 @@ const Footer = () => {
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">
-                  Conditions d'utilisation
+                  Conditions d&apos;utilisation
                 </a>
               </li>
               <li>
@@ -317,11 +317,11 @@ const Footer = () => {
 
           <div className="w-full sm:w-auto">
             <h2 className="mb-7.5 text-custom-1 font-medium text-dark lg:text-right">
-              Télécharger l'application
+              Télécharger l&apos;application
             </h2>
 
             <p className="lg:text-right text-custom-sm mb-4">
-              Économisez avec l'application - Nouveaux utilisateurs uniquement
+              Économisez avec l&apos;application - Nouveaux utilisateurs uniquement
             </p>
 
             <ul className="flex flex-col lg:items-end gap-3">

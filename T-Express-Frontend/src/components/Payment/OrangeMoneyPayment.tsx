@@ -35,6 +35,7 @@ export default function OrangeMoneyPayment({
       setAutoInitiated(true);
       initierPaiement(telephoneProp);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [telephoneProp, autoInitiated]);
 
   const initierPaiement = async (tel: string) => {
@@ -165,7 +166,7 @@ export default function OrangeMoneyPayment({
             <p className="text-sm font-semibold text-gray-700">Instructions:</p>
             <ol className="list-decimal list-inside text-sm text-gray-600 space-y-1">
               <li>Composez #144# sur votre téléphone</li>
-              <li>Sélectionnez "Payer"</li>
+              <li>Sélectionnez &quot;Payer&quot;</li>
               <li>Confirmez le paiement avec votre code secret</li>
             </ol>
           </div>

@@ -35,6 +35,7 @@ export default function WavePayment({
       setAutoInitiated(true);
       initierPaiement(telephoneProp);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [telephoneProp, autoInitiated]);
 
   const initierPaiement = async (tel: string) => {

@@ -26,6 +26,7 @@ const ShopDetailsNew = () => {
     if (productId) {
       loadProduct();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   const loadProduct = async () => {

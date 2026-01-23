@@ -24,6 +24,7 @@ const PriceDropdown = ({ minPrice = null, maxPrice = null, onPriceChange }: Pric
     if (maxPrice !== null && maxPrice !== selectedPrice.to) {
       setSelectedPrice(prev => ({ ...prev, to: maxPrice }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minPrice, maxPrice]);
 
   const handlePriceChange = (e: number[]) => {

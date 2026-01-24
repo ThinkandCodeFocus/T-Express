@@ -147,22 +147,32 @@ export default function AdminRetours() {
                         <tr key={r.id} className="hover:bg-gray-1 transition-colors">
                           <td className="px-6 py-4 font-semibold text-dark">{r.id}</td>
                           <td className="px-6 py-4 text-dark">
-                            {r.commande?.numero_commande || `#${r.commande_id}`}
+                            {`#${r.commande_id}`}
                           </td>
                           <td className="px-6 py-4 text-dark">
-                            {r.commande?.client ? `${r.commande.client.prenom} ${r.commande.client.nom}` : `Client #${r.commande?.client_id}`}
+                            {`Client #${r.client_id}`}
                           </td>
                           <td className="px-6 py-4 text-dark-4">
-                            {LOCALE_CONFIG.formatDate(r.date_demande || r.created_at)}
+                            {LOCALE_CONFIG.formatDate(r.created_at)}
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statutColor.bg} ${statutColor.text}`}>
-                              {r.statut === 'en_attente' ? 'En attente' : r.statut === 'approuve' ? 'Approuvé' : 'Refusé'}
+                              {r.statut === 'demande'
+                                ? 'En attente'
+                                : r.statut === 'approuve'
+                                ? 'Approuvé'
+                                : r.statut === 'refuse'
+                                ? 'Refusé'
+                                : r.statut === 'en_cours'
+                                ? 'En cours'
+                                : r.statut === 'complete'
+                                ? 'Terminé'
+                                : r.statut}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
-                              {r.statut === 'en_attente' && (
+                              {r.statut === 'demande' && (
                                 <>
                                   <button
                                     onClick={() => handleApprouver(r.id)}

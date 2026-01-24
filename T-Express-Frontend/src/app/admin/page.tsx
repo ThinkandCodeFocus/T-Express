@@ -27,6 +27,8 @@ export default function AdminDashboard() {
         total_produits: 0,
         commandes_en_attente: 0,
         stock_faible: 0,
+        ventes_mois: 0,
+        croissance_ventes: 0,
         top_produits: [],
         commandes_recentes: [],
       });

@@ -155,7 +155,7 @@ export default function AdminAvis() {
                           {a.client ? `${a.client.prenom} ${a.client.nom}` : `Client #${a.client_id}`}
                         </td>
                         <td className="px-6 py-4 text-dark">
-                          {a.produit?.nom || `Produit #${a.produit_id}`}
+                          {`Produit #${a.produit_id}`}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1">
@@ -167,7 +167,7 @@ export default function AdminAvis() {
                           <p className="truncate">{a.commentaire || "-"}</p>
                         </td>
                         <td className="px-6 py-4 text-dark-4 text-sm">
-                          {LOCALE_CONFIG.formatDate(a.date || a.created_at)}
+                          {LOCALE_CONFIG.formatDate(a.created_at)}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button

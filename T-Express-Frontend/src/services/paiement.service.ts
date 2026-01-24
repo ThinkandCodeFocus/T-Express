@@ -127,7 +127,7 @@ export const paiementService = {
   /**
    * Vérifier le statut d'un paiement
    */
-  async verifierStatut(transactionId: string): Promise<{
+  async verifierStatutParTransaction(transactionId: string): Promise<{
     success: boolean;
     statut: string;
     message?: string;

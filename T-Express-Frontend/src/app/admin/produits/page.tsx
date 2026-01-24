@@ -23,9 +23,9 @@ export default function AdminProduits() {
   const [form, setForm] = useState<Partial<AdminProduitData>>({
     nom: "",
     description: "",
-    prix: "",
-    prix_promo: "",
-    categorie_id: "",
+    prix: undefined,
+    prix_promo: undefined,
+    categorie_id: undefined,
     marque: "",
     reference: "",
     couleurs: [],
@@ -33,7 +33,7 @@ export default function AdminProduits() {
     en_vedette: false,
     nouveau: false,
     actif: true,
-    quantite_stock: "",
+    quantite_stock: undefined,
   });
   const [imagePrincipale, setImagePrincipale] = useState<File | null>(null);
   const [images, setImages] = useState<File[]>([]);
@@ -71,9 +71,9 @@ export default function AdminProduits() {
       setForm({
         nom: prod.nom,
         description: prod.description || "",
-        prix: prod.prix.toString(),
-        prix_promo: prod.prix_promo?.toString() || "",
-        categorie_id: prod.categorie_id.toString(),
+        prix: prod.prix,
+        prix_promo: prod.prix_promo,
+        categorie_id: prod.categorie_id,
         marque: prod.marque || "",
         reference: prod.reference || "",
         couleurs: Array.isArray(prod.couleurs) ? prod.couleurs : (prod.couleurs ? JSON.parse(prod.couleurs as any) : []),
@@ -81,7 +81,7 @@ export default function AdminProduits() {
         en_vedette: prod.en_vedette || false,
         nouveau: prod.nouveau || false,
         actif: prod.actif !== undefined ? prod.actif : true,
-        quantite_stock: prod.stock?.quantite?.toString() || "",
+        quantite_stock: prod.stock?.quantite ?? undefined,
       });
       if (prod.image_principale) {
         setImagePrincipalePreview(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${prod.image_principale}`);
@@ -91,9 +91,9 @@ export default function AdminProduits() {
       setForm({
         nom: "",
         description: "",
-        prix: "",
-        prix_promo: "",
-        categorie_id: "",
+        prix: undefined,
+        prix_promo: undefined,
+        categorie_id: undefined,
         marque: "",
         reference: "",
         couleurs: [],
@@ -101,7 +101,7 @@ export default function AdminProduits() {
         en_vedette: false,
         nouveau: false,
         actif: true,
-        quantite_stock: "",
+        quantite_stock: undefined,
       });
       setImagePrincipale(null);
       setImages([]);
@@ -185,9 +185,9 @@ export default function AdminProduits() {
       const data: Partial<AdminProduitData> = {
         nom: form.nom,
         description: form.description,
-        prix: parseFloat(form.prix as string),
-        prix_promo: form.prix_promo ? parseFloat(form.prix_promo as string) : undefined,
-        categorie_id: parseInt(form.categorie_id as string),
+        prix: form.prix ?? 0,
+        prix_promo: form.prix_promo ?? undefined,
+        categorie_id: form.categorie_id ?? 0,
         marque: form.marque || undefined,
         reference: form.reference || undefined,
         couleurs: form.couleurs?.length ? form.couleurs : undefined,
@@ -195,7 +195,7 @@ export default function AdminProduits() {
         en_vedette: form.en_vedette,
         nouveau: form.nouveau,
         actif: form.actif,
-        quantite_stock: form.quantite_stock ? parseInt(form.quantite_stock as string, 10) : 0,
+        quantite_stock: form.quantite_stock ?? 0,
       };
 
       if (imagePrincipale) {

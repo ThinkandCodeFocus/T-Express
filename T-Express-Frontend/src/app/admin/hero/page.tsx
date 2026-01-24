@@ -116,16 +116,16 @@ export default function AdminHero() {
     titre: '',
     description: '',
     sous_titre: '',
-    pourcentage_reduction: '',
+    pourcentage_reduction: null,
     texte_reduction: '',
-    prix_actuel: '',
-    prix_ancien: '',
+    prix_actuel: null,
+    prix_ancien: null,
     texte_prix: '',
     lien_url: '',
     texte_bouton: '',
     couleur_fond: '',
     date_fin_countdown: '',
-    ordre: '0',
+    ordre: 0,
     actif: true,
   });
 
@@ -156,16 +156,16 @@ export default function AdminHero() {
         titre: section.titre || '',
         description: section.description || '',
         sous_titre: section.sous_titre || '',
-        pourcentage_reduction: section.pourcentage_reduction?.toString() || '',
+        pourcentage_reduction: section.pourcentage_reduction ?? null,
         texte_reduction: section.texte_reduction || '',
-        prix_actuel: section.prix_actuel?.toString() || '',
-        prix_ancien: section.prix_ancien?.toString() || '',
+        prix_actuel: section.prix_actuel ?? null,
+        prix_ancien: section.prix_ancien ?? null,
         texte_prix: section.texte_prix || '',
         lien_url: section.lien_url || '',
         texte_bouton: section.texte_bouton || '',
         couleur_fond: section.couleur_fond || '',
         date_fin_countdown: section.date_fin_countdown ? (section.date_fin_countdown.includes('T') ? section.date_fin_countdown.substring(0, 16) : section.date_fin_countdown + 'T00:00') : '',
-        ordre: section.ordre?.toString() || '0',
+        ordre: section.ordre ?? 0,
         actif: section.actif !== undefined ? section.actif : true,
       });
       if (section.image) {
@@ -180,21 +180,21 @@ export default function AdminHero() {
     } else {
       setEditSection(null);
       setForm({
-        type: presetType || 'carousel',
+        type: (presetType as 'carousel' | 'side_card' | 'promo_banner' | 'countdown') || 'carousel',
         position: presetPosition || '',
         titre: '',
         description: '',
         sous_titre: '',
-        pourcentage_reduction: '',
+        pourcentage_reduction: null,
         texte_reduction: '',
-        prix_actuel: '',
-        prix_ancien: '',
+        prix_actuel: null,
+        prix_ancien: null,
         texte_prix: '',
         lien_url: '',
         texte_bouton: '',
         couleur_fond: '',
         date_fin_countdown: '',
-        ordre: '0',
+        ordre: 0,
         actif: true,
       });
       setImagePreview(null);
@@ -301,7 +301,7 @@ export default function AdminHero() {
           }
           
           // Si la position n'est pas définie ou si elle est déjà prise, assigner automatiquement
-          if (!form.position || form.position === '') {
+          if (!form.position) {
             // Assigner promo_2 si disponible, sinon promo_3
             const hasPromo2 = existingSmallPromos.some(s => s.position === 'promo_2');
             const hasPromo3 = existingSmallPromos.some(s => s.position === 'promo_3');
@@ -344,16 +344,16 @@ export default function AdminHero() {
         titre: form.titre || '',
         description: form.description || '',
         sous_titre: form.sous_titre || '',
-        pourcentage_reduction: form.pourcentage_reduction ? parseInt(form.pourcentage_reduction as string) : '',
+        pourcentage_reduction: form.pourcentage_reduction ?? null,
         texte_reduction: form.texte_reduction || '',
-        prix_actuel: form.prix_actuel ? parseFloat(form.prix_actuel as string) : '',
-        prix_ancien: form.prix_ancien ? parseFloat(form.prix_ancien as string) : '',
+        prix_actuel: form.prix_actuel ?? null,
+        prix_ancien: form.prix_ancien ?? null,
         texte_prix: form.texte_prix || '',
         lien_url: form.lien_url || '',
         texte_bouton: form.texte_bouton || '',
         couleur_fond: form.couleur_fond || '',
         date_fin_countdown: form.date_fin_countdown || '',
-        ordre: form.ordre ? parseInt(form.ordre as string) : 0,
+        ordre: form.ordre ?? 0,
         actif: form.actif,
       };
 
@@ -507,7 +507,7 @@ export default function AdminHero() {
             <div className="p-6">
               {sectionsByType.carousel.length === 0 ? (
                 <div className="text-center py-8 text-dark-4">
-                  <p>Aucun carousel créé. Cliquez sur "Ajouter une section" et choisissez "Carousel".</p>
+                  <p>Aucun carousel créé. Cliquez sur &quot;Ajouter une section&quot; et choisissez &quot;Carousel&quot;.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -535,7 +535,7 @@ export default function AdminHero() {
             <div className="p-6">
               {sectionsByType.side_card.length === 0 ? (
                 <div className="text-center py-8 text-dark-4">
-                  <p>Aucune carte latérale créée. Cliquez sur "Ajouter une section" et choisissez "Carte latérale".</p>
+                  <p>Aucune carte latérale créée. Cliquez sur &quot;Ajouter une section&quot; et choisissez &quot;Carte latérale&quot;.</p>
                   <p className="text-xs mt-2 text-orange font-semibold">⚠️ Maximum 2 cartes latérales autorisées</p>
                 </div>
               ) : (
@@ -584,7 +584,7 @@ export default function AdminHero() {
             <div className="p-6">
               {sectionsByType.promo_banner.filter(s => s.position === 'promo_1').length === 0 ? (
                 <div className="text-center py-8 text-dark-4">
-                  <p>Aucune grande bannière promo créée. Cliquez sur "Ajouter" ci-dessus.</p>
+                  <p>Aucune grande bannière promo créée. Cliquez sur &quot;Ajouter&quot; ci-dessus.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -637,7 +637,7 @@ export default function AdminHero() {
             <div className="p-6">
               {sectionsByType.promo_banner.filter(s => s.position === 'promo_2' || s.position === 'promo_3').length === 0 ? (
                 <div className="text-center py-8 text-dark-4">
-                  <p>Aucune petite bannière promo créée. Cliquez sur "Ajouter" ci-dessus.</p>
+                  <p>Aucune petite bannière promo créée. Cliquez sur &quot;Ajouter&quot; ci-dessus.</p>
                   <p className="text-xs mt-2 text-teal font-semibold">⚠️ Maximum 2 petites bannières autorisées</p>
                 </div>
               ) : (
@@ -677,7 +677,7 @@ export default function AdminHero() {
             <div className="p-6">
               {sectionsByType.countdown.length === 0 ? (
                 <div className="text-center py-8 text-dark-4">
-                  <p>Aucune section countdown créée. Cliquez sur "Ajouter une section" et choisissez "Section Countdown".</p>
+                  <p>Aucune section countdown créée. Cliquez sur &quot;Ajouter une section&quot; et choisissez &quot;Section Countdown&quot;.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1083,7 +1083,7 @@ export default function AdminHero() {
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                         placeholder="30"
                       />
-                      <p className="text-xs text-dark-4 mt-1">Ex: 30 pour afficher "30%" (le grand nombre bleu à gauche)</p>
+                      <p className="text-xs text-dark-4 mt-1">Ex: 30 pour afficher &quot;30%&quot; (le grand nombre bleu à gauche)</p>
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-dark mb-2">Texte de réduction</label>
@@ -1095,8 +1095,8 @@ export default function AdminHero() {
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                         placeholder="Sale\nOff"
                       />
-                      <p className="text-xs text-dark-4 mt-1">Le texte qui apparaît à côté du pourcentage (ex: "Sale\nOff" pour deux lignes, ou "20% off")</p>
-                      <p className="text-xs text-orange mt-1">💡 Utilisez \n pour créer un saut de ligne (ex: "Sale\nOff")</p>
+                      <p className="text-xs text-dark-4 mt-1">Le texte qui apparaît à côté du pourcentage (ex: &quot;Sale\nOff&quot; pour deux lignes, ou &quot;20% off&quot;)</p>
+                      <p className="text-xs text-orange mt-1">💡 Utilisez \n pour créer un saut de ligne (ex: &quot;Sale\nOff&quot;)</p>
                     </div>
                   </div>
                 </div>

@@ -4,9 +4,20 @@
 
 import { apiClient } from '@/lib/api-client';
 import { API_CONFIG } from '@/config/api.config';
-import type { Client } from '@/types/api.types';
+import type { Client, UpdateClientData } from '@/types/api.types';
 
 export const clientService = {
+    /**
+     * Mettre à jour le profil du client connecté
+     */
+    async updateProfil(data: UpdateClientData): Promise<Client> {
+      const response = await apiClient.post<{ client: Client }>(
+        API_CONFIG.endpoints.client.update,
+        data,
+        { requiresAuth: true }
+      );
+      return response.client;
+    },
   /**
    * Récupérer le profil du client connecté
    */

@@ -21,7 +21,7 @@ export default function AdminLivraisons() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [editId, setEditId] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ statut: "", numero_suivi: "", date_livraison_prevue: "" });
+  const [editForm, setEditForm] = useState({ statut: "", numero_suivi: "", date_livraison_estimee: "" });
 
   const fetchData = async () => {
     setLoading(true);
@@ -52,7 +52,7 @@ export default function AdminLivraisons() {
     setEditForm({
       statut: livraison.statut,
       numero_suivi: livraison.numero_suivi || "",
-      date_livraison_prevue: livraison.date_livraison_prevue || "",
+      date_livraison_estimee: livraison.date_livraison_estimee || "",
     });
   };
 
@@ -63,7 +63,7 @@ export default function AdminLivraisons() {
         editId,
         editForm.statut,
         editForm.numero_suivi || undefined,
-        editForm.date_livraison_prevue || undefined
+        editForm.date_livraison_estimee || undefined
       );
       toast.success("Livraison modifiée avec succès");
       setEditId(null);
@@ -150,10 +150,11 @@ export default function AdminLivraisons() {
                         <tr key={l.id} className="hover:bg-gray-1 transition-colors">
                           <td className="px-6 py-4 font-semibold text-dark">{l.id}</td>
                           <td className="px-6 py-4 text-dark">
-                            {l.commande?.numero_commande || `#${l.commande_id}`}
+                            {`#${l.commande_id}`}
                           </td>
                           <td className="px-6 py-4 text-dark">
-                            {l.commande?.client ? `${l.commande.client.prenom} ${l.commande.client.nom}` : `Client #${l.commande?.client_id}`}
+                            {/* Client info not available from Livraison, display placeholder */}
+                            -
                           </td>
                           <td className="px-6 py-4 text-dark-4">
                             {l.numero_suivi || "-"}
@@ -164,7 +165,7 @@ export default function AdminLivraisons() {
                             </span>
                           </td>
                           <td className="px-6 py-4 text-dark-4 text-sm">
-                            {l.date_livraison_prevue ? LOCALE_CONFIG.formatDate(l.date_livraison_prevue) : "-"}
+                            {l.date_livraison_estimee ? LOCALE_CONFIG.formatDate(l.date_livraison_estimee) : "-"}
                           </td>
                           <td className="px-6 py-4 text-right">
                             <button
@@ -243,8 +244,8 @@ export default function AdminLivraisons() {
                   <label className="block text-sm font-semibold text-dark mb-2">Date de livraison prévue</label>
                   <input
                     type="date"
-                    value={editForm.date_livraison_prevue}
-                    onChange={(e) => setEditForm({ ...editForm, date_livraison_prevue: e.target.value })}
+                    value={editForm.date_livraison_estimee}
+                    onChange={(e) => setEditForm({ ...editForm, date_livraison_estimee: e.target.value })}
                     className="w-full border border-gray-3 rounded-lg px-4 py-3"
                   />
                 </div>

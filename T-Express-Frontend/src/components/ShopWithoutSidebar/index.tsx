@@ -60,7 +60,7 @@ const ShopWithoutSidebar = () => {
       } else {
         // Old Products
         response = await catalogueService.rechercher({
-          tri: 'ancien',
+          tri: 'recent',
           page: currentPage,
           per_page: perPage,
         });

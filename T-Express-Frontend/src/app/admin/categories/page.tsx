@@ -19,9 +19,9 @@ export default function AdminCategories() {
     nom: "",
     slug: "",
     description: "",
-    parent_id: "",
+    parent_id: undefined,
     actif: true,
-    ordre: "0",
+    ordre: 0,
   });
 
   const fetchCategories = async () => {
@@ -49,9 +49,9 @@ export default function AdminCategories() {
         nom: cat.nom,
         slug: cat.slug,
         description: cat.description || "",
-        parent_id: cat.parent_id?.toString() || "",
+        parent_id: cat.parent_id ?? undefined,
         actif: cat.actif !== undefined ? cat.actif : true,
-        ordre: cat.ordre?.toString() || "0",
+        ordre: cat.ordre ?? 0,
       });
       if (cat.image) {
         setImagePreview(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${cat.image}`);
@@ -62,9 +62,9 @@ export default function AdminCategories() {
         nom: "",
         slug: "",
         description: "",
-        parent_id: "",
+        parent_id: undefined,
         actif: true,
-        ordre: "0",
+        ordre: 0,
       });
       setImagePreview(null);
       setImage(null);
@@ -109,9 +109,9 @@ export default function AdminCategories() {
         nom: form.nom,
         slug: form.slug || undefined,
         description: form.description || undefined,
-        parent_id: form.parent_id ? parseInt(form.parent_id as string) : undefined,
+        parent_id: form.parent_id !== undefined ? form.parent_id : undefined,
         actif: form.actif,
-        ordre: form.ordre ? parseInt(form.ordre as string) : 0,
+        ordre: form.ordre !== undefined ? form.ordre : 0,
       };
 
       if (image) {
@@ -221,9 +221,6 @@ export default function AdminCategories() {
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-semibold text-dark">{cat.nom}</p>
-                          {cat.parent && (
-                            <p className="text-sm text-dark-4">Sous-catégorie de: {cat.parent.nom}</p>
-                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-dark-4 font-mono text-sm">{cat.slug}</td>

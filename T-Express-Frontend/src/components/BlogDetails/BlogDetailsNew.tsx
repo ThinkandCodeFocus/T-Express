@@ -32,7 +32,7 @@ const BlogDetailsNew = () => {
   const loadArticle = async () => {
     try {
       setLoading(true);
-      const data = await articleService.getDetail(slug);
+      const data = await articleService.getDetail(Number(slug));
       setArticle(data);
     } catch (error) {
       console.error("Erreur chargement article:", error);
@@ -43,8 +43,8 @@ const BlogDetailsNew = () => {
 
   const loadArticlesRecents = async () => {
     try {
-      const data = await articleService.getRecents(5);
-      setArticlesRecents(data);
+      const response = await articleService.getListe(1, 5);
+      setArticlesRecents(response.data || []);
     } catch (error) {
       console.error("Erreur chargement articles récents:", error);
     }

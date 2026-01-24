@@ -41,14 +41,26 @@ const HeroCarousal = () => {
   // Si pas de slides, afficher le design par défaut
   const displaySlides = slides.length > 0 ? slides : [
     {
-      id: 'default-1',
-      pourcentage_reduction: 30,
-      texte_reduction: 'Sale\nOff',
+      id: 0,
+      type: 'carousel',
+      position: null,
       titre: 'True Wireless Noise Cancelling Headphone',
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi at ipsum at risus euismod lobortis in',
-      texte_bouton: 'Shop Now',
+      sous_titre: null,
+      pourcentage_reduction: 30,
+      texte_reduction: 'Sale\nOff',
+      prix_actuel: null,
+      prix_ancien: null,
+      texte_prix: null,
       lien_url: '#',
+      texte_bouton: 'Shop Now',
       image: null,
+      image_fond: null,
+      image_produit: null,
+      couleur_fond: null,
+      date_fin_countdown: null,
+      ordre: 0,
+      actif: true,
     } as HeroSection
   ];
 

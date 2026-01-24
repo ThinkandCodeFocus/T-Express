@@ -1,12 +1,17 @@
-/**
- * Service Articles (Admin)
- */
-
 import { apiClient } from '@/lib/api-client';
 import { API_CONFIG } from '@/config/api.config';
 import type { Article } from '@/types/api.types';
 
 export const articleService = {
+  /**
+   * Ajouter un commentaire à un article
+   */
+  async ajouterCommentaire(data: { article_id: number; nom: string; email: string; commentaire: string }): Promise<any> {
+    return apiClient.post(
+      API_CONFIG.endpoints.articles.commentaire,
+      data
+    );
+  },
   /**
    * Récupérer la liste des articles
    */

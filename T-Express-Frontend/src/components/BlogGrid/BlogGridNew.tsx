@@ -23,10 +23,7 @@ const BlogGridNew = () => {
   const loadArticles = async () => {
     try {
       setLoading(true);
-      const response = await articleService.getListe({
-        per_page: pagination.perPage,
-        page: pagination.currentPage
-      });
+      const response = await articleService.getListe(pagination.currentPage, pagination.perPage);
 
       setArticles(response.data);
       setPagination(prev => ({

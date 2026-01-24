@@ -26,7 +26,6 @@ export default function AdminArticles() {
     contenu: "",
     auteur: "",
     categorie: "",
-    tags: "",
     publie: false,
     date_publication: "",
   });
@@ -64,7 +63,6 @@ export default function AdminArticles() {
         contenu: article.contenu || "",
         auteur: article.auteur || "",
         categorie: article.categorie || "",
-        tags: article.tags || "",
         publie: article.publie || false,
         date_publication: article.date_publication || "",
       });
@@ -80,7 +78,6 @@ export default function AdminArticles() {
         contenu: "",
         auteur: "",
         categorie: "",
-        tags: "",
         publie: false,
         date_publication: "",
       });
@@ -130,7 +127,6 @@ export default function AdminArticles() {
         contenu: form.contenu,
         auteur: form.auteur,
         categorie: form.categorie || undefined,
-        tags: form.tags || undefined,
         publie: form.publie,
         date_publication: form.date_publication || undefined,
       };
@@ -402,17 +398,6 @@ export default function AdminArticles() {
                     value={form.categorie}
                     onChange={handleChange}
                     className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-dark mb-2">Tags</label>
-                  <input
-                    type="text"
-                    name="tags"
-                    value={form.tags}
-                    onChange={handleChange}
-                    className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
-                    placeholder="tag1, tag2, tag3"
                   />
                 </div>
                 <div>

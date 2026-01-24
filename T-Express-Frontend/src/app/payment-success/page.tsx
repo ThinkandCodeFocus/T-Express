@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 function SuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { rafraichir } = usePanier();
+  const { refresh } = usePanier();
   const commandeId = searchParams.get("commande_id");
   
   const [verifying, setVerifying] = useState(true);
@@ -36,7 +36,7 @@ function SuccessContent() {
         if (result.statut_paiement === 'Complété' || result.statut_paiement === 'validé') {
           setPaymentStatus('success');
           // Rafraîchir le panier (il a été vidé côté backend)
-          await rafraichir();
+          await refresh();
           toast.success('Paiement confirmé !');
         } 
         // Paiement encore en attente
@@ -59,7 +59,7 @@ function SuccessContent() {
     };
 
     verifierPaiement();
-  }, [commandeId, rafraichir]);
+  }, [commandeId, refresh]);
 
   // État de chargement
   if (verifying) {

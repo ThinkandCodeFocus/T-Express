@@ -277,7 +277,7 @@ function SuccessContent() {
                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                   />
                 </svg>
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
             </div>
 
@@ -318,7 +318,7 @@ function SuccessContent() {
                   <div>
                     <h3 className="font-semibold text-dark mb-1">Livraison</h3>
                     <p className="text-sm text-body">
-                      Nous vous livrerons à l'adresse indiquée sous 2-5 jours ouvrés
+                      Nous vous livrerons à l&apos;adresse indiquée sous 2-5 jours ouvrés
                     </p>
                   </div>
                 </div>

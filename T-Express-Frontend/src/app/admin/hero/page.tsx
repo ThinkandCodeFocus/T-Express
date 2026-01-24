@@ -965,7 +965,7 @@ export default function AdminHero() {
                       onChange={handleChange}
                       className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
                     />
-                    <p className="text-xs text-dark-4 mt-1">La date jusqu'à laquelle le compte à rebours doit compter. Si non rempli, une date par défaut sera utilisée.</p>
+                    <p className="text-xs text-dark-4 mt-1">La date jusqu&apos;à laquelle le compte à rebours doit compter. Si non rempli, une date par défaut sera utilisée.</p>
                   </div>
                 </div>
               )}

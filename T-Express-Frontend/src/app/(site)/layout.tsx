@@ -44,6 +44,8 @@ export default function RootLayout({
                     <ModalProvider>
                       <PreviewSliderProvider>
                         <Header />
+                        {/* Ajout du ToastProvider pour les notifications */}
+                        {require("@/components/Common/ToastProvider").default()}
                         {children}
 
                       <QuickViewModal />

@@ -171,12 +171,6 @@ export function usePanier() {
   // Utiliser directement les fonctions execute des mutations (elles sont stables maintenant)
   const ajouter = useCallback(
     async (data: AjouterPanierData) => {
-      // Vérifier l'authentification avant d'ajouter
-      if (!authService.isAuthenticated()) {
-        toast.error('Vous devez être connecté pour ajouter des produits au panier');
-        return;
-      }
-      
       console.log('🛒 Tentative d\'ajout au panier:', data);
       try {
         const result = await ajouterMutation.execute(data);

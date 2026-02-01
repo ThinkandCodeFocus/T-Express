@@ -97,7 +97,7 @@ export const paiementService = {
     return apiClient.post(
       '/wave/verifier',
       { commande_id: commandeId },
-      { requiresAuth: true }
+      { requiresAuth: false }
     );
   },
 
@@ -135,7 +135,7 @@ export const paiementService = {
     return apiClient.post(
       '/api/wave/verifier',
       { transaction_id: transactionId },
-      { requiresAuth: true }
+      { requiresAuth: false }
     );
   },
 

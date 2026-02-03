@@ -96,24 +96,24 @@ export default function RetraitSection() {
   return (
     <div className="space-y-6">
       {/* Carte Solde */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow p-6 text-white">
-        <h2 className="text-lg font-semibold mb-4">💰 Votre Solde</h2>
+      <div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">💰 Votre Solde</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <p className="text-sm opacity-80">Total des ventes</p>
-            <p className="text-2xl font-bold">{LOCALE_CONFIG.formatPrice(solde?.total_ventes || 0)}</p>
+            <p className="text-sm text-gray-500">Total des ventes</p>
+            <p className="text-2xl font-bold text-gray-900">{LOCALE_CONFIG.formatPrice(solde?.total_ventes || 0)}</p>
           </div>
           <div>
-            <p className="text-sm opacity-80">Retraits effectués</p>
-            <p className="text-2xl font-bold">{LOCALE_CONFIG.formatPrice(solde?.total_retraits || 0)}</p>
+            <p className="text-sm text-gray-500">Retraits effectués</p>
+            <p className="text-2xl font-bold text-gray-900">{LOCALE_CONFIG.formatPrice(solde?.total_retraits || 0)}</p>
           </div>
           <div>
-            <p className="text-sm opacity-80">En attente</p>
-            <p className="text-2xl font-bold text-yellow-300">{LOCALE_CONFIG.formatPrice(solde?.retraits_en_attente || 0)}</p>
+            <p className="text-sm text-gray-500">En attente</p>
+            <p className="text-2xl font-bold text-yellow-600">{LOCALE_CONFIG.formatPrice(solde?.retraits_en_attente || 0)}</p>
           </div>
           <div>
-            <p className="text-sm opacity-80">Disponible</p>
-            <p className="text-2xl font-bold text-green-300">{LOCALE_CONFIG.formatPrice(solde?.solde_disponible || 0)}</p>
+            <p className="text-sm text-gray-500">Disponible</p>
+            <p className="text-2xl font-bold text-green-600">{LOCALE_CONFIG.formatPrice(solde?.solde_disponible || 0)}</p>
           </div>
         </div>
       </div>

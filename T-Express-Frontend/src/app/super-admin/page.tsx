@@ -159,7 +159,8 @@ export default function SuperAdminPage() {
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+              className="w-full py-3 bg-blue text-white font-medium rounded-lg hover:bg-blue-dark disabled:bg-gray-400 transition"
+              style={{ backgroundColor: '#3C50E0', color: '#ffffff' }}
             >
               {loginLoading ? "Connexion..." : "Se connecter"}
             </button>

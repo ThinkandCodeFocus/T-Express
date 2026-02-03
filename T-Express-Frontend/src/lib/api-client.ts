@@ -141,10 +141,10 @@ class ApiClient {
         // Si la réponse n'est pas du JSON
       }
 
-      // Si 401, déconnecter l'utilisateur
+      // Si 401, déconnecter l'utilisateur (sauf pour les pages super-admin)
       if (response.status === 401) {
         this.clearAuthToken();
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('super-admin')) {
           window.location.href = '/login';
         }
       }

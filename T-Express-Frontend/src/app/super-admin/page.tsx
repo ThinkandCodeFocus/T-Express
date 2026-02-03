@@ -34,9 +34,11 @@ export default function SuperAdminPage() {
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   useEffect(() => {
-    // Vérifier si déjà connecté
+    // Vérifier si déjà connecté en tant que super admin
     const token = localStorage.getItem("super_admin_token");
     if (token) {
+      // S'assurer que auth_token est aussi défini pour l'apiClient
+      localStorage.setItem("auth_token", token);
       setIsLoggedIn(true);
       loadData();
     }
@@ -50,11 +52,11 @@ export default function SuperAdminPage() {
     try {
       const response = await superAdminService.login(email, password);
       localStorage.setItem("super_admin_token", response.token);
-      localStorage.setItem("token", response.token); // Pour que l'API l'utilise
+      localStorage.setItem("auth_token", response.token); // Pour que l'apiClient l'utilise
       setIsLoggedIn(true);
       loadData();
     } catch (err: any) {
-      setLoginError(err.response?.data?.message || "Identifiants invalides");
+      setLoginError(err.message || "Identifiants invalides");
     } finally {
       setLoginLoading(false);
     }
@@ -62,7 +64,7 @@ export default function SuperAdminPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("super_admin_token");
-    localStorage.removeItem("token");
+    localStorage.removeItem("auth_token");
     setIsLoggedIn(false);
     setDashboard(null);
     setPaiements([]);

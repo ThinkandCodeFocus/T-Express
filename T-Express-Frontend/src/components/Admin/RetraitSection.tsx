@@ -163,7 +163,11 @@ export default function RetraitSection() {
           <button
             type="submit"
             disabled={submitting || !solde || solde.solde_disponible < 1000}
-            className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+            className="w-full md:w-auto px-6 py-3 rounded-lg font-medium disabled:cursor-not-allowed transition"
+            style={{ 
+              backgroundColor: submitting || !solde || solde.solde_disponible < 1000 ? '#9CA3AF' : '#3C50E0', 
+              color: '#ffffff' 
+            }}
           >
             {submitting ? "Envoi en cours..." : "Demander le retrait"}
           </button>

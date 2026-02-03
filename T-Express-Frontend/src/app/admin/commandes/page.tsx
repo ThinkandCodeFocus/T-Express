@@ -4,23 +4,32 @@ import { commandeService } from "@/services/commande.service";
 import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 
-// Valeurs exactes de l'ENUM dans la table commandes
-const STATUTS_COMMANDE = [
-  { value: "En attente", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  { value: "Validée", label: "Validée", color: "bg-blue-100 text-blue-800" },
-  { value: "Préparation", label: "En préparation", color: "bg-orange-100 text-orange-800" },
-  { value: "Expédiée", label: "Expédiée", color: "bg-purple-100 text-purple-800" },
-  { value: "Livrée", label: "Livrée", color: "bg-green-100 text-green-800" },
-  { value: "Annulée", label: "Annulée", color: "bg-red-100 text-red-800" },
+// Statuts de commande (affichage seulement, pas modifiable directement)
+const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
+  "En attente": { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+  "Validée": { label: "Validée", color: "bg-blue-100 text-blue-800" },
+  "Préparation": { label: "En préparation", color: "bg-orange-100 text-orange-800" },
+  "Expédiée": { label: "Expédiée", color: "bg-purple-100 text-purple-800" },
+  "Livrée": { label: "Livrée", color: "bg-green-100 text-green-800" },
+  "Annulée": { label: "Annulée", color: "bg-red-100 text-red-800" },
+};
+
+// Valeurs exactes de l'ENUM dans la table paiements (modifiable par l'admin)
+const STATUTS_PAIEMENT_OPTIONS = [
+  { value: "en_attente", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
+  { value: "validé", label: "Validé", color: "bg-green-100 text-green-800" },
+  { value: "Complété", label: "Complété", color: "bg-green-100 text-green-800" },
+  { value: "Accepté", label: "Accepté", color: "bg-green-100 text-green-800" },
+  { value: "échoué", label: "Échoué", color: "bg-red-100 text-red-800" },
+  { value: "Refusé", label: "Refusé", color: "bg-red-100 text-red-800" },
 ];
 
-// Valeurs de l'ENUM dans la table paiements
 const STATUTS_PAIEMENT: Record<string, { label: string; color: string }> = {
   "en_attente": { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   "En attente": { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  "validé": { label: "Payé", color: "bg-green-100 text-green-800" },
-  "Complété": { label: "Payé", color: "bg-green-100 text-green-800" },
-  "Accepté": { label: "Payé", color: "bg-green-100 text-green-800" },
+  "validé": { label: "Validé", color: "bg-green-100 text-green-800" },
+  "Complété": { label: "Complété", color: "bg-green-100 text-green-800" },
+  "Accepté": { label: "Accepté", color: "bg-green-100 text-green-800" },
   "échoué": { label: "Échoué", color: "bg-red-100 text-red-800" },
   "Refusé": { label: "Refusé", color: "bg-red-100 text-red-800" },
 };
@@ -66,20 +75,20 @@ export default function AdminCommandes() {
   // Fermer le détail
   const closeDetail = () => setShowDetail(null);
 
-  // Changer le statut d'une commande
+  // Changer le statut de paiement d'une commande
   const handleStatusChange = async (commandeId: number, newStatut: string) => {
     setUpdatingStatus(commandeId);
     try {
-      await commandeService.updateStatus(commandeId, newStatut);
-      // Mettre à jour localement
+      const updatedCommande = await commandeService.updateStatus(commandeId, newStatut);
+      // Mettre à jour localement avec la commande retournée par le backend
       setCommandes(prev => 
         prev.map(cmd => 
-          cmd.id === commandeId ? { ...cmd, statut: newStatut as CommandeStatut } : cmd
+          cmd.id === commandeId ? updatedCommande : cmd
         )
       );
       // Si le modal est ouvert, mettre à jour aussi
       if (showDetail?.id === commandeId) {
-        setShowDetail(prev => prev ? { ...prev, statut: newStatut as CommandeStatut } : null);
+        setShowDetail(updatedCommande);
       }
     } catch (e: any) {
       alert(e.message || "Erreur lors de la mise à jour du statut");
@@ -90,8 +99,7 @@ export default function AdminCommandes() {
 
   // Obtenir le style du statut de commande
   const getStatutCommandeStyle = (statut: string) => {
-    const found = STATUTS_COMMANDE.find(s => s.value === statut);
-    return found?.color || "bg-gray-100 text-gray-800";
+    return STATUTS_COMMANDE[statut]?.color || "bg-gray-100 text-gray-800";
   };
 
   // Obtenir le style du statut de paiement
@@ -118,8 +126,8 @@ export default function AdminCommandes() {
                   <th className="py-3 px-3 font-semibold">Client</th>
                   <th className="py-3 px-3 font-semibold">Date</th>
                   <th className="py-3 px-3 font-semibold">Montant</th>
-                  <th className="py-3 px-3 font-semibold">Paiement</th>
-                  <th className="py-3 px-3 font-semibold">Statut commande</th>
+                  <th className="py-3 px-3 font-semibold">Statut Paiement</th>
+                  <th className="py-3 px-3 font-semibold">Statut Commande</th>
                   <th className="py-3 px-3 font-semibold">Actions</th>
                 </tr>
               </thead>
@@ -133,6 +141,7 @@ export default function AdminCommandes() {
                 ) : (
                   commandes.map((cmd) => {
                     const paiementStyle = getStatutPaiementStyle(cmd.paiement?.statut);
+                    const commandeStyle = STATUTS_COMMANDE[cmd.statut] || { label: cmd.statut, color: "bg-gray-100 text-gray-800" };
                     return (
                       <tr key={cmd.id} className="hover:bg-gray-50">
                         <td className="py-3 px-3 font-medium">#{cmd.id}</td>
@@ -142,18 +151,14 @@ export default function AdminCommandes() {
                         <td className="py-3 px-3">{LOCALE_CONFIG.formatDate(cmd.created_at)}</td>
                         <td className="py-3 px-3 font-medium">{LOCALE_CONFIG.formatPrice(cmd.montant_total)}</td>
                         <td className="py-3 px-3">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${paiementStyle.color}`}>
-                            {paiementStyle.label}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3">
+                          {/* Dropdown pour changer le statut de paiement */}
                           <select
-                            value={cmd.statut}
+                            value={cmd.paiement?.statut || "en_attente"}
                             onChange={(e) => handleStatusChange(cmd.id, e.target.value)}
-                            disabled={updatingStatus === cmd.id}
-                            className={`text-xs font-medium rounded-lg px-2 py-1.5 border cursor-pointer ${getStatutCommandeStyle(cmd.statut)}`}
+                            disabled={updatingStatus === cmd.id || !cmd.paiement}
+                            className={`text-xs font-medium rounded-lg px-2 py-1.5 border cursor-pointer ${paiementStyle.color}`}
                           >
-                            {STATUTS_COMMANDE.map((s) => (
+                            {STATUTS_PAIEMENT_OPTIONS.map((s) => (
                               <option key={s.value} value={s.value}>
                                 {s.label}
                               </option>
@@ -162,6 +167,12 @@ export default function AdminCommandes() {
                           {updatingStatus === cmd.id && (
                             <span className="ml-2 text-xs text-gray-500">...</span>
                           )}
+                        </td>
+                        <td className="py-3 px-3">
+                          {/* Statut de commande en lecture seule */}
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${commandeStyle.color}`}>
+                            {commandeStyle.label}
+                          </span>
                         </td>
                         <td className="py-3 px-3">
                           <button
@@ -207,28 +218,31 @@ export default function AdminCommandes() {
               {/* Statuts */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Statut commande</h3>
+                  <h3 className="font-semibold mb-2">Statut Paiement</h3>
                   <select
-                    value={showDetail.statut}
+                    value={showDetail.paiement?.statut || "en_attente"}
                     onChange={(e) => handleStatusChange(showDetail.id, e.target.value)}
-                    disabled={updatingStatus === showDetail.id}
-                    className={`text-sm font-medium rounded-lg px-3 py-2 border w-full ${getStatutCommandeStyle(showDetail.statut)}`}
+                    disabled={updatingStatus === showDetail.id || !showDetail.paiement}
+                    className={`text-sm font-medium rounded-lg px-3 py-2 border w-full ${getStatutPaiementStyle(showDetail.paiement?.statut).color}`}
                   >
-                    {STATUTS_COMMANDE.map((s) => (
+                    {STATUTS_PAIEMENT_OPTIONS.map((s) => (
                       <option key={s.value} value={s.value}>
                         {s.label}
                       </option>
                     ))}
                   </select>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Paiement</h3>
-                  <span className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${getStatutPaiementStyle(showDetail.paiement?.statut).color}`}>
-                    {getStatutPaiementStyle(showDetail.paiement?.statut).label}
-                  </span>
                   {showDetail.paiement?.methode && (
                     <p className="text-sm text-gray-600 mt-1">Mode: {showDetail.paiement.methode}</p>
                   )}
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h3 className="font-semibold mb-2">Statut Commande</h3>
+                  <span className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${getStatutCommandeStyle(showDetail.statut)}`}>
+                    {STATUTS_COMMANDE[showDetail.statut]?.label || showDetail.statut}
+                  </span>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Le statut commande est mis à jour automatiquement quand le paiement est validé.
+                  </p>
                 </div>
               </div>
 

@@ -182,13 +182,14 @@ export function capitalize(text: string): string {
  * Obtenir le statut de commande formaté
  */
 export function formatCommandeStatus(
-  statut: 'en_attente' | 'confirmee' | 'en_preparation' | 'expediee' | 'livree' | 'annulee'
+  statut: string
 ): {
   label: string;
   color: string;
   bgColor: string;
 } {
-  const statusMap = {
+  const statusMap: Record<string, { label: string; color: string; bgColor: string }> = {
+    // Format legacy (minuscules avec underscores)
     en_attente: {
       label: 'En attente',
       color: 'text-yellow-700',
@@ -215,6 +216,37 @@ export function formatCommandeStatus(
       bgColor: 'bg-green-100',
     },
     annulee: {
+      label: 'Annulée',
+      color: 'text-red-700',
+      bgColor: 'bg-red-100',
+    },
+    // Format backend actuel (avec espaces et accents)
+    'En attente': {
+      label: 'En attente',
+      color: 'text-yellow-700',
+      bgColor: 'bg-yellow-100',
+    },
+    'Confirmée': {
+      label: 'Confirmée',
+      color: 'text-blue-700',
+      bgColor: 'bg-blue-100',
+    },
+    'En préparation': {
+      label: 'En préparation',
+      color: 'text-purple-700',
+      bgColor: 'bg-purple-100',
+    },
+    'Expédiée': {
+      label: 'Expédiée',
+      color: 'text-indigo-700',
+      bgColor: 'bg-indigo-100',
+    },
+    'Livrée': {
+      label: 'Livrée',
+      color: 'text-green-700',
+      bgColor: 'bg-green-100',
+    },
+    'Annulée': {
       label: 'Annulée',
       color: 'text-red-700',
       bgColor: 'bg-red-100',

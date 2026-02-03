@@ -25,7 +25,7 @@ export default function PhoneInput({
   name,
   value,
   onChange,
-  placeholder = "+221 77 123 45 67",
+  placeholder = "+221 77 118 87 47",
   required = false,
   disabled = false,
   className = "",

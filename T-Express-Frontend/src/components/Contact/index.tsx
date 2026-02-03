@@ -142,7 +142,7 @@ const Contact = () => {
                       name="phone"
                       value={phone}
                       onChange={setPhone}
-                      placeholder="+221 77 123 45 67"
+                      placeholder="+221 77 118 87 47"
                       label="Téléphone"
                     />
                   </div>

@@ -135,7 +135,7 @@ const Signup = () => {
                     name="telephone"
                     value={formData.telephone}
                     onChange={(value) => setFormData({...formData, telephone: value})}
-                    placeholder="+221 77 123 45 67"
+                    placeholder="+221 77 118 87 47"
                     required
                     label="Téléphone"
                   />

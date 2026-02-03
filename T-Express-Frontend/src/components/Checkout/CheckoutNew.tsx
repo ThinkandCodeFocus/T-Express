@@ -23,13 +23,13 @@ const CheckoutNew = () => {
   const [loadingAdresses, setLoadingAdresses] = useState(true);
   
   // States pour la nouvelle adresse
-  const [showNewAddress, setShowNewAddress] = useState(false);
+  const [showNewAddress, setShowNewAddress] = useState(true); // Toujours afficher le formulaire
   const [newAddress, setNewAddress] = useState({
     nom_complet: "",
     adresse_ligne_1: "",
     adresse_ligne_2: "",
     ville: "",
-    code_postal: "",
+    code_postal: "00000", // Valeur par défaut car non utilisé
     pays: "Sénégal",
     telephone: "",
     type: "Livraison" as "Facturation" | "Livraison" | "Principale"  // Backend attend "Livraison" avec majuscule
@@ -275,44 +275,21 @@ const CheckoutNew = () => {
                   </h2>
 
                   <div className="bg-white shadow-1 rounded-[10px] p-4 sm:p-8.5">
-                    {adresses.length > 0 && !showNewAddress && (
-                      <div className="mb-5">
-                        <label className="block mb-2.5">Sélectionnez une adresse</label>
-                        <select
-                          value={selectedAdresseId || ""}
-                          onChange={(e) => setSelectedAdresseId(Number(e.target.value))}
-                          className="w-full bg-gray-1 rounded-md border border-gray-3 py-3 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                          required
-                        >
-                          <option value="">-- Choisir une adresse --</option>
-                          {adresses.map((addr) => (
-                            <option key={addr.id} value={addr.id}>
-                              {addr.adresse_ligne_1}, {addr.ville} - {addr.code_postal}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => setShowNewAddress(true)}
-                          className="mt-3 text-blue hover:text-blue-dark"
-                        >
-                          + Ajouter une nouvelle adresse
-                        </button>
-                      </div>
-                    )}
+                        <div className="mb-5">
+                          <label htmlFor="nom_complet" className="block mb-2.5">
+                            Nom complet <span className="text-red">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="nom_complet"
+                            value={newAddress.nom_complet}
+                            onChange={(e) => setNewAddress({...newAddress, nom_complet: e.target.value})}
+                            placeholder="Prénom et nom"
+                            className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                            required
+                          />
+                        </div>
 
-                    {(showNewAddress || adresses.length === 0) && (
-                      <>
-                        {adresses.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setShowNewAddress(false)}
-                            className="mb-4 text-blue hover:text-blue-dark"
-                          >
-                            ← Utiliser une adresse existante
-                          </button>
-                        )}
-                        
                         <div className="mb-5">
                           <label htmlFor="ligne1" className="block mb-2.5">
                             Adresse <span className="text-red">*</span>
@@ -324,7 +301,7 @@ const CheckoutNew = () => {
                             onChange={(e) => setNewAddress({...newAddress, adresse_ligne_1: e.target.value})}
                             placeholder="Numéro et nom de rue"
                             className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                            required={showNewAddress}
+                            required
                           />
                         </div>
 
@@ -342,34 +319,18 @@ const CheckoutNew = () => {
                           />
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-5 mb-5">
-                          <div className="w-full">
-                            <label htmlFor="ville" className="block mb-2.5">
-                              Ville <span className="text-red">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              id="ville"
-                              value={newAddress.ville}
-                              onChange={(e) => setNewAddress({...newAddress, ville: e.target.value})}
-                              className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                              required={showNewAddress}
-                            />
-                          </div>
-
-                          <div className="w-full">
-                            <label htmlFor="code_postal" className="block mb-2.5">
-                              Code postal <span className="text-red">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              id="code_postal"
-                              value={newAddress.code_postal}
-                              onChange={(e) => setNewAddress({...newAddress, code_postal: e.target.value})}
-                              className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
-                              required={showNewAddress}
-                            />
-                          </div>
+                        <div className="mb-5">
+                          <label htmlFor="ville" className="block mb-2.5">
+                            Ville <span className="text-red">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="ville"
+                            value={newAddress.ville}
+                            onChange={(e) => setNewAddress({...newAddress, ville: e.target.value})}
+                            className="rounded-md border border-gray-3 bg-gray-1 w-full py-2.5 px-5 outline-none focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                            required
+                          />
                         </div>
 
                         <div className="mb-5">
@@ -378,12 +339,10 @@ const CheckoutNew = () => {
                             value={newAddress.telephone}
                             onChange={(value) => setNewAddress({...newAddress, telephone: value})}
                             placeholder="+221 XX XXX XX XX"
-                            required={showNewAddress}
+                            required
                             label="Téléphone"
                           />
                         </div>
-                      </>
-                    )}
                   </div>
                 </div>
 
@@ -465,20 +424,6 @@ const CheckoutNew = () => {
                         />
                         <div className="flex-1 rounded-md border py-3.5 px-5 border-green-200 bg-green-50">
                           <p className="text-green-700 font-medium">🚚 Livraison Standard - <span className="font-bold">Gratuite</span> (3-5 jours)</p>
-                        </div>
-                      </label>
-
-                      <label className="flex cursor-pointer items-center gap-4">
-                        <input
-                          type="radio"
-                          name="shipping"
-                          value="express"
-                          checked={shippingMethod === "express"}
-                          onChange={(e) => setShippingMethod(e.target.value as "express")}
-                          className="w-4 h-4"
-                        />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-green-200 bg-green-50">
-                          <p className="text-green-700 font-medium">⚡ Livraison Express - <span className="font-bold">Gratuite</span> (1-2 jours)</p>
                         </div>
                       </label>
                     </div>

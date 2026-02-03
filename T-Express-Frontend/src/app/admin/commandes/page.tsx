@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { commandeService } from "@/services/commande.service";
-import type { Commande } from "@/types/api.types";
+import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 
 const STATUTS_COMMANDE = [
@@ -71,12 +71,12 @@ export default function AdminCommandes() {
       // Mettre à jour localement
       setCommandes(prev => 
         prev.map(cmd => 
-          cmd.id === commandeId ? { ...cmd, statut: newStatut } : cmd
+          cmd.id === commandeId ? { ...cmd, statut: newStatut as CommandeStatut } : cmd
         )
       );
       // Si le modal est ouvert, mettre à jour aussi
       if (showDetail?.id === commandeId) {
-        setShowDetail(prev => prev ? { ...prev, statut: newStatut } : null);
+        setShowDetail(prev => prev ? { ...prev, statut: newStatut as CommandeStatut } : null);
       }
     } catch (e: any) {
       alert(e.message || "Erreur lors de la mise à jour du statut");

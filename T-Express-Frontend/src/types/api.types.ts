@@ -215,11 +215,15 @@ export interface AjouterAdresseData {
 
 // ========== Commande ==========
 
+export type CommandeStatut = 
+  | 'en_attente' | 'confirmee' | 'en_preparation' | 'expediee' | 'livree' | 'annulee'
+  | 'En attente' | 'Confirmée' | 'En préparation' | 'Expédiée' | 'Livrée' | 'Annulée';
+
 export interface Commande {
   id: number;
   client_id: number;
   numero_commande: string;
-  statut: 'en_attente' | 'confirmee' | 'en_preparation' | 'expediee' | 'livree' | 'annulee';
+  statut: CommandeStatut;
   montant_total: number;
   montant_ht: number;
   montant_tva: number;

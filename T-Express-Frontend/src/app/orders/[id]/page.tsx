@@ -8,6 +8,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 import { LOCALE_CONFIG } from "@/config/api.config";
 
+
 const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
   "En attente": { label: "En attente", color: "bg-yellow-500" },
   "Validée": { label: "Validée", color: "bg-blue-500" },

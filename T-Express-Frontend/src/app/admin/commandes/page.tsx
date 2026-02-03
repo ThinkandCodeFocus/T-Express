@@ -223,8 +223,8 @@ export default function AdminCommandes() {
                   <span className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${getStatutPaiementStyle(showDetail.paiement?.statut).color}`}>
                     {getStatutPaiementStyle(showDetail.paiement?.statut).label}
                   </span>
-                  {showDetail.paiement?.mode_paiement && (
-                    <p className="text-sm text-gray-600 mt-1">Mode: {showDetail.paiement.mode_paiement}</p>
+                  {showDetail.paiement?.methode && (
+                    <p className="text-sm text-gray-600 mt-1">Mode: {showDetail.paiement.methode}</p>
                   )}
                 </div>
               </div>

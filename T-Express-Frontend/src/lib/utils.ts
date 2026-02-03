@@ -189,14 +189,45 @@ export function formatCommandeStatus(
   bgColor: string;
 } {
   const statusMap: Record<string, { label: string; color: string; bgColor: string }> = {
-    // Format legacy (minuscules avec underscores)
+    // Format exact de la base de données (ENUM table commandes)
+    'En attente': {
+      label: 'En attente',
+      color: 'text-yellow-700',
+      bgColor: 'bg-yellow-100',
+    },
+    'Validée': {
+      label: 'Validée',
+      color: 'text-blue-700',
+      bgColor: 'bg-blue-100',
+    },
+    'Préparation': {
+      label: 'En préparation',
+      color: 'text-purple-700',
+      bgColor: 'bg-purple-100',
+    },
+    'Expédiée': {
+      label: 'Expédiée',
+      color: 'text-indigo-700',
+      bgColor: 'bg-indigo-100',
+    },
+    'Livrée': {
+      label: 'Livrée',
+      color: 'text-green-700',
+      bgColor: 'bg-green-100',
+    },
+    'Annulée': {
+      label: 'Annulée',
+      color: 'text-red-700',
+      bgColor: 'bg-red-100',
+    },
+    // Format legacy (minuscules avec underscores) pour compatibilité
     en_attente: {
       label: 'En attente',
       color: 'text-yellow-700',
       bgColor: 'bg-yellow-100',
     },
     confirmee: {
-      label: 'Confirmée',
+      label: 'Validée',
       color: 'text-blue-700',
       bgColor: 'bg-blue-100',
     },
@@ -220,40 +251,9 @@ export function formatCommandeStatus(
       color: 'text-red-700',
       bgColor: 'bg-red-100',
     },
-    // Format backend actuel (avec espaces et accents)
-    'En attente': {
-      label: 'En attente',
-      color: 'text-yellow-700',
-      bgColor: 'bg-yellow-100',
-    },
-    'Confirmée': {
-      label: 'Confirmée',
-      color: 'text-blue-700',
-      bgColor: 'bg-blue-100',
-    },
-    'En préparation': {
-      label: 'En préparation',
-      color: 'text-purple-700',
-      bgColor: 'bg-purple-100',
-    },
-    'Expédiée': {
-      label: 'Expédiée',
-      color: 'text-indigo-700',
-      bgColor: 'bg-indigo-100',
-    },
-    'Livrée': {
-      label: 'Livrée',
-      color: 'text-green-700',
-      bgColor: 'bg-green-100',
-    },
-    'Annulée': {
-      label: 'Annulée',
-      color: 'text-red-700',
-      bgColor: 'bg-red-100',
-    },
   };
   
-  return statusMap[statut] || statusMap.en_attente;
+  return statusMap[statut] || statusMap['En attente'];
 }
 
 /**

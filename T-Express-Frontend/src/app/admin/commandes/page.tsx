@@ -4,22 +4,25 @@ import { commandeService } from "@/services/commande.service";
 import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 
+// Valeurs exactes de l'ENUM dans la table commandes
 const STATUTS_COMMANDE = [
   { value: "En attente", label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  { value: "Confirmée", label: "Confirmée", color: "bg-blue-100 text-blue-800" },
-  { value: "En préparation", label: "En préparation", color: "bg-orange-100 text-orange-800" },
+  { value: "Validée", label: "Validée", color: "bg-blue-100 text-blue-800" },
+  { value: "Préparation", label: "En préparation", color: "bg-orange-100 text-orange-800" },
   { value: "Expédiée", label: "Expédiée", color: "bg-purple-100 text-purple-800" },
   { value: "Livrée", label: "Livrée", color: "bg-green-100 text-green-800" },
   { value: "Annulée", label: "Annulée", color: "bg-red-100 text-red-800" },
 ];
 
+// Valeurs de l'ENUM dans la table paiements
 const STATUTS_PAIEMENT: Record<string, { label: string; color: string }> = {
   "en_attente": { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  "Complété": { label: "Payé", color: "bg-green-100 text-green-800" },
-  "succeeded": { label: "Payé", color: "bg-green-100 text-green-800" },
+  "En attente": { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
   "validé": { label: "Payé", color: "bg-green-100 text-green-800" },
-  "Échoué": { label: "Échoué", color: "bg-red-100 text-red-800" },
-  "failed": { label: "Échoué", color: "bg-red-100 text-red-800" },
+  "Complété": { label: "Payé", color: "bg-green-100 text-green-800" },
+  "Accepté": { label: "Payé", color: "bg-green-100 text-green-800" },
+  "échoué": { label: "Échoué", color: "bg-red-100 text-red-800" },
+  "Refusé": { label: "Refusé", color: "bg-red-100 text-red-800" },
 };
 
 export default function AdminCommandes() {

@@ -215,9 +215,11 @@ export interface AjouterAdresseData {
 
 // ========== Commande ==========
 
+// Valeurs exactes de l'ENUM dans la table commandes
 export type CommandeStatut = 
-  | 'en_attente' | 'confirmee' | 'en_preparation' | 'expediee' | 'livree' | 'annulee'
-  | 'En attente' | 'Confirmée' | 'En préparation' | 'Expédiée' | 'Livrée' | 'Annulée';
+  | 'En attente' | 'Validée' | 'Préparation' | 'Expédiée' | 'Livrée' | 'Annulée'
+  // Legacy formats (pour compatibilité)
+  | 'en_attente' | 'confirmee' | 'en_preparation' | 'expediee' | 'livree' | 'annulee';
 
 export interface Commande {
   id: number;

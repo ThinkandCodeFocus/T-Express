@@ -134,7 +134,7 @@ function SuccessContent() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link
-                  href="/my-account/orders"
+                  href="/my-account"
                   className="inline-flex items-center justify-center font-medium text-white bg-blue py-3 px-8 rounded-md ease-out duration-200 hover:bg-blue-dark"
                 >
                   Voir mes commandes
@@ -241,7 +241,7 @@ function SuccessContent() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
-                href="/my-account/orders"
+                href="/my-account"
                 className="inline-flex items-center justify-center font-medium text-white bg-blue py-3 px-8 rounded-md ease-out duration-200 hover:bg-blue-dark"
               >
                 <svg

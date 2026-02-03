@@ -42,12 +42,20 @@ const OrdersNew = () => {
 
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, { label: string; color: string }> = {
+      // Formats minuscules avec underscores (legacy)
       'en_attente': { label: 'En attente', color: 'bg-yellow-500' },
       'confirmee': { label: 'Confirmée', color: 'bg-blue' },
       'en_preparation': { label: 'En préparation', color: 'bg-orange-500' },
       'expediee': { label: 'Expédiée', color: 'bg-purple-500' },
       'livree': { label: 'Livrée', color: 'bg-green-500' },
-      'annulee': { label: 'Annulée', color: 'bg-red' }
+      'annulee': { label: 'Annulée', color: 'bg-red' },
+      // Formats avec espaces et accents (backend actuel)
+      'En attente': { label: 'En attente', color: 'bg-yellow-500' },
+      'Confirmée': { label: 'Confirmée', color: 'bg-blue' },
+      'En préparation': { label: 'En préparation', color: 'bg-orange-500' },
+      'Expédiée': { label: 'Expédiée', color: 'bg-purple-500' },
+      'Livrée': { label: 'Livrée', color: 'bg-green-500' },
+      'Annulée': { label: 'Annulée', color: 'bg-red' }
     };
     return statusMap[status] || { label: status, color: 'bg-gray-400' };
   };

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import CustomSelect from "./CustomSelect";
 import { menuData } from "./menuData";
 import Dropdown from "./Dropdown";
@@ -11,7 +12,9 @@ import { formatPrice } from "@/lib/utils";
 import Image from "next/image";
 
 const Header = () => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("0");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -65,6 +68,23 @@ const Header = () => {
     { label: "Tablette", value: "7" },
   ];
 
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) {
+      params.set("mot_cle", searchQuery.trim());
+    }
+    if (selectedCategory && selectedCategory !== "0") {
+      params.set("categorie_id", selectedCategory);
+    }
+    const queryString = params.toString();
+    router.push(`/shop-with-sidebar${queryString ? `?${queryString}` : ""}`);
+  };
+
   return (
     <header
       className={`fixed left-0 top-0 w-full z-9999 bg-white transition-all ease-in-out duration-300 ${
@@ -92,9 +112,9 @@ const Header = () => {
             </Link>
 
             <div className="max-w-[475px] w-full">
-              <form>
+              <form onSubmit={handleSearch}>
                 <div className="flex items-center">
-                  <CustomSelect options={options} />
+                  <CustomSelect options={options} onChange={handleCategoryChange} />
 
                   <div className="relative max-w-[333px] sm:min-w-[333px] w-full">
                     {/* <!-- séparateur --> */}
@@ -111,6 +131,7 @@ const Header = () => {
                     />
 
                     <button
+                      type="submit"
                       id="search-btn"
                       aria-label="Rechercher"
                       className="flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 ease-in duration-200 hover:text-blue"

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import CustomSelect from "./CustomSelect";
 import CategoryDropdown from "./CategoryDropdown";
@@ -15,6 +16,7 @@ import type { Product } from "@/types/product";
 import type { Categorie } from "@/types/api.types";
 
 const ShopWithSidebar = () => {
+  const searchParams = useSearchParams();
   const [productStyle, setProductStyle] = useState("grid");
   const [productSidebar, setProductSidebar] = useState(false);
   const [stickyMenu, setStickyMenu] = useState(false);
@@ -56,10 +58,22 @@ const ShopWithSidebar = () => {
     { label: "Prix : Décroissant", value: "prix:desc" },
   ];
 
-  // Vérifier que le composant est monté côté client
+  // Vérifier que le composant est monté côté client et lire les paramètres URL
   useEffect(() => {
+    // Lire les paramètres de recherche depuis l'URL
+    const motCle = searchParams.get("mot_cle");
+    const categorieId = searchParams.get("categorie_id");
+    
+    if (motCle || categorieId) {
+      setFilters(prev => ({
+        ...prev,
+        mot_cle: motCle || "",
+        categorie_id: categorieId ? parseInt(categorieId, 10) : null
+      }));
+    }
+    
     setMounted(true);
-  }, []);
+  }, [searchParams]);
 
   // Charger les catégories et produits au montage
   useEffect(() => {

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 const menu = [
   { 
@@ -135,67 +136,118 @@ const menu = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Fermer le sidebar quand on change de page sur mobile
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Fermer le sidebar quand on clique en dehors sur mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <aside className="w-64 bg-white shadow-2 min-h-screen border-r border-gray-3 flex flex-col">
-      {/* Header Sidebar */}
-      <div className="p-6 border-b border-gray-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue to-blue-dark flex items-center justify-center shadow-lg">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <div>
-            <Image
-              src="/images/logo/logo.png"
-              alt="T-Express Logo"
-              width={150}
-              height={50}
-              className="h-auto w-auto max-h-12 object-contain"
-            />
-            <p className="text-xs text-dark-4 mt-2">Administration</p>
+    <>
+      {/* Bouton hamburger pour mobile */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border border-gray-200"
+        aria-label="Toggle menu"
+      >
+        {isOpen ? (
+          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
+
+      {/* Overlay pour fermer le menu en cliquant en dehors */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-40
+        w-64 bg-white shadow-2 min-h-screen border-r border-gray-3 flex flex-col
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}>
+        {/* Header Sidebar */}
+        <div className="p-6 border-b border-gray-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue to-blue-dark flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <div>
+              <Image
+                src="/images/logo/logo.png"
+                alt="T-Express Logo"
+                width={150}
+                height={50}
+                className="h-auto w-auto max-h-12 object-contain"
+              />
+              <p className="text-xs text-dark-4 mt-2">Administration</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 overflow-y-auto no-scrollbar">
-        <ul className="space-y-1.5">
-          {menu.map((item) => {
-            const isActive = pathname === item.path;
-            return (
-              <li key={item.path}>
-                <Link
-                  href={item.path}
-                  className={`group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                    isActive
-                      ? "bg-gradient-to-r from-blue-light-5 to-blue-light-4 text-blue shadow-sm border-l-4 border-blue"
-                      : "text-dark-3 hover:bg-gray-1 hover:text-blue"
-                  }`}
-                >
-                  <span className={`${isActive ? "text-blue" : "text-dark-4 group-hover:text-blue"} transition-colors`}>
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
-                  {isActive && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-blue"></div>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+        {/* Navigation */}
+        <nav className="flex-1 p-4 overflow-y-auto no-scrollbar">
+          <ul className="space-y-1.5">
+            {menu.map((item) => {
+              const isActive = pathname === item.path;
+              return (
+                <li key={item.path}>
+                  <Link
+                    href={item.path}
+                    className={`group flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-light-5 to-blue-light-4 text-blue shadow-sm border-l-4 border-blue"
+                        : "text-dark-3 hover:bg-gray-1 hover:text-blue"
+                    }`}
+                  >
+                    <span className={`${isActive ? "text-blue" : "text-dark-4 group-hover:text-blue"} transition-colors`}>
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                    {isActive && (
+                      <div className="ml-auto w-2 h-2 rounded-full bg-blue"></div>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      {/* Footer Sidebar */}
-      <div className="p-4 border-t border-gray-3">
-        <div className="bg-gradient-to-r from-blue-light-5 to-blue-light-4 rounded-lg p-4 border border-blue-light-3">
-          <p className="text-xs font-semibold text-blue-dark mb-1">💡 Astuce</p>
-          <p className="text-xs text-dark-4">
-            Gérez votre boutique en toute simplicité
-          </p>
+        {/* Footer Sidebar */}
+        <div className="p-4 border-t border-gray-3">
+          <div className="bg-gradient-to-r from-blue-light-5 to-blue-light-4 rounded-lg p-4 border border-blue-light-3">
+            <p className="text-xs font-semibold text-blue-dark mb-1">💡 Astuce</p>
+            <p className="text-xs text-dark-4">
+              Gérez votre boutique en toute simplicité
+            </p>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

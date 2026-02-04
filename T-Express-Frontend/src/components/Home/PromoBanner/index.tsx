@@ -72,30 +72,30 @@ const PromoBanner = () => {
         {/* <!-- promo banner big --> */}
         {mainBanner ? (
           <div 
-            className="relative z-1 overflow-hidden rounded-lg py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5"
+            className="relative z-1 overflow-hidden rounded-lg py-8 sm:py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5"
             style={{ backgroundColor: getBackgroundColor(mainBanner.couleur_fond, '#F5F5F7') }}
           >
-            <div className="max-w-[550px] w-full relative z-10">
+            <div className="max-w-full sm:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] w-full relative z-10">
               {mainBanner.sous_titre && (
-                <span className="block font-medium text-xl text-dark mb-3">
+                <span className="block font-medium text-sm sm:text-base lg:text-xl text-dark mb-2 sm:mb-3">
                   {mainBanner.sous_titre}
                 </span>
               )}
 
               {mainBanner.titre && (
-                <h2 className="font-bold text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-5">
+                <h2 className="font-bold text-lg sm:text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-3 sm:mb-5">
                   {mainBanner.titre}
                 </h2>
               )}
 
               {mainBanner.description && (
-                <p>{mainBanner.description}</p>
+                <p className="text-sm sm:text-base">{mainBanner.description}</p>
               )}
 
               {mainBanner.lien_url && mainBanner.lien_url.startsWith('/') && mainBanner.texte_bouton && (
                 <a
                   href={mainBanner.lien_url}
-                  className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
+                  className="inline-flex font-medium text-xs sm:text-custom-sm text-white bg-blue py-2 sm:py-[11px] px-6 sm:px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-4 sm:mt-7.5"
                 >
                   {mainBanner.texte_bouton}
                 </a>
@@ -106,31 +106,31 @@ const PromoBanner = () => {
               <Image
                 src={getImageUrl(mainBanner.image, "/images/promo/promo-01.png")}
                 alt={mainBanner.titre || "promo img"}
-                className="absolute bottom-0 right-4 lg:right-26 z-0"
+                className="absolute bottom-0 right-2 sm:right-4 lg:right-26 z-0 w-[120px] sm:w-[180px] lg:w-[230px] xl:w-[274px] h-auto"
                 width={274}
                 height={350}
               />
             )}
           </div>
         ) : (
-          <div className="relative z-1 overflow-hidden rounded-lg bg-[#F5F5F7] py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5">
-            <div className="max-w-[550px] w-full">
-              <span className="block font-medium text-xl text-dark mb-3">
+          <div className="relative z-1 overflow-hidden rounded-lg bg-[#F5F5F7] py-8 sm:py-12.5 lg:py-17.5 xl:py-22.5 px-4 sm:px-7.5 lg:px-14 xl:px-19 mb-7.5">
+            <div className="max-w-full sm:max-w-[350px] lg:max-w-[450px] xl:max-w-[550px] w-full">
+              <span className="block font-medium text-sm sm:text-base lg:text-xl text-dark mb-2 sm:mb-3">
                 Apple iPhone 14 Plus
               </span>
 
-              <h2 className="font-bold text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-5">
+              <h2 className="font-bold text-lg sm:text-xl lg:text-heading-4 xl:text-heading-3 text-dark mb-3 sm:mb-5">
                 UP TO 30% OFF
               </h2>
 
-              <p>
+              <p className="text-sm sm:text-base">
                 iPhone 14 has the same superspeedy chip that&apos;s in iPhone 13 Pro,
                 A15 Bionic, with a 5‑core GPU, powers all the latest features.
               </p>
 
               <a
                 href="#"
-                className="inline-flex font-medium text-custom-sm text-white bg-blue py-[11px] px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-7.5"
+                className="inline-flex font-medium text-xs sm:text-custom-sm text-white bg-blue py-2 sm:py-[11px] px-6 sm:px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-4 sm:mt-7.5"
               >
                 Buy Now
               </a>
@@ -139,7 +139,7 @@ const PromoBanner = () => {
             <Image
               src="/images/promo/promo-01.png"
               alt="promo img"
-              className="absolute bottom-0 right-4 lg:right-26 -z-1"
+              className="absolute bottom-0 right-2 sm:right-4 lg:right-26 -z-1 w-[120px] sm:w-[180px] lg:w-[230px] xl:w-[274px] h-auto"
               width={274}
               height={350}
             />

@@ -150,36 +150,32 @@ const PromoBanner = () => {
           {smallBanners.length > 0 ? smallBanners.map((banner, index) => (
             <div
               key={banner.id}
-              className="relative z-1 overflow-hidden rounded-lg py-10 xl:py-16 px-4 sm:px-7.5 xl:px-10"
+              className="relative z-1 overflow-hidden rounded-lg py-6 sm:py-10 xl:py-16 px-4 sm:px-7.5 xl:px-10 min-h-[200px] sm:min-h-[280px]"
               style={{ backgroundColor: getBackgroundColor(banner.couleur_fond, index === 0 ? '#DBF4F3' : '#FFECE1') }}
             >
               {banner.image && (
                 <div 
-                  className={`absolute top-1/2 -translate-y-1/2 z-0 ${index === 0 ? 'left-3 sm:left-10' : 'right-3 sm:right-8.5'}`}
-                  style={{
-                    width: index === 0 ? '241px' : '200px',
-                    height: index === 0 ? '241px' : '200px',
-                  }}
+                  className={`absolute top-1/2 -translate-y-1/2 z-0 ${index === 0 ? 'left-2 sm:left-10' : 'right-2 sm:right-8.5'}`}
                 >
                   <Image
                     src={getImageUrl(banner.image, index === 0 ? "/images/promo/promo-02.png" : "/images/promo/promo-03.png")}
                     alt={banner.titre || "promo img"}
                     width={index === 0 ? 241 : 200}
                     height={index === 0 ? 241 : 200}
-                    className="w-full h-full object-cover"
+                    className="w-24 h-24 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-contain"
                   />
                 </div>
               )}
 
-              <div className={`relative z-10 ${index === 0 ? "text-right ml-auto" : "text-left mr-auto"}`} style={{ maxWidth: index === 0 ? 'calc(100% - 260px)' : 'calc(100% - 220px)' }}>
+              <div className={`relative z-10 ${index === 0 ? "text-right ml-auto pl-28 sm:pl-44" : "text-left mr-auto pr-28 sm:pr-44"}`}>
                 {banner.sous_titre && (
-                  <span className="block text-lg text-dark mb-1.5">
+                  <span className="block text-sm sm:text-lg text-dark mb-1.5">
                     {banner.sous_titre}
                   </span>
                 )}
 
                 {banner.titre && (
-                  <h2 className="font-bold text-xl lg:text-heading-4 text-dark mb-2.5">
+                  <h2 className="font-bold text-lg sm:text-xl lg:text-heading-4 text-dark mb-2.5">
                     {banner.pourcentage_reduction ? (
                       <>
                         Up to <span className="text-orange">{banner.pourcentage_reduction}%</span> off
@@ -191,13 +187,13 @@ const PromoBanner = () => {
                 )}
 
                 {banner.texte_reduction && (
-                  <p className={`font-semibold text-custom-1 ${index === 0 ? 'text-teal' : 'text-orange'}`}>
+                  <p className={`font-semibold text-sm sm:text-custom-1 ${index === 0 ? 'text-teal' : 'text-orange'}`}>
                     {banner.texte_reduction}
                   </p>
                 )}
 
                 {banner.description && (
-                  <p className={`max-w-[285px] text-custom-sm ${index === 0 ? 'ml-auto' : ''}`}>
+                  <p className={`max-w-[285px] text-xs sm:text-custom-sm ${index === 0 ? 'ml-auto' : ''}`}>
                     {banner.description}
                   </p>
                 )}
@@ -205,7 +201,7 @@ const PromoBanner = () => {
                 {banner.lien_url && banner.lien_url.startsWith('/') && banner.texte_bouton && (
                   <a
                     href={banner.lien_url}
-                    className={`inline-flex font-medium text-custom-sm text-white py-2.5 px-8.5 rounded-md ease-out duration-200 mt-${index === 0 ? '9' : '7.5'} ${
+                    className={`inline-flex font-medium text-xs sm:text-custom-sm text-white py-2 sm:py-2.5 px-4 sm:px-8.5 rounded-md ease-out duration-200 mt-4 sm:mt-7.5 ${
                       index === 0 
                         ? 'bg-teal hover:bg-teal-dark' 
                         : 'bg-orange hover:bg-orange-dark'

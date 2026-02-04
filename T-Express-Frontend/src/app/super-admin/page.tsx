@@ -338,14 +338,7 @@ export default function SuperAdminPage() {
                               })}
                             </td>
                             <td className="px-6 py-4 text-sm">
-                              {retrait.user ? (
-                                <div>
-                                  <p className="font-medium text-gray-900">{retrait.user.prenom} {retrait.user.nom}</p>
-                                  <p className="text-gray-500 text-xs">{retrait.user.email}</p>
-                                </div>
-                              ) : (
-                                <span className="text-gray-400">N/A</span>
-                              )}
+                              <span className="text-gray-600">{retrait.admin_email || "N/A"}</span>
                             </td>
                             <td className="px-6 py-4 text-sm font-semibold text-gray-900">
                               {LOCALE_CONFIG.formatPrice(retrait.montant)}
@@ -364,16 +357,16 @@ export default function SuperAdminPage() {
                                   <button
                                     onClick={() => handleConfirmerRetrait(retrait.id)}
                                     disabled={actionLoading === retrait.id}
-                                    className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 disabled:bg-gray-400 transition"
+                                    className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded shadow-sm hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                                   >
-                                    {actionLoading === retrait.id ? "..." : "Confirmer"}
+                                    {actionLoading === retrait.id ? "..." : "✓ Confirmer"}
                                   </button>
                                   <button
                                     onClick={() => handleRefuserRetrait(retrait.id)}
                                     disabled={actionLoading === retrait.id}
-                                    className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:bg-gray-400 transition"
+                                    className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded shadow-sm hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                                   >
-                                    Refuser
+                                    ✕ Refuser
                                   </button>
                                 </div>
                               )}

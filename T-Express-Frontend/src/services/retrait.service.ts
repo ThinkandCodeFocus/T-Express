@@ -2,18 +2,12 @@ import { apiClient } from "@/lib/api-client";
 
 export interface Retrait {
   id: number;
-  user_id: number;
+  admin_email: string;
   montant: number;
   statut: "en_attente" | "confirmé" | "refusé";
   note?: string;
   date_confirmation?: string;
   created_at: string;
-  user?: {
-    id: number;
-    nom: string;
-    prenom: string;
-    email: string;
-  };
 }
 
 export interface SoldeInfo {

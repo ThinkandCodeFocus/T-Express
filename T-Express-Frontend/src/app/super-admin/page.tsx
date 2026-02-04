@@ -357,14 +357,32 @@ export default function SuperAdminPage() {
                                   <button
                                     onClick={() => handleConfirmerRetrait(retrait.id)}
                                     disabled={actionLoading === retrait.id}
-                                    className="px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded shadow-sm hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    style={{ 
+                                      backgroundColor: actionLoading === retrait.id ? '#9CA3AF' : '#16A34A', 
+                                      color: '#FFFFFF',
+                                      padding: '6px 12px',
+                                      borderRadius: '4px',
+                                      fontSize: '12px',
+                                      fontWeight: '500',
+                                      border: 'none',
+                                      cursor: actionLoading === retrait.id ? 'not-allowed' : 'pointer'
+                                    }}
                                   >
                                     {actionLoading === retrait.id ? "..." : "✓ Confirmer"}
                                   </button>
                                   <button
                                     onClick={() => handleRefuserRetrait(retrait.id)}
                                     disabled={actionLoading === retrait.id}
-                                    className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded shadow-sm hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                                    style={{ 
+                                      backgroundColor: actionLoading === retrait.id ? '#9CA3AF' : '#DC2626', 
+                                      color: '#FFFFFF',
+                                      padding: '6px 12px',
+                                      borderRadius: '4px',
+                                      fontSize: '12px',
+                                      fontWeight: '500',
+                                      border: 'none',
+                                      cursor: actionLoading === retrait.id ? 'not-allowed' : 'pointer'
+                                    }}
                                   >
                                     ✕ Refuser
                                   </button>

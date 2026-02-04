@@ -16,9 +16,15 @@ function SuccessContent() {
   const [verifying, setVerifying] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState<'success' | 'pending' | 'failed' | 'error'>('pending');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [pollCount, setPollCount] = useState(0);
+  const maxPolls = 10; // Maximum 10 tentatives (30 secondes)
 
-  // Vérifier le statut du paiement au montage
+  // Vérifier le statut du paiement au montage, avec polling
   useEffect(() => {
+    let pollInterval: NodeJS.Timeout | null = null;
+    let isMounted = true;
+    let currentPollCount = 0;
+    
     const verifierPaiement = async () => {
       if (!commandeId) {
         setPaymentStatus('error');
@@ -30,36 +36,64 @@ function SuccessContent() {
       try {
         const result = await paiementService.verifierStatut(parseInt(commandeId));
         
-        console.log('✅ Vérification paiement:', result);
+        console.log('✅ Vérification paiement:', result, 'poll:', currentPollCount);
         
         // Vérifier si le paiement est validé
         if (result.statut_paiement === 'Complété' || result.statut_paiement === 'validé') {
+          if (pollInterval) clearInterval(pollInterval);
           setPaymentStatus('success');
           // Rafraîchir le panier (il a été vidé côté backend)
           await refresh();
           toast.success('Paiement confirmé !');
+          setVerifying(false);
         } 
-        // Paiement encore en attente
+        // Paiement encore en attente - continuer le polling
         else if (result.statut_paiement === 'en_attente' || result.statut_paiement === 'En cours') {
-          setPaymentStatus('pending');
-          setErrorMessage('Le paiement est en cours de traitement. Veuillez patienter...');
+          currentPollCount++;
+          setPollCount(currentPollCount);
+          if (currentPollCount >= maxPolls) {
+            if (pollInterval) clearInterval(pollInterval);
+            setPaymentStatus('pending');
+            setErrorMessage('Le paiement est en cours de traitement. Veuillez patienter ou actualiser la page.');
+            setVerifying(false);
+          }
         } 
         // Paiement échoué
-        else {
+        else if (result.statut_paiement === 'échoué' || result.statut_paiement === 'Échoué') {
+          if (pollInterval) clearInterval(pollInterval);
           setPaymentStatus('failed');
           setErrorMessage('Le paiement a échoué ou a été annulé.');
+          setVerifying(false);
+        } else {
+          // Autre statut inconnu - considérer comme en attente
+          currentPollCount++;
+          setPollCount(currentPollCount);
         }
       } catch (error: any) {
         console.error('❌ Erreur vérification paiement:', error);
+        if (pollInterval) clearInterval(pollInterval);
         setPaymentStatus('error');
         setErrorMessage(error.message || 'Erreur lors de la vérification du paiement');
-      } finally {
         setVerifying(false);
       }
     };
 
+    // Première vérification immédiate
     verifierPaiement();
-  }, [commandeId, refresh]);
+    
+    // Puis polling toutes les 3 secondes
+    pollInterval = setInterval(() => {
+      if (isMounted && currentPollCount < maxPolls) {
+        verifierPaiement();
+      }
+    }, 3000);
+
+    return () => {
+      isMounted = false;
+      if (pollInterval) clearInterval(pollInterval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [commandeId]);
 
   // État de chargement
   if (verifying) {
@@ -91,9 +125,14 @@ function SuccessContent() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-dark mb-4">Vérification du paiement...</h2>
-              <p className="text-lg text-body">
+              <p className="text-lg text-body mb-2">
                 Nous vérifions le statut de votre paiement. Veuillez patienter.
               </p>
+              {pollCount > 0 && (
+                <p className="text-sm text-gray-500">
+                  Tentative {pollCount}/{maxPolls}...
+                </p>
+              )}
             </div>
           </div>
         </section>

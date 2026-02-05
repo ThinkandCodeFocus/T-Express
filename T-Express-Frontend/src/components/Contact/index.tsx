@@ -36,7 +36,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Nom : James Septimus
+                    Nom : Bachirou
                   </p>
 
                   <p className="flex items-center gap-4">
@@ -64,7 +64,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Téléphone : 1234 567890
+                    Téléphone : (+221) 77 118 87 47
                   </p>
 
                   <p className="flex gap-4">
@@ -83,7 +83,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Adresse : 7398 Smoke Ranch RoadLas Vegas, Nevada 89128
+                    Adresse : Touba
                   </p>
                 </div>
               </div>
@@ -101,7 +101,7 @@ const Contact = () => {
                       type="text"
                       name="firstName"
                       id="firstName"
-                      placeholder="Jean"
+                      placeholder="Issa"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -115,7 +115,7 @@ const Contact = () => {
                       type="text"
                       name="lastName"
                       id="lastName"
-                      placeholder="Dupont"
+                      placeholder="Fallt"
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>

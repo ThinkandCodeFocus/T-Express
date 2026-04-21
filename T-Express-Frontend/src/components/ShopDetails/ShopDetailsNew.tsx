@@ -8,6 +8,7 @@ import { usePanierContext } from "@/context/PanierContext";
 import { useFavorisContext } from "@/context/FavorisContext";
 import type { Produit } from "@/types/api.types";
 import { API_CONFIG } from "@/config/api.config";
+import { isBackendImageUrl } from "@/lib/image";
 
 const ShopDetailsNew = () => {
   const searchParams = useSearchParams();
@@ -117,6 +118,7 @@ const ShopDetailsNew = () => {
                   width={500}
                   height={500}
                   className="object-contain"
+                  unoptimized={images.length > 0 && isBackendImageUrl(imageUrl(images[previewImg]))}
                 />
               </div>
 
@@ -136,6 +138,7 @@ const ShopDetailsNew = () => {
                         width={80}
                         height={80}
                         className="object-cover"
+                        unoptimized={isBackendImageUrl(imageUrl(img))}
                       />
                     </button>
                   ))}

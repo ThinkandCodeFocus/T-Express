@@ -7,6 +7,7 @@ import RecentlyViewdItems from "./RecentlyViewd";
 import { usePreviewSlider } from "@/app/context/PreviewSliderContext";
 import { useAppSelector } from "@/redux/store";
 import { formatPrice } from "@/lib/utils";
+import { isBackendImageUrl } from "@/lib/image";
 
 const ShopDetails = () => {
   const [activeColor, setActiveColor] = useState("blue");
@@ -135,6 +136,7 @@ const ShopDetails = () => {
                         alt="products-details"
                         width={400}
                         height={400}
+                        unoptimized={isBackendImageUrl(product.imgs?.previews[previewImg])}
                       />
                     </div>
                   </div>
@@ -156,6 +158,7 @@ const ShopDetails = () => {
                           height={50}
                           src={item}
                           alt="thumbnail"
+                          unoptimized={isBackendImageUrl(item)}
                         />
                       </button>
                     ))}

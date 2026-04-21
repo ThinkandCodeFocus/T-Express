@@ -14,6 +14,7 @@ import { catalogueService } from "@/services/catalogue.service";
 import { API_CONFIG } from "@/config/api.config";
 import type { Produit } from "@/types/api.types";
 import toast from "react-hot-toast";
+import { isBackendImageUrl } from "@/lib/image";
 
 const QuickViewModal = () => {
   const { isModalOpen, closeModal } = useModalContext();
@@ -233,7 +234,7 @@ const QuickViewModal = () => {
                         width={61}
                         height={61}
                         className="aspect-square object-cover"
-                        unoptimized={img?.includes(imageBaseURL)}
+                        unoptimized={isBackendImageUrl(img)}
                       />
                     </button>
                   ))}
@@ -269,7 +270,7 @@ const QuickViewModal = () => {
                       width={400}
                       height={400}
                       className="object-cover w-full h-full"
-                      unoptimized={previews[activePreview]?.includes(imageBaseURL)}
+                      unoptimized={isBackendImageUrl(previews[activePreview])}
                     />
                   </div>
                 </div>

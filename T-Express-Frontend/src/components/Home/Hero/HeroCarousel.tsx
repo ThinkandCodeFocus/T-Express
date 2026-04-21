@@ -11,6 +11,7 @@ import React, { useMemo } from "react";
 import { useHeroContext } from "@/context/HeroContext";
 import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
+import { isBackendImageUrl } from "@/lib/image";
 
 const HeroCarousal = () => {
   const { data, loading } = useHeroContext();
@@ -130,6 +131,7 @@ const HeroCarousal = () => {
                 alt={slide.titre || "headphone"}
                 width={351}
                 height={358}
+                unoptimized={isBackendImageUrl(getImageUrl(slide.image))}
               />
             </div>
           </div>

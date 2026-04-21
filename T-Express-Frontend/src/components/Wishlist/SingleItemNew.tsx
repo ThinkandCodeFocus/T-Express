@@ -1,6 +1,7 @@
 import React from "react";
 import { usePanier } from "@/hooks/usePanier";
 import Image from "next/image";
+import { isBackendImageUrl } from "@/lib/image";
 
 interface SingleItemProps {
   item: {
@@ -85,6 +86,7 @@ const SingleItemNew = ({ item, onRemove }: SingleItemProps) => {
                 width={80} 
                 height={70}
                 className="object-cover"
+                unoptimized={isBackendImageUrl(item.imgs?.thumbnails[0])}
               />
             </div>
 

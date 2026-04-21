@@ -11,6 +11,7 @@ import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
 import toast from "react-hot-toast";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -96,7 +97,13 @@ const SingleItem = ({ item }: { item: Product }) => {
         </div>
 
         <div className="flex justify-center items-center">
-          <Image src={item.imgs.previews[0]} alt="" width={280} height={280} />
+          <Image
+            src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
+            alt=""
+            width={280}
+            height={280}
+            unoptimized={isBackendImageUrl(item.imgs.previews[0])}
+          />
         </div>
 
         <div className="absolute right-0 bottom-0 translate-x-full u-w-full flex flex-col gap-2 p-5.5 ease-linear duration-300 group-hover:translate-x-0">

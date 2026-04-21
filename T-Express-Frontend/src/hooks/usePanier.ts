@@ -11,6 +11,8 @@ import type { PanierContenu, AjouterPanierData } from '@/types/api.types';
 import { useMutation } from './useApi';
 import toast from 'react-hot-toast';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export function usePanier() {
   // Initialiser avec un panier vide pour éviter les problèmes de null
   const [panier, setPanier] = useState<PanierContenu | null>({ lignes: [], total: 0, nombre_articles: 0 });
@@ -20,7 +22,9 @@ export function usePanier() {
   const loadPanier = useCallback(async () => {
     // Vérifier l'authentification avant de charger
     if (!authService.isAuthenticated()) {
-      console.log('Utilisateur non authentifié, panier vide');
+      if (isDev) {
+        console.log('Utilisateur non authentifié, panier vide');
+      }
       setPanier({ lignes: [], total: 0, nombre_articles: 0 });
       setLoading(false);
       return;
@@ -28,14 +32,18 @@ export function usePanier() {
     
     try {
       setLoading(true);
-      console.log('Chargement du panier...');
+      if (isDev) {
+        console.log('Chargement du panier...');
+      }
       const data = await panierService.getContenu();
-      console.log('Panier chargé (données brutes):', JSON.stringify(data, null, 2));
-      console.log('Type de données:', typeof data);
-      console.log('Lignes:', data?.lignes);
-      console.log('Nombre de lignes:', data?.lignes?.length);
-      console.log('Total:', data?.total);
-      console.log('Nombre articles:', data?.nombre_articles);
+      if (isDev) {
+        console.log('Panier chargé (données brutes):', JSON.stringify(data, null, 2));
+        console.log('Type de données:', typeof data);
+        console.log('Lignes:', data?.lignes);
+        console.log('Nombre de lignes:', data?.lignes?.length);
+        console.log('Total:', data?.total);
+        console.log('Nombre articles:', data?.nombre_articles);
+      }
       
       // Vérifier que les données sont dans le bon format
       if (!data || typeof data !== 'object') {
@@ -55,12 +63,16 @@ export function usePanier() {
         nombre_articles,
       };
       
-      console.log('Panier formaté:', panierFormate);
+      if (isDev) {
+        console.log('Panier formaté:', panierFormate);
+      }
       setPanier(panierFormate);
     } catch (error: any) {
       // Si non authentifié, initialiser un panier vide
       if (error.status === 401) {
-        console.log('Utilisateur non authentifié, panier vide');
+        if (isDev) {
+          console.log('Utilisateur non authentifié, panier vide');
+        }
         setPanier({ lignes: [], total: 0, nombre_articles: 0 });
       } else if (error.status === 408 || error.status === 0) {
         // Timeout ou erreur réseau - mode hors ligne
@@ -78,11 +90,15 @@ export function usePanier() {
 
   // Callbacks stables pour les mutations
   const handleAjouterSuccess = useCallback((data: PanierContenu) => {
-    console.log('✅ Produit ajouté avec succès. Données reçues:', data);
+    if (isDev) {
+      console.log('✅ Produit ajouté avec succès. Données reçues:', data);
+    }
     
     // Vérifier le format des données
     if (!data || typeof data !== 'object') {
-      console.error('❌ Données invalides reçues après ajout:', data);
+      if (isDev) {
+        console.error('❌ Données invalides reçues après ajout:', data);
+      }
       // Rafraîchir le panier pour obtenir les bonnes données
       loadPanier();
       return;
@@ -101,7 +117,9 @@ export function usePanier() {
       nombre_articles,
     };
     
-    console.log('📦 Panier formaté après ajout:', panierFormate);
+    if (isDev) {
+      console.log('📦 Panier formaté après ajout:', panierFormate);
+    }
     setPanier(panierFormate);
     toast.success('Produit ajouté au panier');
     
@@ -171,13 +189,19 @@ export function usePanier() {
   // Utiliser directement les fonctions execute des mutations (elles sont stables maintenant)
   const ajouter = useCallback(
     async (data: AjouterPanierData) => {
-      console.log('🛒 Tentative d\'ajout au panier:', data);
+      if (isDev) {
+        console.log('🛒 Tentative d\'ajout au panier:', data);
+      }
       try {
         const result = await ajouterMutation.execute(data);
-        console.log('✅ Résultat de l\'ajout:', result);
+        if (isDev) {
+          console.log('✅ Résultat de l\'ajout:', result);
+        }
         return result;
       } catch (error: any) {
-        console.error('❌ Erreur dans ajouter:', error);
+        if (isDev) {
+          console.error('❌ Erreur dans ajouter:', error);
+        }
         throw error;
       }
     },

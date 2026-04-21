@@ -2,17 +2,19 @@ import React from "react";
 import { BlogItem } from "@/types/blogItem";
 import Image from "next/image";
 import Link from "next/link";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 const BlogItem = ({ blog }: { blog: BlogItem }) => {
   return (
     <div className="shadow-1 bg-white rounded-xl px-4 sm:px-5 pt-5 pb-4">
       <Link href="/blogs/blog-details" className="rounded-md overflow-hidden">
         <Image
-          src={blog.img}
+          src={resolveBackendImageUrl(blog.img, '/images/blog/default-blog.jpg')}
           alt="blog"
           className="rounded-md w-full"
           width={330}
           height={210}
+          unoptimized={isBackendImageUrl(blog.img)}
         />
       </Link>
 

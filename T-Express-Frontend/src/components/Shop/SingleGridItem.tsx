@@ -11,6 +11,7 @@ import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
 import toast from "react-hot-toast";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 const SingleGridItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -47,7 +48,13 @@ const SingleGridItem = ({ item }: { item: Product }) => {
   return (
     <div className="group">
       <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-white shadow-1 min-h-[270px] mb-4">
-        <Image src={item.imgs.previews[0]} alt="" width={250} height={250} />
+        <Image
+          src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
+          alt=""
+          width={250}
+          height={250}
+          unoptimized={isBackendImageUrl(item.imgs.previews[0])}
+        />
 
         <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
           <button

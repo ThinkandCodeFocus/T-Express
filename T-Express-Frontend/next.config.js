@@ -1,4 +1,16 @@
 /** @type {import('next').NextConfig} */
+const backendApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+let backendOrigin = 'http://localhost:8000';
+
+try {
+  backendOrigin = new URL(backendApiUrl).origin;
+} catch {
+  backendOrigin = 'http://localhost:8000';
+}
+
+const backendUrl = new URL(backendOrigin);
+
 const nextConfig = {
   // Disable ESLint during production builds
   eslint: {
@@ -10,6 +22,12 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      {
+        protocol: backendUrl.protocol.replace(':', ''),
+        hostname: backendUrl.hostname,
+        ...(backendUrl.port ? { port: backendUrl.port } : {}),
+        pathname: '/storage/**',
+      },
       {
         protocol: "https",
         hostname: "t-express-backend.onrender.com",

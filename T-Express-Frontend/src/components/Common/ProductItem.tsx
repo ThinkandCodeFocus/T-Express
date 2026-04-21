@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
 import toast from "react-hot-toast";
 import { isBackendImageUrl } from "@/lib/image";
+import { resolveBackendImageUrl } from "@/lib/image";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -54,7 +55,7 @@ const ProductItem = ({ item }: { item: Product }) => {
     <div className="group">
       <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-[#F6F7FB] min-h-[270px] mb-4">
         <Image
-          src={item.imgs.previews[0]}
+          src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
           alt=""
           width={250}
           height={250}

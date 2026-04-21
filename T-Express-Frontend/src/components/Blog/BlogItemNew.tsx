@@ -2,6 +2,7 @@ import React from "react";
 import type { Article } from "@/types/api.types";
 import Image from "next/image";
 import Link from "next/link";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 interface BlogItemNewProps {
   article: Article;
@@ -20,11 +21,12 @@ const BlogItemNew = ({ article }: BlogItemNewProps) => {
     <div className="shadow-1 bg-white rounded-xl px-4 sm:px-5 pt-5 pb-4">
       <Link href={`/blog/${article.slug}`} className="rounded-md overflow-hidden block">
         <Image
-          src={article.image || '/images/blog/default-blog.jpg'}
+          src={resolveBackendImageUrl(article.image, '/images/blog/default-blog.jpg')}
           alt={article.titre}
           className="rounded-md w-full"
           width={330}
           height={210}
+          unoptimized={isBackendImageUrl(article.image)}
         />
       </Link>
 

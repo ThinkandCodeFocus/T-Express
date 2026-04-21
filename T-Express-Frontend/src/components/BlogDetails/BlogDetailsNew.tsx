@@ -6,6 +6,7 @@ import Link from "next/link";
 import { articleService } from "@/services/article.service";
 import type { Article, CommentaireArticle } from "@/types/api.types";
 import { useParams } from "next/navigation";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 const BlogDetailsNew = () => {
   const params = useParams();
@@ -126,10 +127,11 @@ const BlogDetailsNew = () => {
             <div className="rounded-[10px] overflow-hidden mb-7.5">
               <Image
                 className="rounded-[10px] w-full"
-                src={article.image}
+                src={resolveBackendImageUrl(article.image, '/images/blog/default-blog.jpg')}
                 alt={article.titre}
                 width={750}
                 height={477}
+                unoptimized={isBackendImageUrl(article.image)}
               />
             </div>
           )}
@@ -302,11 +304,12 @@ const BlogDetailsNew = () => {
                     >
                       {art.image && (
                         <Image
-                          src={art.image}
+                          src={resolveBackendImageUrl(art.image, '/images/blog/default-blog.jpg')}
                           alt={art.titre}
                           width={350}
                           height={200}
                           className="w-full h-40 object-cover"
+                          unoptimized={isBackendImageUrl(art.image)}
                         />
                       )}
                       <div className="p-4">

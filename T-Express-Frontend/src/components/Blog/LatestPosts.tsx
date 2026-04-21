@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 const LatestPosts = ({ blogs }) => {
   return (
@@ -20,11 +21,12 @@ const LatestPosts = ({ blogs }) => {
                 className="max-w-[110px] w-full rounded-[10px] overflow-hidden"
               >
                 <Image
-                  src={blog.img}
+                  src={resolveBackendImageUrl(blog.img, '/images/blog/default-blog.jpg')}
                   alt="blog"
                   className="rounded-[10px] w-full"
                   width={110}
                   height={80}
+                  unoptimized={isBackendImageUrl(blog.img)}
                 />
               </Link>
 

@@ -2,12 +2,11 @@ import { Categorie } from "@/types/api.types";
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { resolveBackendImageUrl, isBackendImageUrl } from "@/lib/image";
 
 const SingleItem = ({ item }: { item: Categorie }) => {
   // Utiliser l'image de la catégorie ou une image par défaut
-  const imageUrl = item.image 
-    ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${item.image}`
-    : '/images/categories/default.png';
+  const imageUrl = resolveBackendImageUrl(item.image, '/images/categories/default.png');
 
   return (
     <Link 
@@ -21,6 +20,7 @@ const SingleItem = ({ item }: { item: Categorie }) => {
           fill
           className="object-contain p-2"
           sizes="130px"
+          unoptimized={isBackendImageUrl(imageUrl)}
         />
       </div>
 

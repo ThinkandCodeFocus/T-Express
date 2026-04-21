@@ -6,6 +6,8 @@ import SingleItemNew from "@/components/Common/CartSidebarModal/SingleItemNew";
 import Link from "next/link";
 import EmptyCart from "./EmptyCart";
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const CartSidebarModalNew = () => {
   const { isCartModalOpen, closeCartModal } = useCartModalContext();
   const { panier, loading, refresh } = usePanierContext();
@@ -13,7 +15,9 @@ const CartSidebarModalNew = () => {
   // Rafraîchir le panier quand le modal s'ouvre
   React.useEffect(() => {
     if (isCartModalOpen) {
-      console.log('🛒 Modal du panier ouvert, rafraîchissement du panier...');
+      if (isDev) {
+        console.log('🛒 Modal du panier ouvert, rafraîchissement du panier...');
+      }
       refresh();
     }
   }, [isCartModalOpen, refresh]);
@@ -22,14 +26,16 @@ const CartSidebarModalNew = () => {
   
   // Log pour debug
   React.useEffect(() => {
-    console.log('🛒 État du panier dans le modal:', {
-      panier,
-      loading,
-      cartItems,
-      cartItemsLength: cartItems.length,
-      nombreArticles: panier?.nombre_articles,
-      total: panier?.total
-    });
+    if (isDev) {
+      console.log('🛒 État du panier dans le modal:', {
+        panier,
+        loading,
+        cartItems,
+        cartItemsLength: cartItems.length,
+        nombreArticles: panier?.nombre_articles,
+        total: panier?.total
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [panier, loading]);
 

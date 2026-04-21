@@ -12,6 +12,7 @@ import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
 import toast from "react-hot-toast";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -49,7 +50,13 @@ const SingleListItem = ({ item }: { item: Product }) => {
     <div className="group rounded-lg bg-white shadow-1">
       <div className="flex">
         <div className="shadow-list relative overflow-hidden flex items-center justify-center max-w-[270px] w-full sm:min-h-[270px] p-4">
-          <Image src={item.imgs.previews[0]} alt="" width={250} height={250} />
+          <Image
+            src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
+            alt=""
+            width={250}
+            height={250}
+            unoptimized={isBackendImageUrl(item.imgs.previews[0])}
+          />
 
           <div className="absolute left-0 bottom-0 translate-y-full w-full flex items-center justify-center gap-2.5 pb-5 ease-linear duration-200 group-hover:translate-y-0">
             <button

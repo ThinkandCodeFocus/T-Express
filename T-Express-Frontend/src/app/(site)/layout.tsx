@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 
@@ -12,7 +11,6 @@ import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 
 import ScrollToTop from "@/components/Common/ScrollToTop";
-import PreLoader from "@/components/Common/PreLoader";
 import { AuthProvider } from "@/context/AuthContext";
 import { PanierProvider } from "@/context/PanierContext";
 import { HeroProvider } from "@/context/HeroContext";
@@ -22,44 +20,32 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
-
   return (
     <>
-      {loading ? (
-        <PreLoader />
-      ) : (
-        <>
-          <ReduxProvider>
-            <AuthProvider>
-              <PanierProvider>
-                <HeroProvider>
-                  <CartModalProvider>
-                    <ModalProvider>
-                      <PreviewSliderProvider>
-                        <Header />
-                        {/* Ajout du ToastProvider pour les notifications */}
-                        {require("@/components/Common/ToastProvider").default()}
-                        {children}
+      <ReduxProvider>
+        <AuthProvider>
+          <PanierProvider>
+            <HeroProvider>
+              <CartModalProvider>
+                <ModalProvider>
+                  <PreviewSliderProvider>
+                    <Header />
+                    {/* Ajout du ToastProvider pour les notifications */}
+                    {require("@/components/Common/ToastProvider").default()}
+                    {children}
 
-                      <QuickViewModal />
-                      <CartSidebarModal />
-                      <PreviewSliderModal />
-                    </PreviewSliderProvider>
-                  </ModalProvider>
-                </CartModalProvider>
-                </HeroProvider>
-              </PanierProvider>
-            </AuthProvider>
-          </ReduxProvider>
-          <ScrollToTop />
-          <Footer />
-        </>
-      )}
+                  <QuickViewModal />
+                  <CartSidebarModal />
+                  <PreviewSliderModal />
+                </PreviewSliderProvider>
+              </ModalProvider>
+            </CartModalProvider>
+            </HeroProvider>
+          </PanierProvider>
+        </AuthProvider>
+      </ReduxProvider>
+      <ScrollToTop />
+      <Footer />
     </>
   );
 }

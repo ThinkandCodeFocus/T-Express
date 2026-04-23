@@ -3,13 +3,6 @@ export function isBackendImageUrl(src?: string | null): boolean {
     return false;
   }
 
-  // Keep direct image loading only in development.
-  // In production, let Next.js proxy remote images via /_next/image
-  // to avoid browser-side failures against backend storage hosts.
-  if (process.env.NODE_ENV !== 'development') {
-    return false;
-  }
-
   return (
     /^https?:\/\//i.test(src) &&
     (

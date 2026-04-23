@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { articleService } from "@/services/article.service";
 import type { Article } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
+import { resolveBackendImageUrl } from "@/lib/image";
 import toast from "react-hot-toast";
 
 export default function AdminArticles() {
@@ -67,7 +68,7 @@ export default function AdminArticles() {
         date_publication: article.date_publication || "",
       });
       if (article.image) {
-        setImagePreview(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${article.image}`);
+        setImagePreview(resolveBackendImageUrl(article.image, '/images/blog/default-blog.jpg'));
       }
     } else {
       setEditArticle(null);
@@ -245,9 +246,12 @@ export default function AdminArticles() {
                         <td className="px-6 py-4">
                           {article.image ? (
                             <img
-                              src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${article.image}`}
+                              src={resolveBackendImageUrl(article.image, '/images/blog/default-blog.jpg')}
                               alt={article.titre}
                               className="w-16 h-16 object-cover rounded-lg"
+                              onError={(e) => {
+                                e.currentTarget.src = '/images/blog/default-blog.jpg';
+                              }}
                             />
                           ) : (
                             <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">

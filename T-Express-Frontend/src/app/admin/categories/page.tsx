@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { adminService } from "@/services/admin.service";
 import type { Categorie, AdminCategorieData } from "@/types/api.types";
+import { resolveBackendImageUrl } from "@/lib/image";
 import toast from "react-hot-toast";
 
 export default function AdminCategories() {
@@ -54,7 +55,7 @@ export default function AdminCategories() {
         ordre: cat.ordre ?? 0,
       });
       if (cat.image) {
-        setImagePreview(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${cat.image}`);
+        setImagePreview(resolveBackendImageUrl(cat.image, '/images/categories/default.png'));
       }
     } else {
       setEditCategorie(null);
@@ -206,9 +207,12 @@ export default function AdminCategories() {
                       <td className="px-6 py-4">
                         {cat.image ? (
                           <img
-                            src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${cat.image}`}
+                            src={resolveBackendImageUrl(cat.image, '/images/categories/default.png')}
                             alt={cat.nom}
                             className="w-16 h-16 object-cover rounded-lg"
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/categories/default.png';
+                            }}
                           />
                         ) : (
                           <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">

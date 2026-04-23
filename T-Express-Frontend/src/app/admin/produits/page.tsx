@@ -4,6 +4,7 @@ import { adminService } from "@/services/admin.service";
 import { categorieService } from "@/services/categorie.service";
 import type { Produit, Categorie, AdminProduitData } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
+import { resolveBackendImageUrl } from "@/lib/image";
 import toast from "react-hot-toast";
 
 export default function AdminProduits() {
@@ -84,7 +85,7 @@ export default function AdminProduits() {
         quantite_stock: prod.stock?.quantite ?? undefined,
       });
       if (prod.image_principale) {
-        setImagePrincipalePreview(`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${prod.image_principale}`);
+        setImagePrincipalePreview(resolveBackendImageUrl(prod.image_principale, '/images/products/default.png'));
       }
     } else {
       setEditProduit(null);
@@ -329,9 +330,12 @@ export default function AdminProduits() {
                         <td className="px-6 py-4">
                           {prod.image_principale ? (
                             <img
-                              src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '')}/storage/${prod.image_principale}`}
+                              src={resolveBackendImageUrl(prod.image_principale, '/images/products/default.png')}
                               alt={prod.nom}
                               className="w-16 h-16 object-cover rounded-lg"
+                              onError={(e) => {
+                                e.currentTarget.src = '/images/products/default.png';
+                              }}
                             />
                           ) : (
                             <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { superAdminService, DashboardSuperAdmin, PaiementSuperAdmin, Retrait } from "@/services/retrait.service";
 import { LOCALE_CONFIG } from "@/config/api.config";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/Common/ConfirmModal";
 
 const STATUT_PAIEMENT: Record<string, { label: string; color: string }> = {
   en_attente: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
@@ -32,6 +34,10 @@ export default function SuperAdminPage() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"dashboard" | "paiements" | "retraits">("dashboard");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+  type: "confirm" | "refuse";
+  retraitId: number;
+} | null>(null);
 
   useEffect(() => {
     // Vérifier si déjà connecté en tant que super admin
@@ -92,34 +98,41 @@ export default function SuperAdminPage() {
     }
   };
 
-  const handleConfirmerRetrait = async (id: number) => {
-    if (!confirm("Confirmer ce retrait ? Le montant sera déduit du solde.")) return;
+ const handleConfirmerRetrait = (id: number) => {
+  setConfirmModal({ type: "confirm", retraitId: id });
+};
 
-    try {
-      setActionLoading(id);
-      await superAdminService.confirmerRetrait(id);
-      loadData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Erreur lors de la confirmation");
-    } finally {
-      setActionLoading(null);
-    }
-  };
+const handleRefuserRetrait = (id: number) => {
+  setConfirmModal({ type: "refuse", retraitId: id });
+};
 
-  const handleRefuserRetrait = async (id: number) => {
-    const note = prompt("Raison du refus (optionnel):");
-    if (note === null) return; // Annulé
+const executeConfirmerRetrait = async (id: number) => {
+  try {
+    setActionLoading(id);
+    await superAdminService.confirmerRetrait(id);
+    toast.success("Retrait confirmé avec succès");
+    loadData();
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || "Erreur lors de la confirmation");
+  } finally {
+    setActionLoading(null);
+    setConfirmModal(null);
+  }
+};
 
-    try {
-      setActionLoading(id);
-      await superAdminService.refuserRetrait(id, note || undefined);
-      loadData();
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Erreur lors du refus");
-    } finally {
-      setActionLoading(null);
-    }
-  };
+const executeRefuserRetrait = async (id: number, note?: string) => {
+  try {
+    setActionLoading(id);
+    await superAdminService.refuserRetrait(id, note || undefined);
+    toast.success("Retrait refusé");
+    loadData();
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || "Erreur lors du refus");
+  } finally {
+    setActionLoading(null);
+    setConfirmModal(null);
+  }
+};
 
   // Page de connexion
   if (!isLoggedIn) {
@@ -408,6 +421,29 @@ export default function SuperAdminPage() {
           </>
         )}
       </main>
+
+      <ConfirmModal
+        isOpen={confirmModal?.type === "confirm"}
+        title="Confirmer le retrait"
+        message="Confirmer ce retrait ? Le montant sera déduit du solde."
+        confirmLabel="Confirmer"
+        confirmColor="green"
+        onConfirm={() => confirmModal && executeConfirmerRetrait(confirmModal.retraitId)}
+        onCancel={() => setConfirmModal(null)}
+      />
+
+      <ConfirmModal
+        isOpen={confirmModal?.type === "refuse"}
+        title="Refuser le retrait"
+        message="Merci d'indiquer la raison du refus (optionnel)."
+        showInput
+        inputLabel="Raison du refus"
+        inputPlaceholder="Ex: solde insuffisant, informations incorrectes..."
+        confirmLabel="Refuser"
+        confirmColor="red"
+        onConfirm={(note) => confirmModal && executeRefuserRetrait(confirmModal.retraitId, note)}
+        onCancel={() => setConfirmModal(null)}
+      />
     </div>
   );
 }

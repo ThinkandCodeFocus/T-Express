@@ -11,6 +11,7 @@ import { PreviewSliderProvider } from "../context/PreviewSliderContext";
 import PreviewSliderModal from "@/components/Common/PreviewSlider";
 
 import ScrollToTop from "@/components/Common/ScrollToTop";
+import ToastProvider from "@/components/Common/ToastProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import { PanierProvider } from "@/context/PanierContext";
 import { HeroProvider } from "@/context/HeroContext";
@@ -31,7 +32,7 @@ export default function RootLayout({
                   <PreviewSliderProvider>
                     <Header />
                     {/* Ajout du ToastProvider pour les notifications */}
-                    {require("@/components/Common/ToastProvider").default()}
+                    <ToastProvider />
                     {children}
 
                   <QuickViewModal />

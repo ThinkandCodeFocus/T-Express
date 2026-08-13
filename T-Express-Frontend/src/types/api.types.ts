@@ -319,6 +319,16 @@ export interface Livraison {
   notes?: string;
   created_at: string;
   updated_at: string;
+  // Chargée par le backend via Livraison::with(['commande.client', 'adresse'])
+  commande?: {
+    id: number;
+    client?: {
+      id: number;
+      nom: string;
+      prenom: string;
+      email?: string;
+    };
+  };
 }
 
 // ========== Avis ==========

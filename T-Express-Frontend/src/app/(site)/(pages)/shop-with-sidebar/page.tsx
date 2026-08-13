@@ -3,8 +3,8 @@ import ShopWithSidebar from "@/components/ShopWithSidebar";
 
 import { Metadata } from "next";
 export const metadata: Metadata = {
-  title: "Shop Page | NextCommerce Nextjs E-commerce template",
-  description: "This is Shop Page for NextCommerce Template",
+  title: "Boutique | T-Express",
+  description: "Parcourez tous les produits disponibles sur T-Express, filtrez par catégorie et trouvez ce qu'il vous faut.",
   // other metadata
 };
 

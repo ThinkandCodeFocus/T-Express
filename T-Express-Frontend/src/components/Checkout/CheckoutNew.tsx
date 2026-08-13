@@ -85,57 +85,41 @@ const CheckoutNew = () => {
   // Soumettre la commande
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    console.log("🚀 handleSubmit appelé");
-    console.log("📦 Mode de paiement:", paymentMethod);
-    console.log("👤 User:", user);
-    console.log("🛒 Panier:", panier);
 
     if (!user) {
-      console.log("❌ Pas d'utilisateur connecté");
       alert("Vous devez être connecté pour passer commande");
       router.push("/signin");
       return;
     }
 
     if (!selectedAdresseId && !showNewAddress) {
-      console.log("❌ Pas d'adresse sélectionnée");
       alert("Veuillez sélectionner une adresse de livraison");
       return;
     }
 
     if (!panier || panier.lignes.length === 0) {
-      console.log("❌ Panier vide");
       alert("Votre panier est vide");
       return;
     }
 
     try {
       setProcessing(true);
-      console.log("⏳ Traitement en cours...");
 
       // Créer une nouvelle adresse si nécessaire
       let adresseId = selectedAdresseId;
       if (showNewAddress && newAddress.adresse_ligne_1) {
-        console.log("📍 Création d'une nouvelle adresse...");
-        console.log("📋 Données adresse:", newAddress);
-        
         // Valider le téléphone si fourni
         if (newAddress.telephone && !validatePhone(newAddress.telephone)) {
-          console.log("❌ Téléphone invalide:", newAddress.telephone);
           toast.error("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
           setProcessing(false);
           return;
         }
-        
+
         try {
           const nouvelleAdresse = await adresseService.ajouter(newAddress);
           adresseId = nouvelleAdresse.id;
-          console.log("✅ Adresse créée avec ID:", adresseId);
         } catch (adresseError: any) {
-          console.error("❌ ERREUR création adresse:", adresseError);
-          console.error("❌ Message:", adresseError.message);
-          console.error("❌ Response:", adresseError.response);
+          console.error("Erreur création adresse:", adresseError.message);
           toast.error("Erreur lors de la création de l'adresse: " + (adresseError.message || "Erreur inconnue"));
           setProcessing(false);
           return;
@@ -143,7 +127,6 @@ const CheckoutNew = () => {
       }
 
       if (!adresseId) {
-        console.log("❌ Pas d'adresse ID");
         alert("Veuillez fournir une adresse de livraison");
         setProcessing(false);
         return;
@@ -158,17 +141,10 @@ const CheckoutNew = () => {
         frais_livraison: shippingMethod === "express" ? 5000 : 2000
       };
 
-      console.log("📝 Données commande:", commandeData);
-      console.log("🔄 Appel API création commande...");
-      
       const commande = await commandeService.creer(commandeData);
-      
-      console.log("✅ Commande créée:", commande);
-      console.log("💰 Mode de paiement:", paymentMethod);
-      
+
       // Si paiement en espèces, rediriger vers mes commandes
       if (paymentMethod === "especes") {
-        console.log("💵 Paiement en espèces - Redirection vers mes commandes");
         toast.success(`Commande ${commande.numero_commande} créée avec succès ! Paiement à la livraison.`);
         router.push(`/my-account/orders`);
         return;
@@ -178,19 +154,15 @@ const CheckoutNew = () => {
       // Inclure le téléphone pour éviter de le redemander
       const telephone = newAddress.telephone || user.telephone || '';
       const paymentUrl = `/payment?commande_id=${commande.id}&mode=${paymentMethod}&montant=${totalWithShipping}&telephone=${encodeURIComponent(telephone)}`;
-      console.log("💳 Paiement électronique - Redirection vers:", paymentUrl);
-      console.log("📞 Téléphone transmis:", telephone);
       toast.success(`Commande ${commande.numero_commande} créée ! Redirection vers le paiement...`);
-      
+
       // Utiliser window.location pour forcer la navigation
       window.location.href = paymentUrl;
     } catch (error: any) {
-      console.error("❌ Erreur lors de la création de la commande:", error);
-      console.error("❌ Détails:", error.response || error.message);
+      console.error("Erreur lors de la création de la commande:", error.message);
       toast.error(error.message || "Erreur lors de la création de la commande");
     } finally {
       setProcessing(false);
-      console.log("✅ Traitement terminé");
     }
   };
 

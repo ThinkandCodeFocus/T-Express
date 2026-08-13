@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect } from "react";
-import Discount from "./Discount";
 import OrderSummaryNew from "./OrderSummaryNew";
 import SingleItemNew from "./SingleItemNew";
 import Breadcrumb from "../Common/Breadcrumb";
@@ -91,7 +90,6 @@ const Cart = () => {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-7.5 xl:gap-11 mt-9">
-              <Discount />
               <OrderSummaryNew />
             </div>
           </div>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { commandeService } from "@/services/commande.service";
 import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
+import toast from "react-hot-toast";
 
 // Statuts de commande (affichage seulement, pas modifiable directement)
 const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
@@ -91,7 +92,7 @@ export default function AdminCommandes() {
         setShowDetail(updatedCommande);
       }
     } catch (e: any) {
-      alert(e.message || "Erreur lors de la mise à jour du statut");
+      toast.error(e.message || "Erreur lors de la mise à jour du statut");
     } finally {
       setUpdatingStatus(null);
     }

@@ -93,20 +93,20 @@ const CheckoutNew = () => {
 
     if (!user) {
       console.log("❌ Pas d'utilisateur connecté");
-      alert("Vous devez être connecté pour passer commande");
+      toast.error("Vous devez être connecté pour passer commande");
       router.push("/signin");
       return;
     }
 
     if (!selectedAdresseId && !showNewAddress) {
       console.log("❌ Pas d'adresse sélectionnée");
-      alert("Veuillez sélectionner une adresse de livraison");
+      toast.error("Veuillez sélectionner une adresse de livraison");
       return;
     }
 
     if (!panier || panier.lignes.length === 0) {
       console.log("❌ Panier vide");
-      alert("Votre panier est vide");
+      toast.error("Votre panier est vide");
       return;
     }
 
@@ -144,7 +144,7 @@ const CheckoutNew = () => {
 
       if (!adresseId) {
         console.log("❌ Pas d'adresse ID");
-        alert("Veuillez fournir une adresse de livraison");
+        toast.error("Veuillez fournir une adresse de livraison");
         setProcessing(false);
         return;
       }

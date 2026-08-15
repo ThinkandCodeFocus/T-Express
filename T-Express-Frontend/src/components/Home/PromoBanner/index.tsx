@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useHeroContext } from "@/context/HeroContext";
 import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
+import { isBackendImageUrl } from "@/lib/image";
 
 const PromoBanner = () => {
   const { data, loading } = useHeroContext();
@@ -109,6 +110,7 @@ const PromoBanner = () => {
                 className="absolute bottom-0 right-2 sm:right-4 lg:right-26 z-0 w-[120px] sm:w-[180px] lg:w-[230px] xl:w-[274px] h-auto"
                 width={274}
                 height={350}
+                unoptimized={isBackendImageUrl(getImageUrl(mainBanner.image, "/images/promo/promo-01.png"))}
               />
             )}
           </div>
@@ -163,6 +165,7 @@ const PromoBanner = () => {
                     width={index === 0 ? 241 : 200}
                     height={index === 0 ? 241 : 200}
                     className="w-24 h-24 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-contain"
+                    unoptimized={isBackendImageUrl(getImageUrl(banner.image, index === 0 ? "/images/promo/promo-02.png" : "/images/promo/promo-03.png"))}
                   />
                 </div>
               )}
@@ -230,6 +233,7 @@ const PromoBanner = () => {
                         width={241}
                         height={241}
                         className="w-full h-full object-cover"
+                        unoptimized={isBackendImageUrl(getImageUrl(smallBanners[0].image, "/images/promo/promo-02.png"))}
                       />
                     </div>
                   )}
@@ -312,6 +316,7 @@ const PromoBanner = () => {
                         width={200}
                         height={200}
                         className="w-full h-full object-cover"
+                        unoptimized={isBackendImageUrl(getImageUrl(smallBanners[1].image, "/images/promo/promo-03.png"))}
                       />
                     </div>
                   )}

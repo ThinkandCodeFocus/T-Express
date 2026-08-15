@@ -2,8 +2,8 @@ import Home from "@/components/Home";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "NextCommerce | Nextjs E-commerce template",
-  description: "This is Home for NextCommerce Template",
+  title: "T-Express | Votre boutique en ligne au Sénégal",
+  description: "T-Express, la plateforme e-commerce sénégalaise : produits de qualité, paiement adapté et livraison partout au Sénégal.",
   // other metadata
 };
 

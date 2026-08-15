@@ -13,17 +13,31 @@ export function adaptProduitToProduct(produit: Produit): Product {
   // Construire les URLs des images
   const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || '';
   const storagePath = `${baseUrl}/storage/`;
-  
+
+  // Le backend renvoie image_principale déjà en URL absolue, et images soit en
+  // tableau soit (anciennes données) en chaîne JSON : on gère les deux, et on
+  // ne préfixe que les chemins relatifs pour éviter de doubler l'origine.
+  const toUrl = (img: string) => (/^https?:\/\//i.test(img) ? img : `${storagePath}${img}`);
+
   const fallback = '/images/products/product-1-bg-1.png';
-  const images = produit.images ? JSON.parse(produit.images as any) : [];
-  const thumbnails = images.length > 0 
-    ? images.map((img: string) => `${storagePath}${img}`)
+  let images: string[] = [];
+  if (Array.isArray(produit.images)) {
+    images = produit.images;
+  } else if (typeof produit.images === 'string' && produit.images) {
+    try {
+      images = JSON.parse(produit.images);
+    } catch {
+      images = [];
+    }
+  }
+  const thumbnails = images.length > 0
+    ? images.map(toUrl)
     : [fallback];
   const previews = thumbnails; // Utiliser les mêmes images pour les previews
-  
+
   // Si on a une image principale, l'utiliser en premier
   if (produit.image_principale) {
-    const mainImage = `${storagePath}${produit.image_principale}`;
+    const mainImage = toUrl(produit.image_principale);
     thumbnails.unshift(mainImage);
     previews.unshift(mainImage);
   }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useHeroContext } from "@/context/HeroContext";
 import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
+import { isBackendImageUrl } from "@/lib/image";
 
 const CounDown = () => {
   const { data, loading } = useHeroContext();
@@ -128,6 +129,7 @@ const CounDown = () => {
               className="hidden sm:block absolute right-0 bottom-0 -z-1"
               width={737}
               height={482}
+              unoptimized={isBackendImageUrl(getImageUrl(imageFond, "/images/countdown/countdown-bg.png"))}
             />
           ) : (
             <Image
@@ -147,6 +149,7 @@ const CounDown = () => {
               className="hidden lg:block absolute right-4 xl:right-33 bottom-4 xl:bottom-10 -z-1"
               width={411}
               height={376}
+              unoptimized={isBackendImageUrl(getImageUrl(imageProduit, "/images/countdown/countdown-01.png"))}
             />
           ) : (
             <Image

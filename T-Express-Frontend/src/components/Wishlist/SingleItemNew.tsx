@@ -2,6 +2,7 @@ import React from "react";
 import { usePanier } from "@/hooks/usePanier";
 import Image from "next/image";
 import { isBackendImageUrl } from "@/lib/image";
+import toast from "react-hot-toast";
 
 interface SingleItemProps {
   item: {
@@ -23,7 +24,7 @@ const SingleItemNew = ({ item, onRemove }: SingleItemProps) => {
 
   const handleAddToCart = async () => {
     if (!item.inStock) {
-      alert("Ce produit n'est pas en stock");
+      toast.error("Ce produit n'est pas en stock");
       return;
     }
 

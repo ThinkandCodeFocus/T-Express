@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./css/euclid-circular-a-font.css";
 import "./css/style.css";
 
 export const metadata: Metadata = {
   title: "T-Express",
   description: "Boutique en ligne T-Express",
-  openGraph: {
+openGraph: {
     title: "T-Express",
     description: "Boutique en ligne T-Express",
     url: "https://www.t-express.sn",
@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     description: "Boutique en ligne T-Express",
     images: ["/images/logo/logo.png"],
   },
+  manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#3C50E0",
 };
 export default function RootLayout({
   children,

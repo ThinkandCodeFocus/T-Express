@@ -108,8 +108,15 @@ const CheckoutNew = () => {
       // Créer une nouvelle adresse si nécessaire
       let adresseId = selectedAdresseId;
       if (showNewAddress && newAddress.adresse_ligne_1) {
-        // Valider le téléphone si fourni
-        if (newAddress.telephone && !validatePhone(newAddress.telephone)) {
+        // Le backend exige desormais le telephone sur une adresse (utilise pour le
+        // suivi WhatsApp de la commande) : le verifier ici evite un aller-retour API
+        // qui echouerait avec 422 pour un champ que le formulaire laissait optionnel.
+        if (!newAddress.telephone) {
+          toast.error("Le numéro de téléphone est obligatoire pour la livraison");
+          setProcessing(false);
+          return;
+        }
+        if (!validatePhone(newAddress.telephone)) {
           toast.error("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
           setProcessing(false);
           return;

@@ -141,12 +141,14 @@ class ApiClient {
         // Si la réponse n'est pas du JSON
       }
 
-      // Si 401, déconnecter l'utilisateur (sauf pour les pages super-admin)
+      // Si 401, invalider le token local. On ne redirige PAS automatiquement :
+      // beaucoup d'appels (favoris, panier...) sont faits en arrière-plan
+      // pour un visiteur non connecté, sur des pages publiques (fiche
+      // produit, boutique...) ; les rediriger de force vers /login cassait
+      // la navigation anonyme. Les pages qui exigent une connexion gèrent
+      // déjà leur propre redirection via authService.isAuthenticated().
       if (response.status === 401) {
         this.clearAuthToken();
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('super-admin')) {
-          window.location.href = '/login';
-        }
       }
 
       throw errorData;

@@ -4,6 +4,8 @@ import { commandeService } from "@/services/commande.service";
 import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import Link from "next/link";
+import toast from "react-hot-toast";
+import AdminErrorState from "@/components/Admin/AdminErrorState";
 
 // Statuts de commande (affichage seulement, pas modifiable directement)
 const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
@@ -92,7 +94,7 @@ export default function AdminCommandes() {
         setShowDetail(updatedCommande);
       }
     } catch (e: any) {
-      alert(e.message || "Erreur lors de la mise à jour du statut");
+      toast.error(e.message || "Erreur lors de la mise à jour du statut");
     } finally {
       setUpdatingStatus(null);
     }
@@ -117,7 +119,7 @@ export default function AdminCommandes() {
         {loading && !commandes.length ? (
           <div className="text-center py-8">Chargement...</div>
         ) : error ? (
-          <div className="text-red-600 mb-4">{error}</div>
+          <AdminErrorState message={error} onRetry={fetchCommandes} />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">

@@ -170,8 +170,9 @@ const [autoOpenHandled, setAutoOpenHandled] = useState(false);
                             {`#${l.commande_id}`}
                           </td>
                           <td className="px-6 py-4 text-dark">
-                            {/* Client info not available from Livraison, display placeholder */}
-                            -
+                            {l.commande?.client
+                              ? `${l.commande.client.prenom} ${l.commande.client.nom}`
+                              : "-"}
                           </td>
                           <td className="px-6 py-4 text-dark-4">
                             {l.numero_suivi || "-"}

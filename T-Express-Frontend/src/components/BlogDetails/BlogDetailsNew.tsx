@@ -7,6 +7,7 @@ import { articleService } from "@/services/article.service";
 import type { Article, CommentaireArticle } from "@/types/api.types";
 import { useParams } from "next/navigation";
 import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
+import toast from "react-hot-toast";
 
 const BlogDetailsNew = () => {
   const params = useParams();
@@ -62,11 +63,11 @@ const BlogDetailsNew = () => {
         ...commentFormData
       });
       
-      alert("Commentaire ajouté avec succès! Il sera visible après approbation.");
+      toast.success("Commentaire ajouté avec succès! Il sera visible après approbation.");
       setCommentFormData({ nom: '', email: '', commentaire: '' });
     } catch (error) {
       console.error("Erreur ajout commentaire:", error);
-      alert("Erreur lors de l'ajout du commentaire");
+      toast.error("Erreur lors de l'ajout du commentaire");
     } finally {
       setSubmittingComment(false);
     }

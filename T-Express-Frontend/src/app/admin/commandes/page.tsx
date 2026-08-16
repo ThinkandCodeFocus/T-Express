@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { commandeService } from "@/services/commande.service";
 import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
+import Link from "next/link";
 
 // Statuts de commande (affichage seulement, pas modifiable directement)
 const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
@@ -183,11 +184,12 @@ export default function AdminCommandes() {
       Voir détails
     </button>
     
-     <a href={`/admin/livraisons?commande=${cmd.id}`}
-      className="text-purple-600 hover:underline text-sm"
-    >
-      Gérer livraison
-    </a>
+     <Link
+  href={`/admin/livraisons?commande=${cmd.id}`}
+  className="text-purple-600 hover:underline text-sm"
+>
+  Gérer livraison
+</Link>
   </div>
 </td>
                       </tr>
@@ -251,11 +253,12 @@ export default function AdminCommandes() {
                   <p className="text-xs text-gray-500 mt-2">
                     Le statut commande est mis à jour automatiquement quand le paiement est validé.
                   </p>
-                  <a href={`/admin/livraisons?commande=${showDetail.id}`}
+    <Link
+  href={`/admin/livraisons?commande=${showDetail.id}`}
   className="inline-block mt-3 text-sm text-purple-600 hover:underline font-medium"
 >
   → Gérer la livraison de cette commande
-</a>
+</Link>
                 </div>
               </div>
 

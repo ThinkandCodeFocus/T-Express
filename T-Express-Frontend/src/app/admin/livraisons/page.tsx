@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { livraisonService } from "@/services/livraison.service";
 import type { Livraison } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
@@ -14,7 +14,17 @@ const STATUT_COLORS: Record<string, { bg: string; text: string }> = {
   retournee: { bg: "bg-red-light-6", text: "text-red-dark" },
 };
 
+// useSearchParams() exige une frontiere Suspense en App Router (sinon next build
+// echoue avec "should be wrapped in a suspense boundary"), d'ou ce wrapper.
 export default function AdminLivraisons() {
+  return (
+    <Suspense fallback={<div className="p-6 lg:p-8">Chargement...</div>}>
+      <AdminLivraisonsContent />
+    </Suspense>
+  );
+}
+
+function AdminLivraisonsContent() {
   const [livraisons, setLivraisons] = useState<Livraison[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

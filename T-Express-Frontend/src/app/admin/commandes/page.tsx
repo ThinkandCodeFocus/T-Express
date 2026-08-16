@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { commandeService } from "@/services/commande.service";
 import type { Commande, CommandeStatut } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
+import Link from "next/link";
 import toast from "react-hot-toast";
 import AdminErrorState from "@/components/Admin/AdminErrorState";
 
@@ -177,13 +178,22 @@ export default function AdminCommandes() {
                           </span>
                         </td>
                         <td className="py-3 px-3">
-                          <button
-                            className="text-blue-600 hover:underline text-sm"
-                            onClick={() => handleShowDetail(cmd.id)}
-                          >
-                            Voir détails
-                          </button>
-                        </td>
+  <div className="flex flex-col gap-1">
+    <button
+      className="text-blue-600 hover:underline text-sm text-left"
+      onClick={() => handleShowDetail(cmd.id)}
+    >
+      Voir détails
+    </button>
+    
+     <Link
+  href={`/admin/livraisons?commande=${cmd.id}`}
+  className="text-purple-600 hover:underline text-sm"
+>
+  Gérer livraison
+</Link>
+  </div>
+</td>
                       </tr>
                     );
                   })
@@ -245,6 +255,12 @@ export default function AdminCommandes() {
                   <p className="text-xs text-gray-500 mt-2">
                     Le statut commande est mis à jour automatiquement quand le paiement est validé.
                   </p>
+    <Link
+  href={`/admin/livraisons?commande=${showDetail.id}`}
+  className="inline-block mt-3 text-sm text-purple-600 hover:underline font-medium"
+>
+  → Gérer la livraison de cette commande
+</Link>
                 </div>
               </div>
 

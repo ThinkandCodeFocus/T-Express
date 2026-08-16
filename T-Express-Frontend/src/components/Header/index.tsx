@@ -1,4 +1,6 @@
 "use client";
+import { categorieService } from "@/services/categorie.service";
+import type { Categorie } from "@/types/api.types";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,6 +23,7 @@ const Header = () => {
   const { openCartModal } = useCartModalContext();
   const { user, isAuthenticated, logout } = useAuthContext();
   const { panier } = usePanierContext();
+  const [categories, setCategories] = useState<Categorie[]>([]);
 
   // Calculer le nombre d'articles et le total depuis le panier
   const nombreArticles = panier?.nombre_articles || 0;
@@ -42,7 +45,17 @@ const Header = () => {
   useEffect(() => {
     window.addEventListener("scroll", handleStickyMenu);
   });
-
+useEffect(() => {
+  const loadCategories = async () => {
+    try {
+      const data = await categorieService.getListe();
+      setCategories(data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des catégories:", error);
+    }
+  };
+  loadCategories();
+}, []);
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,16 +70,13 @@ const Header = () => {
     };
   }, [userDropdownOpen]);
 
-  const options = [
-    { label: "Toutes les catégories", value: "0" },
-    { label: "Bureau", value: "1" },
-    { label: "Ordinateur portable", value: "2" },
-    { label: "Moniteur", value: "3" },
-    { label: "Téléphone", value: "4" },
-    { label: "Montre", value: "5" },
-    { label: "Souris", value: "6" },
-    { label: "Tablette", value: "7" },
-  ];
+ const options = [
+  { label: "Toutes les catégories", value: "0" },
+  ...categories.map((cat) => ({
+    label: cat.nom,
+    value: String(cat.id),
+  })),
+];
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);

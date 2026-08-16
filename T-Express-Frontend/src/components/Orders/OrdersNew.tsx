@@ -7,23 +7,25 @@ import Link from "next/link";
 const OrdersNew = () => {
   const [orders, setOrders] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     loadOrders();
   }, []);
 
-  const loadOrders = async () => {
-    try {
-      setLoading(true);
-      const response = await commandeService.getHistorique();
-      setOrders(response.data);
-    } catch (error) {
-      console.error("Erreur chargement commandes:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+ const loadOrders = async () => {
+  try {
+    setLoading(true);
+    setError(false);
+    const response = await commandeService.getHistorique();
+    setOrders(response.data);
+  } catch (error) {
+    console.error("Erreur chargement commandes:", error);
+    setError(true);
+  } finally {
+    setLoading(false);
+  }
+};
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-SN', {
       style: 'currency',
@@ -154,11 +156,23 @@ const OrdersNew = () => {
                 </div>
               );
             })
-          ) : (
-            <p className="py-9.5 px-4 sm:px-7.5 xl:px-10">
-              Vous n&apos;avez encore passé aucune commande!
-            </p>
-          )}
+         ) : error ? (
+  <div className="py-9.5 px-4 sm:px-7.5 xl:px-10 text-center">
+    <p className="text-red-600 mb-4">
+      Impossible de charger vos commandes. Veuillez vérifier votre connexion et réessayer.
+    </p>
+    <button
+      onClick={loadOrders}
+      className="inline-flex items-center justify-center rounded-md bg-blue py-2.5 px-6 text-white font-medium hover:bg-blue-dark transition"
+    >
+      Réessayer
+    </button>
+  </div>
+) : (
+  <p className="py-9.5 px-4 sm:px-7.5 xl:px-10">
+    Vous n&apos;avez encore passé aucune commande!
+  </p>
+)}
         </div>
 
         {/* Mobile view - simplified cards */}

@@ -50,10 +50,7 @@ export default function OrangeMoneyPayment({
         cancel_url: `${window.location.origin}/checkout`,
       };
 
-      console.log('🍊 Initiation paiement Orange Money:', data);
       const response = await paiementService.initierOrangeMoney(data);
-
-      console.log('🍊 Réponse Orange Money:', response);
 
       if (response.success) {
         // Si on a une URL de paiement, rediriger
@@ -74,7 +71,7 @@ export default function OrangeMoneyPayment({
         toast.error(response.message || 'Erreur lors de l\'initialisation du paiement');
       }
     } catch (error: any) {
-      console.error('❌ Erreur paiement Orange Money:', error);
+      console.error('Erreur paiement Orange Money:', error?.message || error);
       toast.error(error.message || 'Erreur lors du paiement Orange Money');
       setLoading(false);
     }

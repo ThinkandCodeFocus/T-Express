@@ -10,6 +10,7 @@ import type { Adresse, UpdateClientData } from "@/types/api.types";
 import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/Common/PhoneInput";
 import { validatePhone } from "@/lib/utils";
+import toast from "react-hot-toast";
 
 const MyAccountNew = () => {
   const router = useRouter();
@@ -60,32 +61,32 @@ const MyAccountNew = () => {
 
     // Valider le téléphone si fourni
     if (profileData.telephone && !validatePhone(profileData.telephone)) {
-      alert("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
+      toast.error("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
       return;
     }
 
     try {
       await clientService.updateProfil(profileData);
-      alert("Profil mis à jour avec succès !");
+      toast.success("Profil mis à jour avec succès !");
       setEditingProfile(false);
       window.location.reload(); // Recharger pour afficher les nouvelles données
     } catch (error: any) {
       console.error("Erreur lors de la mise à jour du profil:", error);
-      alert(error.message || "Erreur lors de la mise à jour du profil");
+      toast.error(error.message || "Erreur lors de la mise à jour du profil");
     }
   };
 
   // Gérer le changement de mot de passe
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Les mots de passe ne correspondent pas");
+      toast.error("Les mots de passe ne correspondent pas");
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      alert("Le mot de passe doit contenir au moins 6 caractères");
+      toast.error("Le mot de passe doit contenir au moins 6 caractères");
       return;
     }
 
@@ -94,8 +95,8 @@ const MyAccountNew = () => {
         mot_de_passe: passwordData.newPassword,
         mot_de_passe_confirmation: passwordData.confirmPassword
       });
-      
-      alert("Mot de passe modifié avec succès !");
+
+      toast.success("Mot de passe modifié avec succès !");
       setPasswordData({
         oldPassword: "",
         newPassword: "",
@@ -103,7 +104,7 @@ const MyAccountNew = () => {
       });
     } catch (error: any) {
       console.error("Erreur lors du changement de mot de passe:", error);
-      alert(error.message || "Erreur lors du changement de mot de passe");
+      toast.error(error.message || "Erreur lors du changement de mot de passe");
     }
   };
 

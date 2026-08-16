@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useHeroContext } from "@/context/HeroContext";
 import { type HeroSection } from "@/services/hero.service";
 import { API_CONFIG } from "@/config/api.config";
+import { isBackendImageUrl } from "@/lib/image";
 
 const Hero = () => {
   const { data, loading } = useHeroContext();
@@ -100,6 +101,7 @@ const Hero = () => {
                             alt={sideCards[0].titre || "mobile image"}
                             width={123}
                             height={161}
+                            unoptimized={isBackendImageUrl(getImageUrl(sideCards[0].image))}
                           />
                         </div>
                       </div>
@@ -173,6 +175,7 @@ const Hero = () => {
                             alt={sideCards[1].titre || "mobile image"}
                             width={123}
                             height={161}
+                            unoptimized={isBackendImageUrl(getImageUrl(sideCards[1].image))}
                           />
                         </div>
                       </div>

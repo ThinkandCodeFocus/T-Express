@@ -50,10 +50,7 @@ export default function WavePayment({
         cancel_url: `${window.location.origin}/checkout`,
       };
 
-      console.log('📱 Initiation paiement Wave:', data);
       const response = await paiementService.initierWave(data);
-
-      console.log('📱 Réponse Wave:', response);
 
       // Le backend retourne wave_launch_url pour ouvrir l'app Wave
       if (response.wave_launch_url) {
@@ -77,8 +74,8 @@ export default function WavePayment({
         toast.error(response.message || 'Aucune URL de paiement retournée');
       }
     } catch (error: any) {
-      console.error('❌ Erreur paiement Wave:', error);
-      
+      console.error('Erreur paiement Wave:', error?.message || error);
+
       // Gestion améliorée des messages d'erreur
       let errorMessage = 'Erreur lors du paiement Wave';
       

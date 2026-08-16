@@ -1,12 +1,55 @@
 import React, { Suspense } from "react";
 import ShopDetailsNew from "@/components/ShopDetails/ShopDetailsNew";
 import { Metadata } from "next";
+import { catalogueService } from "@/services/catalogue.service";
 
-export const metadata: Metadata = {
-  title: "Détails Produit | T-Express E-commerce",
-  description: "Découvrez les détails du produit - T-Express Sénégal",
-  // other metadata
-};
+const TITRE_DEFAUT = "Détails Produit | T-Express E-commerce";
+const DESCRIPTION_DEFAUT = "Découvrez les détails du produit - T-Express Sénégal";
+
+// L'id du produit vient d'un query param (?id=), pas d'un segment de route
+// dynamique (voir ShopDetailsNew.tsx) : generateMetadata le lit via searchParams
+// pour que partager un lien produit affiche sa vraie photo/titre au lieu du
+// logo générique du site.
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}): Promise<Metadata> {
+  const { id } = await searchParams;
+  const produitId = id ? Number(id) : null;
+
+  if (!produitId || Number.isNaN(produitId)) {
+    return { title: TITRE_DEFAUT, description: DESCRIPTION_DEFAUT };
+  }
+
+  try {
+    const produit = await catalogueService.getDetail(produitId);
+    const titre = `${produit.nom} | T-Express`;
+    const description = produit.description
+      ? produit.description.slice(0, 160)
+      : DESCRIPTION_DEFAUT;
+
+    return {
+      title: titre,
+      description,
+      openGraph: {
+        title: titre,
+        description,
+        images: produit.image_principale ? [{ url: produit.image_principale }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: titre,
+        description,
+        images: produit.image_principale ? [produit.image_principale] : undefined,
+      },
+    };
+  } catch {
+    // Produit introuvable/API indisponible : retomber sur le générique plutôt
+    // que faire échouer le rendu de la page pour un souci de métadonnées.
+    return { title: TITRE_DEFAUT, description: DESCRIPTION_DEFAUT };
+  }
+}
 
 const ShopDetailsPage = () => {
   return (

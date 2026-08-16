@@ -4,6 +4,7 @@ import { livraisonService } from "@/services/livraison.service";
 import type { Livraison } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
+import { useSearchParams } from "next/navigation";
 
 const STATUT_COLORS: Record<string, { bg: string; text: string }> = {
   en_preparation: { bg: "bg-yellow-light-4", text: "text-yellow-dark-2" },
@@ -22,6 +23,9 @@ export default function AdminLivraisons() {
   const [totalPages, setTotalPages] = useState(1);
   const [editId, setEditId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({ statut: "", numero_suivi: "", date_livraison_estimee: "" });
+  const searchParams = useSearchParams();
+const commandeParam = searchParams.get("commande");
+const [autoOpenHandled, setAutoOpenHandled] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -41,6 +45,19 @@ export default function AdminLivraisons() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+  if (!autoOpenHandled && commandeParam && livraisons.length > 0) {
+    const match = livraisons.find(
+      (l) => String(l.commande_id) === String(commandeParam)
+    );
+    if (match) {
+      openEditModal(match);
+    } else {
+      toast.error(`Aucune livraison trouvée pour la commande #${commandeParam}`);
+    }
+    setAutoOpenHandled(true);
+  }
+}, [commandeParam, livraisons, autoOpenHandled]);
 
   useEffect(() => {
     fetchData();

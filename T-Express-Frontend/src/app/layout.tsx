@@ -3,12 +3,18 @@ import "./css/euclid-circular-a-font.css";
 import "./css/style.css";
 
 export const metadata: Metadata = {
+  // Sans metadataBase, Next.js ne peut pas resoudre les URLs relatives des
+  // images OG/Twitter en URLs absolues : les crawlers WhatsApp/Facebook/Twitter
+  // recoivent alors un chemin qu'ils ne peuvent pas recuperer, et l'aperçu de
+  // lien echoue silencieusement. Domaine reel du site (voir config/cors.php
+  // cote backend) : t-express.shop, pas t-express.sn qui etait utilise ici.
+  metadataBase: new URL("https://t-express.shop"),
   title: "T-Express",
   description: "Boutique en ligne T-Express",
-openGraph: {
+  openGraph: {
     title: "T-Express",
     description: "Boutique en ligne T-Express",
-    url: "https://www.t-express.sn",
+    url: "https://t-express.shop",
     siteName: "T-Express",
     images: [
       {

@@ -13,6 +13,7 @@ import PreviewSliderModal from "@/components/Common/PreviewSlider";
 import ScrollToTop from "@/components/Common/ScrollToTop";
 import { AuthProvider } from "@/context/AuthContext";
 import { PanierProvider } from "@/context/PanierContext";
+import { FavorisProvider } from "@/context/FavorisContext";
 import { HeroProvider } from "@/context/HeroContext";
 
 export default function RootLayout({
@@ -25,22 +26,22 @@ export default function RootLayout({
       <ReduxProvider>
         <AuthProvider>
           <PanierProvider>
-            <HeroProvider>
-              <CartModalProvider>
-                <ModalProvider>
-                  <PreviewSliderProvider>
-                    <Header />
-                    {/* Ajout du ToastProvider pour les notifications */}
-                    {require("@/components/Common/ToastProvider").default()}
-                    {children}
+            <FavorisProvider>
+              <HeroProvider>
+                <CartModalProvider>
+                  <ModalProvider>
+                    <PreviewSliderProvider>
+                      <Header />
+                      {children}
 
-                  <QuickViewModal />
-                  <CartSidebarModal />
-                  <PreviewSliderModal />
-                </PreviewSliderProvider>
-              </ModalProvider>
-            </CartModalProvider>
-            </HeroProvider>
+                      <QuickViewModal />
+                      <CartSidebarModal />
+                      <PreviewSliderModal />
+                    </PreviewSliderProvider>
+                  </ModalProvider>
+                </CartModalProvider>
+              </HeroProvider>
+            </FavorisProvider>
           </PanierProvider>
         </AuthProvider>
       </ReduxProvider>

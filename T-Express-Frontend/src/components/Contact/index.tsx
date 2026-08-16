@@ -1,10 +1,57 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import PhoneInput from "../Common/PhoneInput";
 
+const ADMIN_WHATSAPP_NUMBER = "221771188747";
+
 const Contact = () => {
+  const router = useRouter();
   const [phone, setPhone] = useState("");
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    subject: "",
+    message: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError("Le prénom et le nom sont obligatoires.");
+      return;
+    }
+    setError("");
+    setSubmitting(true);
+
+    const lines = [
+      `Nouveau message depuis le site T-Express`,
+      `Nom : ${formData.firstName} ${formData.lastName}`,
+      phone ? `Téléphone : ${phone}` : null,
+      formData.subject ? `Sujet : ${formData.subject}` : null,
+      formData.message ? `Message : ${formData.message}` : null,
+    ].filter(Boolean);
+
+    const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
+      lines.join("\n")
+    )}`;
+
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    setSubmitting(false);
+    router.push("/mail-success");
+  };
+
   return (
     <>
       <Breadcrumb title={"Contact"} pages={["contact"]} />
@@ -90,7 +137,10 @@ const Contact = () => {
             </div>
 
             <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
-              <form>
+              <form onSubmit={handleSubmit}>
+                {error && (
+                  <p className="mb-5 text-red text-sm">{error}</p>
+                )}
                 <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                   <div className="w-full">
                     <label htmlFor="firstName" className="block mb-2.5">
@@ -102,6 +152,9 @@ const Contact = () => {
                       name="firstName"
                       id="firstName"
                       placeholder="Issa"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -116,6 +169,9 @@ const Contact = () => {
                       name="lastName"
                       id="lastName"
                       placeholder="Fallt"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -132,6 +188,8 @@ const Contact = () => {
                       name="subject"
                       id="subject"
                       placeholder="Saisissez votre sujet"
+                      value={formData.subject}
+                      onChange={handleChange}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     />
                   </div>
@@ -158,15 +216,18 @@ const Contact = () => {
                     id="message"
                     rows={5}
                     placeholder="Saisissez votre message"
+                    value={formData.message}
+                    onChange={handleChange}
                     className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
-                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark"
+                  disabled={submitting}
+                  className="inline-flex font-medium text-white bg-blue py-3 px-7 rounded-md ease-out duration-200 hover:bg-blue-dark disabled:opacity-60"
                 >
-                  Envoyer le message
+                  {submitting ? "Envoi..." : "Envoyer le message"}
                 </button>
               </form>
             </div>

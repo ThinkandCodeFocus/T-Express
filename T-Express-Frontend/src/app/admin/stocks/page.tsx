@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { stockService } from "@/services/stock.service";
 import { produitService } from "@/services/produit.service";
 import type { Stock, Produit } from "@/types/api.types";
+import AdminErrorState from "@/components/Admin/AdminErrorState";
 
 export default function AdminStocks() {
   const [stocks, setStocks] = useState<Stock[]>([]);
@@ -81,7 +82,7 @@ export default function AdminStocks() {
         {loading ? (
           <div>Chargement...</div>
         ) : error ? (
-          <div className="text-red-600 mb-4">{error}</div>
+          <AdminErrorState message={error} onRetry={fetchData} />
         ) : (
           <table className="w-full text-left">
             <thead>

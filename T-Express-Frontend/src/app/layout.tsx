@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./css/euclid-circular-a-font.css";
 import "./css/style.css";
+import ToastProvider from "@/components/Common/ToastProvider";
 
 export const metadata: Metadata = {
   title: "T-Express",
@@ -20,9 +21,9 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className="font-euclid-circular-a antialiased">
+        <ToastProvider />
         {children}
       </body>
     </html>
   );
 }
-

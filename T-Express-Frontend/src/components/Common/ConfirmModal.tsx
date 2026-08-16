@@ -27,17 +27,16 @@ export default function ConfirmModal({
   onCancel,
 }: ConfirmModalProps) {
   const [inputValue, setInputValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (isOpen) setInputValue("");
+    if (isOpen) {
+      setInputValue("");
+      setIsSubmitting(false);
+    }
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const confirmBtnClass =
-    confirmColor === "red"
-      ? "bg-red-600 hover:bg-red-700"
-      : "bg-green-600 hover:bg-green-700";
 
   return (
     <div
@@ -67,17 +66,22 @@ export default function ConfirmModal({
           </div>
         )}
 
-       <div className="mt-5 flex items-center justify-end gap-3">
+        <div className="mt-5 flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100"
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-600 rounded-lg hover:bg-gray-100 disabled:opacity-50"
           >
             Annuler
           </button>
           <button
             type="button"
-            onClick={() => onConfirm(showInput ? inputValue : undefined)}
+            onClick={() => {
+              setIsSubmitting(true);
+              onConfirm(showInput ? inputValue : undefined);
+            }}
+            disabled={isSubmitting}
             style={{
               backgroundColor: confirmColor === "red" ? "#DC2626" : "#16A34A",
               color: "#FFFFFF",
@@ -86,10 +90,11 @@ export default function ConfirmModal({
               fontSize: "14px",
               fontWeight: 500,
               border: "none",
-              cursor: "pointer",
+              cursor: isSubmitting ? "not-allowed" : "pointer",
+              opacity: isSubmitting ? 0.6 : 1,
             }}
           >
-            {confirmLabel}
+            {isSubmitting ? "..." : confirmLabel}
           </button>
         </div>
       </div>

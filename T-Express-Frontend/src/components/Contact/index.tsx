@@ -1,10 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "../Common/Breadcrumb";
 import PhoneInput from "../Common/PhoneInput";
+import { apiClient } from "@/lib/api-client";
+import { API_CONFIG } from "@/config/api.config";
 
 const ADMIN_WHATSAPP_NUMBER = "221771188747";
+
+interface ContactSettings {
+  adresse: string;
+  telephone: string;
+  email: string;
+}
 
 const Contact = () => {
   const router = useRouter();
@@ -17,6 +25,29 @@ const Contact = () => {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [settings, setSettings] = useState<ContactSettings>({
+    adresse: "Adresse à définir par l'administrateur",
+    telephone: "Téléphone à définir par l'administrateur",
+    email: "Email à définir par l'administrateur",
+  });
+
+  useEffect(() => {
+    const loadContactSettings = async () => {
+      try {
+        const response = await apiClient.post<{ footer: ContactSettings }>(
+          API_CONFIG.endpoints.settings.footer,
+          {}
+        );
+        if (response.footer) {
+          setSettings(response.footer);
+        }
+      } catch (error) {
+        console.warn('⚠️ Impossible de charger les paramètres de contact. Utilisation des valeurs par défaut.', error);
+      }
+    };
+
+    loadContactSettings();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -83,7 +114,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Nom : Bachirou
+                    {settings.email}
                   </p>
 
                   <p className="flex items-center gap-4">
@@ -111,7 +142,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Téléphone : (+221) 77 118 87 47
+                    Téléphone : {settings.telephone}
                   </p>
 
                   <p className="flex gap-4">
@@ -130,7 +161,7 @@ const Contact = () => {
                         fill="#3C50E0"
                       />
                     </svg>
-                    Adresse : Touba
+                    Adresse : {settings.adresse}
                   </p>
                 </div>
               </div>

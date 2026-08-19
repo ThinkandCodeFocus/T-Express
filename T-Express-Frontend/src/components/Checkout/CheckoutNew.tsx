@@ -78,8 +78,12 @@ const CheckoutNew = () => {
     loadAdresses();
   }, [user]);
 
-  // Calculer les frais de livraison - LIVRAISON GRATUITE
-  const shippingCost = 0;
+  // Calculer les frais de livraison selon la méthode choisie
+  const SHIPPING_COSTS: Record<"standard" | "express", number> = {
+    standard: 2000,
+    express: 5000,
+  };
+  const shippingCost = SHIPPING_COSTS[shippingMethod];
   const totalWithShipping = (panier?.total || 0) + shippingCost;
 
   // Soumettre la commande
@@ -145,7 +149,7 @@ const CheckoutNew = () => {
         adresse_facturation_id: adresseId,
         mode_paiement: (paymentMethod === "especes" ? "cash" : paymentMethod) as "wave" | "orange_money" | "cash" | "carte",
         notes: notes || undefined,
-        frais_livraison: shippingMethod === "express" ? 5000 : 2000
+        frais_livraison: shippingCost
       };
 
       const commande = await commandeService.creer(commandeData);
@@ -372,7 +376,7 @@ const CheckoutNew = () => {
 
                     <div className="flex items-center justify-between py-5 border-b border-gray-3">
                       <p className="text-dark">Frais de livraison</p>
-                      <p className="text-green-600 font-semibold text-right">Gratuite ✓</p>
+                      <p className="text-dark font-semibold text-right">{formatPrice(shippingCost)}</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-5">
@@ -384,7 +388,7 @@ const CheckoutNew = () => {
                   </div>
                 </div>
 
-               {/* Méthode de livraison - Gratuite */}
+               {/* Méthode de livraison */}
                 <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
                   <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
                     <h3 className="font-medium text-xl text-dark">Méthode de livraison</h3>
@@ -401,8 +405,8 @@ const CheckoutNew = () => {
                           onChange={(e) => setShippingMethod(e.target.value as "standard")}
                           className="w-4 h-4"
                         />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-green-200 bg-green-50">
-                          <p className="text-green-700 font-medium">🚚 Livraison Standard - <span className="font-bold">Gratuite</span> (3-5 jours)</p>
+                        <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
+                          <p className="text-dark font-medium">🚚 Livraison Standard - <span className="font-bold">{formatPrice(SHIPPING_COSTS.standard)}</span> (3-5 jours)</p>
                         </div>
                       </label>
                     </div>

@@ -259,9 +259,8 @@ export interface DetailCommande {
 export interface CreerCommandeData {
   adresse_livraison_id: number;
   adresse_facturation_id: number;
-  mode_paiement: 'wave' | 'orange_money' | 'cash' | 'carte';
+  mode_paiement: 'wave' | 'cash' | 'carte';
   notes?: string;
-  frais_livraison?: number;
 }
 
 // ========== Paiement ==========
@@ -290,7 +289,7 @@ export interface Paiement {
 
 export interface InitierPaiementData {
   commande_id: number;
-  mode_paiement: 'wave' | 'orange_money';
+  mode_paiement: 'wave';
   telephone?: string;
   return_url?: string;
   cancel_url?: string;

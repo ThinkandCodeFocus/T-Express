@@ -36,7 +36,7 @@ const CheckoutNew = () => {
   });
   
   // States pour la commande
-  const [paymentMethod, setPaymentMethod] = useState<"wave" | "orange_money" | "especes">("wave");
+  const [paymentMethod, setPaymentMethod] = useState<"wave" | "especes">("wave");
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
   const [notes, setNotes] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -78,12 +78,13 @@ const CheckoutNew = () => {
     loadAdresses();
   }, [user]);
 
-  // Calculer les frais de livraison selon la méthode choisie
-  const SHIPPING_COSTS: Record<"standard" | "express", number> = {
-    standard: 2000,
-    express: 5000,
-  };
-  const shippingCost = SHIPPING_COSTS[shippingMethod];
+  // La livraison est gratuite. Ne pas remettre de frais ici sans les avoir
+  // d'abord implementes cote backend : la table `commandes` n'a aucune
+  // colonne `frais_livraison`, sa validation (Commande/CreateRequest) ne lit
+  // pas ce champ, et `montant_total` y est recalcule a partir des seuls
+  // produits. Afficher des frais ici annoncerait donc au client un total
+  // superieur a celui reellement enregistre en base. Ticket #4.
+  const shippingCost = 0;
   const totalWithShipping = (panier?.total || 0) + shippingCost;
 
   // Soumettre la commande
@@ -147,9 +148,8 @@ const CheckoutNew = () => {
       const commandeData = {
         adresse_livraison_id: adresseId,
         adresse_facturation_id: adresseId,
-        mode_paiement: (paymentMethod === "especes" ? "cash" : paymentMethod) as "wave" | "orange_money" | "cash" | "carte",
-        notes: notes || undefined,
-        frais_livraison: shippingCost
+        mode_paiement: (paymentMethod === "especes" ? "cash" : paymentMethod) as "wave" | "cash" | "carte",
+        notes: notes || undefined
       };
 
       const commande = await commandeService.creer(commandeData);
@@ -376,7 +376,7 @@ const CheckoutNew = () => {
 
                     <div className="flex items-center justify-between py-5 border-b border-gray-3">
                       <p className="text-dark">Frais de livraison</p>
-                      <p className="text-dark font-semibold text-right">{formatPrice(shippingCost)}</p>
+                      <p className="text-green-600 font-semibold text-right">Gratuite ✓</p>
                     </div>
 
                     <div className="flex items-center justify-between pt-5">
@@ -406,7 +406,7 @@ const CheckoutNew = () => {
                           className="w-4 h-4"
                         />
                         <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
-                          <p className="text-dark font-medium">🚚 Livraison Standard - <span className="font-bold">{formatPrice(SHIPPING_COSTS.standard)}</span> (3-5 jours)</p>
+                          <p className="text-dark font-medium">🚚 Livraison Standard - <span className="font-bold">Gratuite</span> (3-5 jours)</p>
                         </div>
                       </label>
                     </div>
@@ -435,21 +435,6 @@ const CheckoutNew = () => {
                         </div>
                       </label>
 
-                      {/* Option Orange Money - temporairement désactivée
-                      <label className="flex cursor-pointer items-center gap-4">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="orange_money"
-                          checked={paymentMethod === "orange_money"}
-                          onChange={(e) => setPaymentMethod(e.target.value as "orange_money")}
-                          className="w-4 h-4"
-                        />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
-                          <p>Orange Money</p>
-                        </div>
-                      </label>
-                      */}
 
                       {/* Option Espèces - temporairement désactivée
                       <label className="flex cursor-pointer items-center gap-4">

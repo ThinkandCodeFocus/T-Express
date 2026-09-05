@@ -228,19 +228,13 @@ export const LOCALE_CONFIG = {
   },
 };
 
-// Configuration des paiements (Wave & Orange Money)
+// Configuration des paiements
 export const PAYMENT_CONFIG = {
   wave: {
     enabled: process.env.NEXT_PUBLIC_ENABLE_WAVE === 'true',
     apiUrl: process.env.NEXT_PUBLIC_WAVE_API_URL,
     name: 'Wave',
     logo: '/images/payment/wave.png',
-  },
-  orangeMoney: {
-    enabled: process.env.NEXT_PUBLIC_ENABLE_ORANGE_MONEY === 'true',
-    apiUrl: process.env.NEXT_PUBLIC_ORANGE_MONEY_API_URL,
-    name: 'Orange Money',
-    logo: '/images/payment/orange-money.png',
   },
 };
 

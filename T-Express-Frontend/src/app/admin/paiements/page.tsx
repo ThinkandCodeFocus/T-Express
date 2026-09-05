@@ -113,6 +113,9 @@ export default function AdminPaiements() {
             >
               <option value="">Toutes les méthodes</option>
               <option value="wave">Wave</option>
+              {/* Orange Money a ete abandonne (ticket #20) : conserve ici
+                  uniquement pour rester capable de filtrer les paiements
+                  historiques ayant encore cette methode en base. */}
               <option value="orange_money">Orange Money</option>
               <option value="cash">Espèces</option>
               <option value="carte">Carte bancaire</option>

@@ -3,7 +3,6 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Breadcrumb from "@/components/Common/Breadcrumb";
 import WavePayment from "@/components/Payment/WavePayment";
-import OrangeMoneyPayment from "@/components/Payment/OrangeMoneyPayment";
 import toast from "react-hot-toast";
 
 function PaymentContent() {
@@ -11,7 +10,7 @@ function PaymentContent() {
   const searchParams = useSearchParams();
   
   const commandeId = searchParams.get("commande_id");
-  const mode = searchParams.get("mode") as "wave" | "orange_money";
+  const mode = searchParams.get("mode") as "wave";
   const montant = searchParams.get("montant");
   const telephone = searchParams.get("telephone");
 
@@ -26,7 +25,7 @@ function PaymentContent() {
     }
 
     // Vérifier que le mode est valide
-    if (mode !== "wave" && mode !== "orange_money") {
+    if (mode !== "wave") {
       toast.error("Mode de paiement invalide");
       router.push("/checkout");
       return;
@@ -70,7 +69,7 @@ function PaymentContent() {
         <div className="max-w-[600px] w-full mx-auto px-4 sm:px-8 xl:px-0">
           <div className="bg-white rounded-[10px] shadow-1 p-8">
             <h1 className="text-2xl font-bold text-dark mb-6 text-center">
-              {mode === "wave" ? "Paiement Wave" : "Paiement Orange Money"}
+              Paiement Wave
             </h1>
 
             {mode === "wave" && (
@@ -83,15 +82,6 @@ function PaymentContent() {
               />
             )}
 
-            {mode === "orange_money" && (
-              <OrangeMoneyPayment
-                commandeId={parseInt(commandeId!)}
-                montant={parseFloat(montant!)}
-                telephone={telephone || ''}
-                onSuccess={handleSuccess}
-                onCancel={handleCancel}
-              />
-            )}
           </div>
         </div>
       </section>

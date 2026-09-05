@@ -101,28 +101,6 @@ export const paiementService = {
     );
   },
 
-  /**
-   * Initier un paiement Orange Money
-   */
-  async initierOrangeMoney(data: {
-    commande_id: number;
-    mode_paiement: string;
-    telephone?: string;
-    return_url?: string;
-    cancel_url?: string;
-  }): Promise<{
-    success: boolean;
-    message?: string;
-    payment_url?: string;
-    ussd_code?: string;
-    transaction_id?: string;
-  }> {
-    return apiClient.post(
-      '/api/orange-money/initier',
-      data,
-      { requiresAuth: true }
-    );
-  },
 
   /**
    * Vérifier le statut d'un paiement

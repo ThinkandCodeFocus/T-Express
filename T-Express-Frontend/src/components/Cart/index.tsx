@@ -34,9 +34,9 @@ const Cart = () => {
         <section className="overflow-hidden py-20 bg-gray-2">
           <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
             <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-1/4 mb-7.5"></div>
+              <div className="h-8 bg-gray-3 rounded w-1/4 mb-7.5"></div>
               <div className="bg-white rounded-[10px] shadow-1 p-7.5">
-                <div className="h-64 bg-gray-200 rounded"></div>
+                <div className="h-64 bg-gray-2 rounded"></div>
               </div>
             </div>
           </div>
@@ -55,24 +55,26 @@ const Cart = () => {
             </div>
 
             <div className="bg-white rounded-[10px] shadow-1">
-              <div className="w-full overflow-x-auto">
-                <div className="min-w-[1170px]">
+              {/* Tableau à partir de xl seulement : en dessous, chaque ligne
+                  s'affiche en carte (SingleItemNew), sans scroll horizontal. */}
+              <div className="w-full xl:overflow-x-auto">
+                <div className="xl:min-w-[1170px]">
                   {/* <!-- table header --> */}
-                  <div className="flex items-center py-5.5 px-7.5">
+                  <div className="hidden xl:flex items-center py-5.5 px-7.5">
                     <div className="min-w-[400px]">
-                      <p className="text-dark">Product</p>
+                      <p className="text-dark">Produit</p>
                     </div>
 
                     <div className="min-w-[180px]">
-                      <p className="text-dark">Price</p>
+                      <p className="text-dark">Prix</p>
                     </div>
 
                     <div className="min-w-[275px]">
-                      <p className="text-dark">Quantity</p>
+                      <p className="text-dark">Quantité</p>
                     </div>
 
                     <div className="min-w-[200px]">
-                      <p className="text-dark">Subtotal</p>
+                      <p className="text-dark">Sous-total</p>
                     </div>
 
                     <div className="min-w-[50px]">
@@ -82,8 +84,8 @@ const Cart = () => {
 
                   {/* <!-- cart item --> */}
                   {cartItems.length > 0 &&
-                    cartItems.map((item, key) => (
-                      <SingleItemNew item={item} key={key} />
+                    cartItems.map((item) => (
+                      <SingleItemNew item={item} key={item.id} />
                     ))}
                 </div>
               </div>

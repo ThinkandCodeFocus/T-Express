@@ -243,6 +243,85 @@ export default function AdminProduits() {
     }
   };
 
+  // Éléments partagés par le tableau (desktop) et les cartes (mobile).
+  const imageProduit = (prod: Produit) =>
+    prod.image_principale ? (
+      <img
+        src={resolveBackendImageUrl(prod.image_principale, '/images/products/default.png')}
+        alt={prod.nom}
+        className="w-16 h-16 object-cover rounded-lg"
+        onError={(e) => {
+          e.currentTarget.src = '/images/products/default.png';
+        }}
+      />
+    ) : (
+      <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">
+        <svg className="w-8 h-8 text-gray-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+    );
+
+  const prixProduit = (prod: Produit) => (
+    <div>
+      <p className="font-bold text-dark">{LOCALE_CONFIG.formatPrice(prod.prix)}</p>
+      {prod.prix_promo && (
+        <p className="text-sm text-green line-through">{LOCALE_CONFIG.formatPrice(prod.prix_promo)}</p>
+      )}
+    </div>
+  );
+
+  const stockProduit = (prod: Produit) => (
+    <div className="flex items-center gap-2">
+      <span className={`font-semibold ${(prod.stock?.quantite ?? 0) <= 10 ? 'text-red' : 'text-green'}`}>
+        {prod.stock?.quantite ?? 0}
+      </span>
+      {(prod.stock?.quantite ?? 0) <= 10 && (
+        <span className="px-2 py-0.5 bg-red-light-6 text-red-dark text-xs rounded-full">Faible</span>
+      )}
+    </div>
+  );
+
+  const statutProduit = (prod: Produit) => (
+    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+      prod.actif
+        ? 'bg-green-light-6 text-green-dark'
+        : 'bg-gray-3 text-dark-4'
+    }`}>
+      {prod.actif ? 'Actif' : 'Inactif'}
+    </span>
+  );
+
+  const actionsProduit = (prod: Produit) => (
+    <div className="flex items-center justify-end gap-2">
+      <button
+        onClick={() => openModal(prod)}
+        className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
+        title="Modifier"
+        aria-label={`Modifier ${prod.nom}`}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </button>
+      <button
+        onClick={() => handleDelete(prod.id)}
+        disabled={deleteLoading && deleteId === prod.id}
+        className="p-2 text-red hover:bg-red-light-6 rounded-lg transition-colors disabled:opacity-50"
+        title="Supprimer"
+        aria-label={`Supprimer ${prod.nom}`}
+      >
+        {deleteLoading && deleteId === prod.id ? (
+          <div className="w-5 h-5 border-2 border-red border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div className="p-6 lg:p-8">
       {/* Header */}
@@ -276,7 +355,44 @@ export default function AdminProduits() {
           <AdminErrorState message={error} onRetry={fetchData} />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Cartes sur mobile : le tableau (7 colonnes) débordait de l'écran. */}
+            <ul className="md:hidden divide-y divide-gray-3">
+              {produits.length === 0 ? (
+                <li className="px-4 py-12 text-center">
+                  <p className="text-dark-4">Aucun produit trouvé</p>
+                  <button onClick={() => openModal()} className="mt-3 text-blue hover:text-blue-dark font-medium">
+                    Créer votre premier produit
+                  </button>
+                </li>
+              ) : (
+                produits.map((prod) => (
+                  <li key={prod.id} className="p-4">
+                    <div className="flex gap-4">
+                      <div className="flex-shrink-0">{imageProduit(prod)}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-dark break-words">{prod.nom}</p>
+                            {prod.reference && <p className="text-xs text-dark-4 break-all">Ref: {prod.reference}</p>}
+                          </div>
+                          {actionsProduit(prod)}
+                        </div>
+                        <div className="mt-2">{prixProduit(prod)}</div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 text-sm">
+                      <span className="px-3 py-1 bg-blue-light-5 text-blue rounded-full text-xs font-medium">
+                        {prod.categorie?.nom || "-"}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-dark-4">Stock : {stockProduit(prod)}</span>
+                      {statutProduit(prod)}
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-1 border-b border-gray-3">
                   <tr>
@@ -310,24 +426,7 @@ export default function AdminProduits() {
                   ) : (
                     produits.map((prod) => (
                       <tr key={prod.id} className="hover:bg-gray-1 transition-colors">
-                        <td className="px-6 py-4">
-                          {prod.image_principale ? (
-                            <img
-                              src={resolveBackendImageUrl(prod.image_principale, '/images/products/default.png')}
-                              alt={prod.nom}
-                              className="w-16 h-16 object-cover rounded-lg"
-                              onError={(e) => {
-                                e.currentTarget.src = '/images/products/default.png';
-                              }}
-                            />
-                          ) : (
-                            <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">
-                              <svg className="w-8 h-8 text-gray-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                            </div>
-                          )}
-                        </td>
+                        <td className="px-6 py-4">{imageProduit(prod)}</td>
                         <td className="px-6 py-4">
                           <div>
                             <p className="font-semibold text-dark">{prod.nom}</p>
@@ -341,60 +440,10 @@ export default function AdminProduits() {
                             {prod.categorie?.nom || "-"}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <div>
-                            <p className="font-bold text-dark">{LOCALE_CONFIG.formatPrice(prod.prix)}</p>
-                            {prod.prix_promo && (
-                              <p className="text-sm text-green line-through">{LOCALE_CONFIG.formatPrice(prod.prix_promo)}</p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className={`font-semibold ${(prod.stock?.quantite ?? 0) <= 10 ? 'text-red' : 'text-green'}`}>
-                              {prod.stock?.quantite ?? 0}
-                            </span>
-                            {(prod.stock?.quantite ?? 0) <= 10 && (
-                              <span className="px-2 py-0.5 bg-red-light-6 text-red-dark text-xs rounded-full">Faible</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            prod.actif 
-                              ? 'bg-green-light-6 text-green-dark' 
-                              : 'bg-gray-3 text-dark-4'
-                          }`}>
-                            {prod.actif ? 'Actif' : 'Inactif'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => openModal(prod)}
-                              className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
-                              title="Modifier"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(prod.id)}
-                              disabled={deleteLoading && deleteId === prod.id}
-                              className="p-2 text-red hover:bg-red-light-6 rounded-lg transition-colors disabled:opacity-50"
-                              title="Supprimer"
-                            >
-                              {deleteLoading && deleteId === prod.id ? (
-                                <div className="w-5 h-5 border-2 border-red border-t-transparent rounded-full animate-spin"></div>
-                              ) : (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              )}
-                            </button>
-                          </div>
-                        </td>
+                        <td className="px-6 py-4">{prixProduit(prod)}</td>
+                        <td className="px-6 py-4">{stockProduit(prod)}</td>
+                        <td className="px-6 py-4">{statutProduit(prod)}</td>
+                        <td className="px-6 py-4 text-right">{actionsProduit(prod)}</td>
                       </tr>
                     ))
                   )}

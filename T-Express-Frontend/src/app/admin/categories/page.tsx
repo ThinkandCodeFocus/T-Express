@@ -149,6 +149,69 @@ export default function AdminCategories() {
     }
   };
 
+  // Éléments partagés par le tableau (desktop) et les cartes (mobile).
+  const imageCategorie = (cat: Categorie) =>
+    cat.image ? (
+      <img
+        src={resolveBackendImageUrl(cat.image, '/images/categories/default.png')}
+        alt={cat.nom}
+        className="w-16 h-16 object-cover rounded-lg"
+        onError={(e) => {
+          e.currentTarget.src = '/images/categories/default.png';
+        }}
+      />
+    ) : (
+      <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">
+        <svg className="w-8 h-8 text-gray-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      </div>
+    );
+
+  const nombreProduits = (cat: Categorie) => (
+    <span className="px-3 py-1 bg-blue-light-5 text-blue rounded-full text-sm font-medium">
+      {cat.produits_count || 0} produits
+    </span>
+  );
+
+  const statutCategorie = (cat: Categorie) => (
+    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+      cat.actif
+        ? 'bg-green-light-6 text-green-dark'
+        : 'bg-gray-3 text-dark-4'
+    }`}>
+      {cat.actif ? 'Active' : 'Inactive'}
+    </span>
+  );
+
+  const actionsCategorie = (cat: Categorie) => (
+    <div className="flex items-center justify-end gap-2">
+      <button
+        onClick={() => openModal(cat)}
+        className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
+        aria-label={`Modifier ${cat.nom}`}
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </button>
+      <button
+        onClick={() => handleDelete(cat.id)}
+        disabled={deleteId === cat.id}
+        className="p-2 text-red hover:bg-red-light-6 rounded-lg transition-colors disabled:opacity-50"
+        aria-label={`Supprimer ${cat.nom}`}
+      >
+        {deleteId === cat.id ? (
+          <div className="w-5 h-5 border-2 border-red border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
@@ -182,7 +245,34 @@ export default function AdminCategories() {
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Cartes sur mobile : le tableau (6 colonnes) débordait de l'écran. */}
+          <ul className="md:hidden divide-y divide-gray-3">
+            {categories.length === 0 ? (
+              <li className="px-4 py-12 text-center text-dark-4">Aucune catégorie trouvée</li>
+            ) : (
+              categories.map((cat) => (
+                <li key={cat.id} className="p-4 flex gap-4">
+                  <div className="flex-shrink-0">{imageCategorie(cat)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-dark break-words">{cat.nom}</p>
+                        <p className="text-xs text-dark-4 font-mono break-all">{cat.slug}</p>
+                      </div>
+                      {actionsCategorie(cat)}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      {nombreProduits(cat)}
+                      {statutCategorie(cat)}
+                    </div>
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-1 border-b border-gray-3">
                 <tr>
@@ -204,75 +294,21 @@ export default function AdminCategories() {
                 ) : (
                   categories.map((cat) => (
                     <tr key={cat.id} className="hover:bg-gray-1 transition-colors">
+                      <td className="px-6 py-4">{imageCategorie(cat)}</td>
                       <td className="px-6 py-4">
-                        {cat.image ? (
-                          <img
-                            src={resolveBackendImageUrl(cat.image, '/images/categories/default.png')}
-                            alt={cat.nom}
-                            className="w-16 h-16 object-cover rounded-lg"
-                            onError={(e) => {
-                              e.currentTarget.src = '/images/categories/default.png';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-16 h-16 bg-gray-2 rounded-lg flex items-center justify-center">
-                            <svg className="w-8 h-8 text-gray-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                            </svg>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-semibold text-dark">{cat.nom}</p>
-                        </div>
+                        <p className="font-semibold text-dark">{cat.nom}</p>
                       </td>
                       <td className="px-6 py-4 text-dark-4 font-mono text-sm">{cat.slug}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 bg-blue-light-5 text-blue rounded-full text-sm font-medium">
-                          {cat.produits_count || 0} produits
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          cat.actif 
-                            ? 'bg-green-light-6 text-green-dark' 
-                            : 'bg-gray-3 text-dark-4'
-                        }`}>
-                          {cat.actif ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openModal(cat)}
-                            className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => handleDelete(cat.id)}
-                            disabled={deleteId === cat.id}
-                            className="p-2 text-red hover:bg-red-light-6 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            {deleteId === cat.id ? (
-                              <div className="w-5 h-5 border-2 border-red border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            )}
-                          </button>
-                        </div>
-                      </td>
+                      <td className="px-6 py-4">{nombreProduits(cat)}</td>
+                      <td className="px-6 py-4">{statutCategorie(cat)}</td>
+                      <td className="px-6 py-4 text-right">{actionsCategorie(cat)}</td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

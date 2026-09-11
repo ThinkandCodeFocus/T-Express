@@ -100,6 +100,35 @@ const [autoOpenHandled, setAutoOpenHandled] = useState(false);
     }
   };
 
+  // Éléments partagés par le tableau (desktop) et les cartes (mobile).
+  const nomClient = (l: Livraison) =>
+    l.commande?.client ? `${l.commande.client.prenom} ${l.commande.client.nom}` : "-";
+
+  const badgeStatut = (l: Livraison) => {
+    const statutColor = STATUT_COLORS[l.statut] || { bg: "bg-gray-3", text: "text-dark-4" };
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statutColor.bg} ${statutColor.text}`}>
+        {l.statut}
+      </span>
+    );
+  };
+
+  const boutonModifier = (l: Livraison) => (
+    <button
+      onClick={() => openEditModal(l)}
+      className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
+      title="Modifier"
+      aria-label={`Modifier la livraison ${l.id}`}
+    >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      </svg>
+    </button>
+  );
+
+  const datePrevue = (l: Livraison) =>
+    l.date_livraison_estimee ? LOCALE_CONFIG.formatDate(l.date_livraison_estimee) : "-";
+
   return (
     <div className="p-6 lg:p-8">
       <div className="mb-8">
@@ -150,7 +179,33 @@ const [autoOpenHandled, setAutoOpenHandled] = useState(false);
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Cartes sur mobile : le tableau (7 colonnes) débordait de l'écran. */}
+            <ul className="md:hidden divide-y divide-gray-3">
+              {livraisons.length === 0 ? (
+                <li className="px-4 py-12 text-center text-dark-4">Aucune livraison trouvée</li>
+              ) : (
+                livraisons.map((l) => (
+                  <li key={l.id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-dark">
+                          Livraison {l.id} · Commande #{l.commande_id}
+                        </p>
+                        <p className="text-sm text-dark truncate">{nomClient(l)}</p>
+                      </div>
+                      {boutonModifier(l)}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 text-sm text-dark-4">
+                      {badgeStatut(l)}
+                      <span>Suivi : {l.numero_suivi || "-"}</span>
+                      <span>Prévue : {datePrevue(l)}</span>
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-1 border-b border-gray-3">
                   <tr>
@@ -171,44 +226,17 @@ const [autoOpenHandled, setAutoOpenHandled] = useState(false);
                       </td>
                     </tr>
                   ) : (
-                    livraisons.map((l) => {
-                      const statutColor = STATUT_COLORS[l.statut] || { bg: "bg-gray-3", text: "text-dark-4" };
-                      return (
+                    livraisons.map((l) => (
                         <tr key={l.id} className="hover:bg-gray-1 transition-colors">
                           <td className="px-6 py-4 font-semibold text-dark">{l.id}</td>
-                          <td className="px-6 py-4 text-dark">
-                            {`#${l.commande_id}`}
-                          </td>
-                          <td className="px-6 py-4 text-dark">
-                            {l.commande?.client
-                              ? `${l.commande.client.prenom} ${l.commande.client.nom}`
-                              : "-"}
-                          </td>
-                          <td className="px-6 py-4 text-dark-4">
-                            {l.numero_suivi || "-"}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statutColor.bg} ${statutColor.text}`}>
-                              {l.statut}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-dark-4 text-sm">
-                            {l.date_livraison_estimee ? LOCALE_CONFIG.formatDate(l.date_livraison_estimee) : "-"}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => openEditModal(l)}
-                              className="p-2 text-blue hover:bg-blue-light-5 rounded-lg transition-colors"
-                              title="Modifier"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                          </td>
+                          <td className="px-6 py-4 text-dark">{`#${l.commande_id}`}</td>
+                          <td className="px-6 py-4 text-dark">{nomClient(l)}</td>
+                          <td className="px-6 py-4 text-dark-4">{l.numero_suivi || "-"}</td>
+                          <td className="px-6 py-4">{badgeStatut(l)}</td>
+                          <td className="px-6 py-4 text-dark-4 text-sm">{datePrevue(l)}</td>
+                          <td className="px-6 py-4 text-right">{boutonModifier(l)}</td>
                         </tr>
-                      );
-                    })
+                    ))
                   )}
                 </tbody>
               </table>

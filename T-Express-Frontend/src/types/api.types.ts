@@ -109,6 +109,9 @@ export interface Stock {
   id?: number;
   produit_id: number;
   quantite: number;
+  /** Calculé par l'API admin (quantité <= 10), même seuil que le dashboard. */
+  statut?: 'faible' | 'normal';
+  produit_nom?: string;
   created_at: string;
   updated_at: string;
 }

@@ -5,6 +5,32 @@ import { produitService } from "@/services/produit.service";
 import type { Stock, Produit } from "@/types/api.types";
 import AdminErrorState from "@/components/Admin/AdminErrorState";
 
+// Même seuil que le backend (AdminStockController, carte "stock faible" du
+// dashboard) ; ne sert que si l'API ne renvoie pas déjà le statut.
+const SEUIL_STOCK_FAIBLE = 10;
+
+type NiveauStock = "rupture" | "faible" | "normal";
+
+const niveauStock = (stock: Stock): NiveauStock => {
+  if (stock.quantite <= 0) return "rupture";
+  const faible = stock.statut ? stock.statut === "faible" : stock.quantite <= SEUIL_STOCK_FAIBLE;
+  return faible ? "faible" : "normal";
+};
+
+const STYLE_NIVEAU: Record<NiveauStock, { ligne: string; quantite: string; badge?: { classe: string; libelle: string } }> = {
+  rupture: {
+    ligne: "bg-red-light-6",
+    quantite: "text-red-dark",
+    badge: { classe: "bg-red-light-4 text-red-dark", libelle: "Rupture" },
+  },
+  faible: {
+    ligne: "bg-yellow-light-4",
+    quantite: "text-yellow-dark-2",
+    badge: { classe: "bg-yellow-light-2 text-yellow-dark-2", libelle: "Stock faible" },
+  },
+  normal: { ligne: "", quantite: "text-dark" },
+};
+
 export default function AdminStocks() {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [produits, setProduits] = useState<Produit[]>([]);
@@ -13,6 +39,7 @@ export default function AdminStocks() {
   const [editStock, setEditStock] = useState<Stock | null>(null);
   const [form, setForm] = useState({ quantite: "" });
   const [saving, setSaving] = useState(false);
+  const [aSurveillerSeulement, setASurveillerSeulement] = useState(false);
 
   // Charger stocks et produits
   const fetchData = async () => {
@@ -75,9 +102,36 @@ export default function AdminStocks() {
     return produits.find((p) => p.id === produit_id)?.nom || "-";
   };
 
+  const nbRupture = stocks.filter((s) => niveauStock(s) === "rupture").length;
+  const nbFaible = stocks.filter((s) => niveauStock(s) === "faible").length;
+  const stocksAffiches = aSurveillerSeulement
+    ? stocks.filter((s) => niveauStock(s) !== "normal")
+    : stocks;
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Gestion des stocks</h1>
+
+      {!loading && !error && (
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-red-light-5 text-red-dark">
+            {nbRupture} en rupture
+          </span>
+          <span className="px-3 py-1.5 rounded-full text-sm font-medium bg-yellow-light-2 text-yellow-dark-2">
+            {nbFaible} en stock faible (≤ {SEUIL_STOCK_FAIBLE})
+          </span>
+          <label className="flex items-center gap-2 text-sm text-dark cursor-pointer sm:ml-auto">
+            <input
+              type="checkbox"
+              checked={aSurveillerSeulement}
+              onChange={(e) => setASurveillerSeulement(e.target.checked)}
+              className="w-4 h-4"
+            />
+            Afficher seulement les stocks à surveiller
+          </label>
+        </div>
+      )}
+
       <div className="bg-white rounded shadow p-6">
         {loading ? (
           <div>Chargement...</div>
@@ -94,26 +148,40 @@ export default function AdminStocks() {
               </tr>
             </thead>
             <tbody>
-              {stocks.length === 0 ? (
+              {stocksAffiches.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="text-center py-4">Aucun stock trouvé.</td>
+                  <td colSpan={4} className="text-center py-4">
+                    {aSurveillerSeulement ? "Aucun stock à surveiller." : "Aucun stock trouvé."}
+                  </td>
                 </tr>
               ) : (
-                stocks.map((stock) => (
-                  <tr key={stock.id}>
-                    <td className="py-2 px-3">{stock.id}</td>
-                    <td className="py-2 px-3">{getProduitNom(stock.produit_id)}</td>
-                    <td className="py-2 px-3">{stock.quantite}</td>
-                    <td className="py-2 px-3">
-                      <button
-                        className="text-blue-600 hover:underline mr-2"
-                        onClick={() => openModal(stock)}
-                      >
-                        Modifier
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                stocksAffiches.map((stock) => {
+                  const style = STYLE_NIVEAU[niveauStock(stock)];
+                  return (
+                    <tr key={stock.id} className={`border-t border-gray-3 ${style.ligne}`}>
+                      <td className="py-2 px-3">{stock.id}</td>
+                      <td className="py-2 px-3">{stock.produit_nom || getProduitNom(stock.produit_id)}</td>
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${style.quantite}`}>{stock.quantite}</span>
+                          {style.badge && (
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${style.badge.classe}`}>
+                              {style.badge.libelle}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2 px-3">
+                        <button
+                          className="text-blue hover:underline mr-2"
+                          onClick={() => openModal(stock)}
+                        >
+                          Modifier
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -122,11 +190,12 @@ export default function AdminStocks() {
 
       {/* Modal modification stock */}
       {editStock && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-dark/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded shadow-lg p-8 w-full max-w-md relative">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+              className="absolute top-2 right-2 text-dark-4 hover:text-dark"
               onClick={closeModal}
+              aria-label="Fermer"
             >
               ×
             </button>
@@ -153,7 +222,7 @@ export default function AdminStocks() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded font-medium hover:bg-blue-700 transition"
+                  className="bg-blue text-white px-4 py-2 rounded font-medium hover:bg-blue-dark transition disabled:opacity-50"
                   disabled={saving}
                 >
                   {saving ? "Enregistrement..." : "Enregistrer"}

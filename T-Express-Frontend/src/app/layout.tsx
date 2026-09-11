@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./css/euclid-circular-a-font.css";
 import "./css/style.css";
 import ToastProvider from "@/components/Common/ToastProvider";
+import { SITE_URL } from "@/config/site";
 
 export const metadata: Metadata = {
   // Sans metadataBase, Next.js ne peut pas resoudre les URLs relatives des
@@ -9,13 +10,13 @@ export const metadata: Metadata = {
   // recoivent alors un chemin qu'ils ne peuvent pas recuperer, et l'aperçu de
   // lien echoue silencieusement. Domaine reel du site (voir config/cors.php
   // cote backend) : t-express.shop, pas t-express.sn qui etait utilise ici.
-  metadataBase: new URL("https://t-express.shop"),
+  metadataBase: new URL(SITE_URL),
   title: "T-Express",
   description: "Boutique en ligne T-Express",
   openGraph: {
     title: "T-Express",
     description: "Boutique en ligne T-Express",
-    url: "https://t-express.shop",
+    url: SITE_URL,
     siteName: "T-Express",
     images: [
       {

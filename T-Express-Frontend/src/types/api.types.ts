@@ -256,11 +256,11 @@ export interface DetailCommande {
   updated_at: string;
 }
 
+// Seuls champs lus par le backend (Commande/CreateRequest) : le mode de
+// paiement et les notes se règlent avec l'admin sur WhatsApp (ticket #2).
 export interface CreerCommandeData {
   adresse_livraison_id: number;
   adresse_facturation_id: number;
-  mode_paiement: 'wave' | 'cash' | 'carte';
-  notes?: string;
 }
 
 // ========== Paiement ==========

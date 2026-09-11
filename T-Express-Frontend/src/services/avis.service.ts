@@ -1,12 +1,24 @@
 /**
- * Service Avis (Admin)
+ * Service Avis (Admin, sauf getRecents qui est public)
  */
 
 import { apiClient } from '@/lib/api-client';
 import { API_CONFIG } from '@/config/api.config';
 import type { Avis } from '@/types/api.types';
+import type { Testimonial } from '@/types/testimonial';
 
 export const avisService = {
+  /**
+   * Avis récents bien notés (4+) et commentés, pour la page d'accueil
+   */
+  async getRecents(limite: number = 6): Promise<Testimonial[]> {
+    const response = await apiClient.post<{ avis: Testimonial[] }>(
+      API_CONFIG.endpoints.avis.recents,
+      { limite }
+    );
+    return response.avis ?? [];
+  },
+
   /**
    * Récupérer la liste des avis
    */

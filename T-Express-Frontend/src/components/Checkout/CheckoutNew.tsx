@@ -1,21 +1,34 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import Breadcrumb from "../Common/Breadcrumb";
-import { usePanier } from "@/hooks/usePanier";
+import { usePanierContext } from "@/context/PanierContext";
 import { useAuthContext } from "@/context/AuthContext";
 import { adresseService } from "@/services/adresse.service";
 import { commandeService } from "@/services/commande.service";
+import { panierService } from "@/services/panier.service";
 import { useRouter } from "next/navigation";
 import type { Adresse } from "@/types/api.types";
-import Image from "next/image";
 import PhoneInput from "@/components/Common/PhoneInput";
 import { validatePhone } from "@/lib/utils";
+import { lienWhatsAppAdmin, messageCommandeWhatsApp } from "@/lib/whatsapp";
 import toast from "react-hot-toast";
+
+const WhatsAppIcon = ({ className = "" }: { className?: string }) => (
+  <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+  </svg>
+);
+
+type Confirmation = { commandeId: number; lienWhatsApp: string };
+const CLE_CONFIRMATION = "t-express:derniere-commande";
 
 const CheckoutNew = () => {
   const router = useRouter();
   const { user } = useAuthContext();
-  const { panier, loading: panierLoading } = usePanier();
+  // Contexte partagé (et non usePanier) : vider le panier après la commande
+  // doit aussi remettre à zéro le compteur du header.
+  const { panier, loading: panierLoading, refresh: rafraichirPanier } = usePanierContext();
   
   // States pour les adresses
   const [adresses, setAdresses] = useState<Adresse[]>([]);
@@ -36,10 +49,29 @@ const CheckoutNew = () => {
   });
   
   // States pour la commande
-  const [paymentMethod, setPaymentMethod] = useState<"wave" | "especes">("wave");
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
   const [notes, setNotes] = useState("");
   const [processing, setProcessing] = useState(false);
+  // Renseigné une fois la commande créée : affiche l'écran de finalisation.
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+
+  // Sur mobile, basculer vers WhatsApp décharge souvent l'onglet : au retour,
+  // sans cette reprise, le client verrait "panier vide" et perdrait le lien.
+  // Seulement si le panier est vide, pour ne jamais masquer un nouveau checkout.
+  useEffect(() => {
+    if (panierLoading || confirmation) return;
+    try {
+      const sauvegarde = sessionStorage.getItem(CLE_CONFIRMATION);
+      if (!sauvegarde) return;
+      if (panier && panier.lignes.length > 0) {
+        sessionStorage.removeItem(CLE_CONFIRMATION);
+        return;
+      }
+      setConfirmation(JSON.parse(sauvegarde));
+    } catch {
+      // Stockage indisponible (navigation privée...) : pas de reprise.
+    }
+  }, [panierLoading, panier, confirmation]);
 
   // Format FCFA
   const formatPrice = (price: number) => {
@@ -144,31 +176,56 @@ const CheckoutNew = () => {
         return;
       }
 
-      // Créer la commande
-      const commandeData = {
+      const commande = await commandeService.creer({
         adresse_livraison_id: adresseId,
         adresse_facturation_id: adresseId,
-        mode_paiement: (paymentMethod === "especes" ? "cash" : paymentMethod) as "wave" | "cash" | "carte",
-        notes: notes || undefined
-      };
+      });
 
-      const commande = await commandeService.creer(commandeData);
+      // Plus de paiement en ligne (l'accès à l'API Wave a été retiré) : la
+      // commande est finalisée par l'admin, à qui le client envoie le
+      // récapitulatif sur WhatsApp. Le backend ne stocke pas les notes, elles
+      // passent donc par ce message.
+      const adresseUtilisee =
+        showNewAddress && newAddress.adresse_ligne_1
+          ? newAddress
+          : adresses.find((a) => a.id === adresseId);
+      const message = messageCommandeWhatsApp({
+        commandeId: commande.id,
+        client: {
+          nom: adresseUtilisee?.nom_complet || `${user.prenom} ${user.nom}`,
+          telephone: adresseUtilisee?.telephone || user.telephone || "",
+          adresse: [adresseUtilisee?.adresse_ligne_1, adresseUtilisee?.adresse_ligne_2, adresseUtilisee?.ville]
+            .filter(Boolean)
+            .join(", "),
+        },
+        lignes: panier.lignes.map((ligne) => ({
+          nom: ligne.produit?.nom ?? `Produit #${ligne.produit_id}`,
+          quantite: ligne.quantite,
+          prixUnitaire: ligne.prix_unitaire,
+          lien: `${window.location.origin}/shop-details?id=${ligne.produit_id}`,
+        })),
+        fraisLivraison: shippingCost,
+        total: totalWithShipping,
+        notes: notes.trim() || undefined,
+      });
 
-      // Si paiement en espèces, rediriger vers mes commandes
-      if (paymentMethod === "especes") {
-        toast.success(`Commande ${commande.numero_commande} créée avec succès ! Paiement à la livraison.`);
-        router.push(`/my-account/orders`);
-        return;
+      // Le backend ne vide le panier qu'après un paiement Wave réussi, qui
+      // n'arrive plus : sans ça, les articles commandés y resteraient.
+      try {
+        await panierService.vider();
+        await rafraichirPanier();
+      } catch (viderError) {
+        console.warn("Commande créée mais panier non vidé :", viderError);
       }
 
-      // Sinon, rediriger vers la page de paiement avec l'ID de la commande
-      // Inclure le téléphone pour éviter de le redemander
-      const telephone = newAddress.telephone || user.telephone || '';
-      const paymentUrl = `/payment?commande_id=${commande.id}&mode=${paymentMethod}&montant=${totalWithShipping}&telephone=${encodeURIComponent(telephone)}`;
-      toast.success(`Commande ${commande.numero_commande} créée ! Redirection vers le paiement...`);
-
-      // Utiliser window.location pour forcer la navigation
-      window.location.href = paymentUrl;
+      const nouvelleConfirmation = { commandeId: commande.id, lienWhatsApp: lienWhatsAppAdmin(message) };
+      try {
+        sessionStorage.setItem(CLE_CONFIRMATION, JSON.stringify(nouvelleConfirmation));
+      } catch {
+        // Stockage indisponible : l'écran s'affiche quand même, sans reprise.
+      }
+      setConfirmation(nouvelleConfirmation);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error: any) {
       console.error("Erreur lors de la création de la commande:", error.message);
       toast.error(error.message || "Erreur lors de la création de la commande");
@@ -176,6 +233,56 @@ const CheckoutNew = () => {
       setProcessing(false);
     }
   };
+
+  // Commande créée : à tester avant "panier vide", le panier vient d'être vidé.
+  if (confirmation) {
+    return (
+      <>
+        <Breadcrumb title={"Commande enregistrée"} pages={["commande"]} />
+        <section className="overflow-hidden py-20 bg-gray-2">
+          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+            <div className="bg-white rounded-[10px] shadow-1 px-4 py-10 sm:p-12.5 text-center max-w-[640px] mx-auto">
+              <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-green-light-6 text-green flex items-center justify-center">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-medium text-dark mb-3">
+                Commande #{confirmation.commandeId} enregistrée
+              </h2>
+              <p className="text-dark-4 mb-2">
+                Dernière étape : envoyez-nous le récapitulatif de votre commande sur WhatsApp.
+              </p>
+              <p className="text-dark-4 mb-8">
+                Notre équipe vous répondra sur WhatsApp pour confirmer la commande et convenir avec vous
+                du paiement et de la livraison.
+              </p>
+
+              <a
+                href={confirmation.lienWhatsApp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto font-medium text-white bg-[#25D366] py-3.5 px-8 rounded-md ease-out duration-200 hover:bg-[#1ebe5b]"
+              >
+                <WhatsAppIcon />
+                Envoyer ma commande sur WhatsApp
+              </a>
+
+              <p className="text-custom-sm text-dark-5 mt-4">
+                Le message est déjà rempli (produits, adresse, total) : il vous suffit de l&apos;envoyer.
+              </p>
+
+              <div className="mt-8 pt-6 border-t border-gray-3">
+                <Link href="/my-account/orders" className="text-blue hover:underline">
+                  Voir mes commandes
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
 
   // Loading state
   if (panierLoading || loadingAdresses) {
@@ -413,45 +520,19 @@ const CheckoutNew = () => {
                   </div>
                 </div>
 
-                {/* Méthode de paiement */}
+                {/* Finalisation */}
                 <div className="bg-white shadow-1 rounded-[10px] mt-7.5">
                   <div className="border-b border-gray-3 py-5 px-4 sm:px-8.5">
-                    <h3 className="font-medium text-xl text-dark">Méthode de paiement</h3>
+                    <h3 className="font-medium text-xl text-dark">Paiement</h3>
                   </div>
 
-                  <div className="p-4 sm:p-8.5">
-                    <div className="flex flex-col gap-3">
-                      <label className="flex cursor-pointer items-center gap-4">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="wave"
-                          checked={paymentMethod === "wave"}
-                          onChange={(e) => setPaymentMethod(e.target.value as "wave")}
-                          className="w-4 h-4"
-                        />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
-                          <p>Wave</p>
-                        </div>
-                      </label>
-
-
-                      {/* Option Espèces - temporairement désactivée
-                      <label className="flex cursor-pointer items-center gap-4">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="especes"
-                          checked={paymentMethod === "especes"}
-                          onChange={(e) => setPaymentMethod(e.target.value as "especes")}
-                          className="w-4 h-4"
-                        />
-                        <div className="flex-1 rounded-md border py-3.5 px-5 border-gray-4">
-                          <p>Paiement à la livraison (Espèces)</p>
-                        </div>
-                      </label>
-                      */}
-                    </div>
+                  <div className="p-4 sm:p-8.5 flex gap-4">
+                    <WhatsAppIcon className="flex-shrink-0 text-[#25D366] mt-0.5" />
+                    <p className="text-dark-4 text-custom-sm">
+                      Après validation, vous enverrez le récapitulatif de votre commande à notre équipe sur
+                      WhatsApp. Elle vous confirmera la commande et conviendra avec vous du paiement et de la
+                      livraison.
+                    </p>
                   </div>
                 </div>
 
@@ -463,7 +544,7 @@ const CheckoutNew = () => {
                     processing ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  {processing ? "Traitement en cours..." : "Confirmer la commande"}
+                  {processing ? "Traitement en cours..." : "Valider la commande"}
                 </button>
               </div>
             </div>

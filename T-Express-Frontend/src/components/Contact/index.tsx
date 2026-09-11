@@ -5,8 +5,7 @@ import Breadcrumb from "../Common/Breadcrumb";
 import PhoneInput from "../Common/PhoneInput";
 import { apiClient } from "@/lib/api-client";
 import { API_CONFIG } from "@/config/api.config";
-
-const ADMIN_WHATSAPP_NUMBER = "221771188747";
+import { lienWhatsAppAdmin } from "@/lib/whatsapp";
 
 interface ContactSettings {
   adresse: string;
@@ -74,11 +73,7 @@ const Contact = () => {
       formData.message ? `Message : ${formData.message}` : null,
     ].filter(Boolean);
 
-    const whatsappUrl = `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      lines.join("\n")
-    )}`;
-
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    window.open(lienWhatsAppAdmin(lines.join("\n")), "_blank", "noopener,noreferrer");
     setSubmitting(false);
     router.push("/mail-success");
   };

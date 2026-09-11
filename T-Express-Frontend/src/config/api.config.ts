@@ -65,6 +65,7 @@ export const API_CONFIG = {
     // Avis
     avis: {
       soumettre: '/avis/soumettre',
+      recents: '/avis/recents',
     },
     
     // Favoris

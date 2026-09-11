@@ -1,8 +1,9 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useCallback, useRef } from "react";
-import testimonialsData from "./testimonialsData";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { avisService } from "@/services/avis.service";
+import type { Testimonial } from "@/types/testimonial";
 
 // Import Swiper styles
 import "swiper/css/navigation";
@@ -11,6 +12,14 @@ import SingleItem from "./SingleItem";
 
 const Testimonials = () => {
   const sliderRef = useRef(null);
+  const [avis, setAvis] = useState<Testimonial[]>([]);
+
+  useEffect(() => {
+    avisService
+      .getRecents(6)
+      .then(setAvis)
+      .catch((error) => console.warn("Avis clients indisponibles :", error));
+  }, []);
 
   const handlePrev = useCallback(() => {
     if (!sliderRef.current) return;
@@ -21,6 +30,10 @@ const Testimonials = () => {
     if (!sliderRef.current) return;
     sliderRef.current.swiper.slideNext();
   }, []);
+
+  // Pas de vrais avis (ou API indisponible) : on masque la section plutôt
+  // que d'afficher de faux témoignages.
+  if (avis.length === 0) return null;
 
   return (
     <section className="overflow-hidden pb-16.5">
@@ -102,8 +115,8 @@ const Testimonials = () => {
                 },
               }}
             >
-              {testimonialsData.map((item, key) => (
-                <SwiperSlide key={key}>
+              {avis.map((item) => (
+                <SwiperSlide key={item.id} className="!h-auto">
                   <SingleItem testimonial={item} />
                 </SwiperSlide>
               ))}

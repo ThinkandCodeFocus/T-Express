@@ -261,7 +261,7 @@ export default function OrderDetailPage() {
 
                 {/* Contact support */}
                 <div className="mt-6 pt-6 border-t">
-                  <h4 className="font-medium text-dark mb-2">Besoin d'aide ?</h4>
+                  <h4 className="font-medium text-dark mb-2">Besoin d&apos;aide ?</h4>
                   <p className="text-sm text-gray-600 mb-3">
                     Contactez notre service client pour toute question concernant votre commande.
                   </p>

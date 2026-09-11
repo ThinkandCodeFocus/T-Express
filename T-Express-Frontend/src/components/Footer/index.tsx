@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { API_CONFIG } from "@/config/api.config";
 
@@ -288,24 +289,24 @@ const Footer = () => {
 
             <ul className="flex flex-col gap-3">
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href="#">
+                <Link className="ease-out duration-200 hover:text-blue" href="/privacy">
                   Politique de confidentialité
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href="#">
+                <Link className="ease-out duration-200 hover:text-blue" href="/refund-policy">
                   Politique de remboursement
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href="#">
+                <Link className="ease-out duration-200 hover:text-blue" href="/terms">
                   Conditions d&apos;utilisation
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="ease-out duration-200 hover:text-blue" href="#">
+                <Link className="ease-out duration-200 hover:text-blue" href="/faq">
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="#">

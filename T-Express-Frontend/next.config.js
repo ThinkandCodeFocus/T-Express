@@ -11,15 +11,10 @@ try {
 
 const backendUrl = new URL(backendOrigin);
 
+// Pas de `eslint.ignoreDuringBuilds` ni de `typescript.ignoreBuildErrors` :
+// une erreur ESLint ou TypeScript doit faire échouer `next build` plutôt que
+// de partir en production (les warnings, eux, ne bloquent pas).
 const nextConfig = {
-  // Disable ESLint during production builds
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  // Disable TypeScript errors during builds
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     remotePatterns: [
       {

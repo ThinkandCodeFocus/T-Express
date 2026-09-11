@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import PhoneInput from "@/components/Common/PhoneInput";
 import { validatePhone } from "@/lib/utils";
 
+// Aligné sur la règle backend (RegisterRequest : password min:8).
+const LONGUEUR_MIN_MOT_DE_PASSE = 8;
+
 const Signup = () => {
   const [formData, setFormData] = useState({
     nom: "",
@@ -20,6 +23,10 @@ const Signup = () => {
   const { register, registerLoading } = useAuthContext();
   const router = useRouter();
   const [error, setError] = useState<string>("");
+
+  // Signalé dès la saisie de la confirmation, sans attendre l'envoi.
+  const confirmationDifferente =
+    formData.password_confirmation.length > 0 && formData.password !== formData.password_confirmation;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -37,7 +44,17 @@ const Signup = () => {
       setError("Le numéro de téléphone n'est pas valide. Format attendu : +221 XX XXX XX XX");
       return;
     }
-    
+
+    if (formData.password.length < LONGUEUR_MIN_MOT_DE_PASSE) {
+      setError(`Le mot de passe doit contenir au moins ${LONGUEUR_MIN_MOT_DE_PASSE} caractères.`);
+      return;
+    }
+
+    if (formData.password !== formData.password_confirmation) {
+      setError("Les deux mots de passe ne correspondent pas.");
+      return;
+    }
+
     // Adapter les noms de champs pour l'API Laravel
     const data = {
       nom: formData.nom,
@@ -74,7 +91,7 @@ const Signup = () => {
             <div>
               <form onSubmit={handleSubmit}>
                 {error && (
-                  <div className="mb-5 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+                  <div role="alert" className="mb-5 p-4 bg-red-light-6 border border-red-light-4 text-red rounded-lg">
                     {error}
                   </div>
                 )}
@@ -151,11 +168,15 @@ const Signup = () => {
                     id="password"
                     placeholder="Votre mot de passe"
                     autoComplete="new-password"
+                    aria-describedby="password-aide"
                     value={formData.password}
                     onChange={handleChange}
                     required
                     className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                   />
+                  <p id="password-aide" className="mt-1.5 text-custom-sm text-dark-5">
+                    {LONGUEUR_MIN_MOT_DE_PASSE} caractères minimum.
+                  </p>
                 </div>
 
                 <div className="mb-5">
@@ -168,11 +189,18 @@ const Signup = () => {
                     id="password_confirmation"
                     placeholder="Confirmez votre mot de passe"
                     autoComplete="new-password"
+                    aria-invalid={confirmationDifferente}
+                    aria-describedby="password-confirmation-aide"
                     value={formData.password_confirmation}
                     onChange={handleChange}
                     required
-                    className="rounded-lg border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
+                    className={`rounded-lg border bg-gray-1 placeholder:text-dark-5 w-full py-3 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20 ${
+                      confirmationDifferente ? "border-red" : "border-gray-3"
+                    }`}
                   />
+                  <p id="password-confirmation-aide" aria-live="polite" className="mt-1.5 text-custom-sm text-red">
+                    {confirmationDifferente ? "Les deux mots de passe ne correspondent pas." : ""}
+                  </p>
                 </div>
 
                 <button

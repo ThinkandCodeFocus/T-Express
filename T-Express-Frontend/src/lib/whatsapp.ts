@@ -56,3 +56,29 @@ export function messageCommandeWhatsApp(commande: DonneesMessageCommande): strin
     ...(commande.notes ? ["", `Notes : ${commande.notes}`] : []),
   ].join("\n");
 }
+
+export interface DonneesMessageMotDePasse {
+  email: string;
+  /** Facultatif : aide l'admin à retrouver le compte et à vérifier l'identité. */
+  telephone?: string;
+}
+
+/**
+ * Demande de réinitialisation de mot de passe envoyée à l'admin.
+ *
+ * Le backend n'expose aucun endpoint de réinitialisation ni d'envoi d'email :
+ * la demande passe donc par WhatsApp, comme la finalisation des commandes.
+ */
+export function messageMotDePasseOublieWhatsApp(
+  donnees: DonneesMessageMotDePasse
+): string {
+  return [
+    "Bonjour T-Express, j'ai oublié le mot de passe de mon compte.",
+    "",
+    "*Compte concerné*",
+    `Email : ${donnees.email}`,
+    ...(donnees.telephone ? [`Téléphone : ${donnees.telephone}`] : []),
+    "",
+    "Pouvez-vous m'aider à le réinitialiser ?",
+  ].join("\n");
+}

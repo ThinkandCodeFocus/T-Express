@@ -90,12 +90,12 @@ const Signin = () => {
                   {loginLoading ? "Connexion..." : "Se connecter"}
                 </button>
 
-                <a
-                  href="#"
+                <Link
+                  href="/forgot-password"
                   className="block text-center text-dark-4 mt-4.5 ease-out duration-200 hover:text-dark"
                 >
                   Mot de passe oublié ?
-                </a>
+                </Link>
 
                 <p className="text-center mt-6">
                   Vous n&apos;avez pas de compte ?

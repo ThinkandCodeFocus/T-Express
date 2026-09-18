@@ -25,7 +25,12 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+# `.env` contient la configuration locale (URL de l API...) et ne doit pas
+# etre suivi : la production fournit ses variables via l hebergeur.
+# `.env.example` reste versionne comme modele.
+.env
 .env*.local
+!.env.example
 
 # vercel
 .vercel

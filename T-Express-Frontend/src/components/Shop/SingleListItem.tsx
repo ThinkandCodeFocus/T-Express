@@ -52,7 +52,7 @@ const SingleListItem = ({ item }: { item: Product }) => {
         <div className="shadow-list relative overflow-hidden flex items-center justify-center max-w-[270px] w-full sm:min-h-[270px] p-4">
           <Image
             src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
-            alt=""
+            alt={item.title}
             width={250}
             height={250}
             unoptimized={isBackendImageUrl(item.imgs.previews[0])}
@@ -139,31 +139,31 @@ const SingleListItem = ({ item }: { item: Product }) => {
             <div className="flex items-center gap-1">
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={15}
                 height={15}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={15}
                 height={15}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={15}
                 height={15}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={15}
                 height={15}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={15}
                 height={15}
               />

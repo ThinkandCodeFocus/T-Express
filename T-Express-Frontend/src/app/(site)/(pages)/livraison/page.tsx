@@ -28,8 +28,7 @@ const LivraisonPage = () => (
 
     <Section titre="Zones couvertes">
       <p>
-        [À COMPLÉTER] — liste ou description des zones/régions actuellement livrées (ex : Dakar et
-        environs, national, etc.).
+        (.).
       </p>
     </Section>
 
@@ -39,8 +38,7 @@ const LivraisonPage = () => (
         commande.
       </p>
       <p>
-        [À COMPLÉTER] — si une option de livraison express ou payante existe ou est prévue, la détailler
-        ici (délai, coût).
+        ().
       </p>
     </Section>
 

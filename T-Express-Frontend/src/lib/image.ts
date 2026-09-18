@@ -10,11 +10,7 @@ export function isBackendImageUrl(src?: string | null): boolean {
 
   // Otherwise, only treat full HTTP(S) URLs that point to the known backend hosts as backend images
   if (/^https?:\/\//i.test(src)) {
-    return (
-      src.includes("t-express-backend.onrender.com") ||
-      src.includes("localhost:8000") ||
-      src.includes("127.0.0.1:8000")
-    );
+    return src.includes("localhost:8000") || src.includes("127.0.0.1:8000");
   }
 
   return false;

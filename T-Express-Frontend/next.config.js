@@ -24,11 +24,6 @@ const nextConfig = {
         pathname: '/storage/**',
       },
       {
-        protocol: "https",
-        hostname: "t-express-backend.onrender.com",
-        pathname: "/storage/**",
-      },
-      {
         protocol: "http",
         hostname: "localhost",
         port: "8000",

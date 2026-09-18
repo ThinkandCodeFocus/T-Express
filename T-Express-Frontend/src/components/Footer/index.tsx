@@ -308,6 +308,17 @@ const Footer = () => {
             </h2>
 
             <ul className="flex flex-col gap-3">
+
+              <li>
+  <Link className="ease-out duration-200 hover:text-blue" href="/a-propos">
+    À propos
+  </Link>
+</li>
+<li>
+  <Link className="ease-out duration-200 hover:text-blue" href="/livraison">
+    Informations de livraison
+  </Link>
+</li>
               <li>
                 <Link className="ease-out duration-200 hover:text-blue" href="/privacy">
                   Politique de confidentialité

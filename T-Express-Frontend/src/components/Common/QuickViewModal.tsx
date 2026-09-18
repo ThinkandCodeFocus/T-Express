@@ -230,7 +230,7 @@ const QuickViewModal = () => {
                     >
                       <Image
                         src={img || fallbackImage}
-                        alt="thumbnail"
+                        alt={`${productName} — vignette ${key + 1}`}
                         width={61}
                         height={61}
                         className="aspect-square object-cover"
@@ -266,7 +266,7 @@ const QuickViewModal = () => {
 
                     <Image
                       src={previews[activePreview] || fallbackImage}
-                      alt="products-details"
+                      alt={productName}
                       width={400}
                       height={400}
                       className="object-cover w-full h-full"

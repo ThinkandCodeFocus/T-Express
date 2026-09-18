@@ -56,7 +56,7 @@ const ProductItem = ({ item }: { item: Product }) => {
       <div className="relative overflow-hidden flex items-center justify-center rounded-lg bg-[#F6F7FB] min-h-[270px] mb-4">
         <Image
           src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
-          alt=""
+          alt={item.title}
           width={250}
           height={250}
           unoptimized={isBackendImageUrl(item.imgs.previews[0])}
@@ -131,31 +131,31 @@ const ProductItem = ({ item }: { item: Product }) => {
         <div className="flex items-center gap-1">
           <Image
             src="/images/icons/icon-star.svg"
-            alt="star icon"
+            alt=""
             width={14}
             height={14}
           />
           <Image
             src="/images/icons/icon-star.svg"
-            alt="star icon"
+            alt=""
             width={14}
             height={14}
           />
           <Image
             src="/images/icons/icon-star.svg"
-            alt="star icon"
+            alt=""
             width={14}
             height={14}
           />
           <Image
             src="/images/icons/icon-star.svg"
-            alt="star icon"
+            alt=""
             width={14}
             height={14}
           />
           <Image
             src="/images/icons/icon-star.svg"
-            alt="star icon"
+            alt=""
             width={14}
             height={14}
           />

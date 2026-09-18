@@ -19,7 +19,7 @@ const LatestProducts = ({ products }) => {
               <div className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5">
                 <Image
                   src={resolveBackendImageUrl(product.imgs?.thumbnails?.[0], '/images/products/default.png')}
-                  alt="product"
+                  alt={product.title}
                   width={74}
                   height={74}
                   unoptimized={isBackendImageUrl(product.imgs?.thumbnails?.[0])}

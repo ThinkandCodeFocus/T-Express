@@ -53,31 +53,31 @@ const SingleItem = ({ item }: { item: Product }) => {
             <div className="flex items-center gap-1">
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={14}
                 height={14}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={14}
                 height={14}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={14}
                 height={14}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={14}
                 height={14}
               />
               <Image
                 src="/images/icons/icon-star.svg"
-                alt="star icon"
+                alt=""
                 width={14}
                 height={14}
               />
@@ -99,7 +99,7 @@ const SingleItem = ({ item }: { item: Product }) => {
         <div className="flex justify-center items-center">
           <Image
             src={resolveBackendImageUrl(item.imgs.previews[0], '/images/products/default.png')}
-            alt=""
+            alt={item.title}
             width={280}
             height={280}
             unoptimized={isBackendImageUrl(item.imgs.previews[0])}

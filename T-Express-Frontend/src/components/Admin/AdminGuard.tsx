@@ -35,22 +35,14 @@ export default function AdminGuard({ children }: AdminGuardProps) {
       // Récupérer les données utilisateur depuis le localStorage
       const userData = authService.getUserData();
 
-      // Vérifier si l'utilisateur a le rôle admin
+      // Vérifier si l'utilisateur a le rôle admin. Le rôle est le seul critère :
+      // aucune liste d'emails autorisés en dur, sinon changer l'email du compte
+      // admin casse silencieusement son accès sans configuration possible.
       if (!userData || userData.role !== "admin") {
         console.warn("Accès admin refusé : rôle insuffisant", {
           userRole: userData?.role,
-          userEmail: userData?.email,
         });
         // Rediriger vers la page d'accueil avec un message d'erreur
-        router.push("/?error=access_denied");
-        return;
-      }
-
-      // Vérifier spécifiquement l'email admin autorisé
-      if (userData.email !== "t-express@t-express.com") {
-        console.warn("Accès admin refusé : email non autorisé", {
-          userEmail: userData.email,
-        });
         router.push("/?error=access_denied");
         return;
       }
@@ -80,7 +72,7 @@ export default function AdminGuard({ children }: AdminGuardProps) {
 
   // Si l'utilisateur n'est pas admin, ne rien afficher (la redirection est en cours)
   const userData = authService.getUserData();
-  if (!userData || userData.role !== "admin" || userData.email !== "t-express@t-express.com") {
+  if (!userData || userData.role !== "admin") {
     return null;
   }
 

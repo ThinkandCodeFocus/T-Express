@@ -1228,7 +1228,7 @@ export default function AdminHero() {
                         value={form.texte_bouton}
                         onChange={handleChange}
                         className="w-full border border-gray-3 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue"
-                        placeholder={form.type === 'promo_banner' ? "Ex: Grab Now" : "Ex: Shop Now, Buy Now"}
+                        placeholder={form.type === 'promo_banner' ? "Ex : J’en profite" : "Ex : Voir la boutique, Acheter"}
                       />
                       <p className="text-xs text-dark-4 mt-1">Le texte qui apparaît sur le bouton</p>
                     </div>

@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
 import toast from "react-hot-toast";
 import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
+import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
 
 const SingleListItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -134,6 +135,15 @@ const SingleListItem = ({ item }: { item: Product }) => {
               )}
             </span>
           </div>
+
+          <BoutonCommanderWhatsApp
+            produitId={item.id}
+            nom={item.title}
+            prix={item.discountedPrice}
+            prixInitial={item.price}
+            image={resolveBackendImageUrl(item.imgs?.previews?.[0], '/images/products/default.png')}
+            className="mt-4 max-w-[260px]"
+          />
 
           <div className="flex items-center gap-2.5 mb-2">
             <div className="flex items-center gap-1">

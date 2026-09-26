@@ -8,7 +8,27 @@ import { usePanierContext } from "@/context/PanierContext";
 import { useFavorisContext } from "@/context/FavorisContext";
 import type { Produit } from "@/types/api.types";
 import { API_CONFIG } from "@/config/api.config";
-import { isBackendImageUrl } from "@/lib/image";
+import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
+import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
+
+const IMAGE_DEFAUT = "/images/products/default.png";
+
+/** Accepte un tableau, une chaine JSON ou rien, et ne leve jamais d'exception. */
+function normaliserImages(brut: unknown): string[] {
+  if (Array.isArray(brut)) return brut.filter((i): i is string => typeof i === "string" && i !== "");
+  if (typeof brut === "string" && brut.trim() !== "") {
+    try {
+      const parse = JSON.parse(brut);
+      return Array.isArray(parse)
+        ? parse.filter((i): i is string => typeof i === "string" && i !== "")
+        : [brut];
+    } catch {
+      // Chemin unique stocke en clair plutot qu'en JSON.
+      return [brut];
+    }
+  }
+  return [];
+}
 
 const ShopDetailsNew = () => {
   const searchParams = useSearchParams();
@@ -57,8 +77,23 @@ const ShopDetailsNew = () => {
     }
   };
 
-  const images = product?.images ? JSON.parse(product.images as any) : [];
-  const imageUrl = (img: string) => `${API_CONFIG.baseURL.replace('/api', '')}/storage/${img}`;
+  // L'API renvoie `images` tantot en tableau, tantot en chaine JSON. Le code
+  // appelait `JSON.parse` dans tous les cas : sur un tableau deja parse, y
+  // compris le tableau vide (qui est truthy), cela levait une exception et
+  // faisait ecran blanc sur toute la fiche produit.
+  // La photo principale vit dans son propre champ : sans elle en tete de liste,
+  // les produits dont `images` est vide n'affichaient aucun visuel.
+  const images: string[] = Array.from(
+    new Set(
+      [
+        ...(typeof product?.image_principale === "string" && product.image_principale
+          ? [product.image_principale]
+          : []),
+        ...normaliserImages(product?.images),
+      ]
+    )
+  );
+  const imageUrl = (img: string) => resolveBackendImageUrl(img, IMAGE_DEFAUT);
 
   if (loading) {
     return (
@@ -113,12 +148,13 @@ const ShopDetailsNew = () => {
             <div className="lg:max-w-[570px] w-full">
               <div className="lg:min-h-[512px] rounded-lg shadow-1 bg-gray-2 p-4 sm:p-7.5 relative flex items-center justify-center">
                 <Image
-                  src={images.length > 0 ? imageUrl(images[previewImg]) : "/images/placeholder.jpg"}
+                  src={images.length > 0 ? imageUrl(images[previewImg]) : IMAGE_DEFAUT}
                   alt={product.nom}
                   width={500}
                   height={500}
                   className="object-contain"
                   unoptimized={images.length > 0 && isBackendImageUrl(imageUrl(images[previewImg]))}
+                  onError={(e) => { e.currentTarget.src = IMAGE_DEFAUT; }}
                 />
               </div>
 
@@ -139,6 +175,7 @@ const ShopDetailsNew = () => {
                         height={80}
                         className="object-cover"
                         unoptimized={isBackendImageUrl(imageUrl(img))}
+                        onError={(e) => { e.currentTarget.src = IMAGE_DEFAUT; }}
                       />
                     </button>
                   ))}
@@ -267,13 +304,25 @@ const ShopDetailsNew = () => {
                 </div>
               )}
 
-              <button
-                onClick={handleAddToCart}
-                disabled={panierLoading}
-                className="flex-1 min-w-[200px] font-medium text-white bg-dark py-3 px-8 rounded-md ease-out duration-200 hover:bg-blue disabled:opacity-50"
-              >
-                {panierLoading ? "Ajout..." : "Ajouter au panier"}
-              </button>
+              <div className="flex-1 min-w-[240px] flex flex-col gap-2.5">
+                <BoutonCommanderWhatsApp
+                  produitId={product.id}
+                  nom={product.nom}
+                  prix={product.prix_promo && product.prix_promo < product.prix ? product.prix_promo : product.prix}
+                  prixInitial={product.prix_promo && product.prix_promo < product.prix ? product.prix : null}
+                  image={images.length > 0 ? imageUrl(images[previewImg] ?? images[0]) : null}
+                  quantite={quantity}
+                  taille="plein"
+                />
+
+                <button
+                  onClick={handleAddToCart}
+                  disabled={panierLoading}
+                  className="w-full font-medium text-dark bg-gray-1 border border-gray-3 py-3 px-8 rounded-md ease-out duration-200 hover:border-blue hover:text-blue disabled:opacity-50"
+                >
+                  {panierLoading ? "Ajout..." : "Ajouter au panier"}
+                </button>
+              </div>
 
               <button
                 onClick={handleAddToWishlist}

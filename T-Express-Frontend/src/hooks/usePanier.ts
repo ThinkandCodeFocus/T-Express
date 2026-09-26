@@ -131,6 +131,16 @@ export function usePanier() {
 
   const handleAjouterError = useCallback((error: any) => {
     console.error('❌ Erreur lors de l\'ajout au panier:', error);
+    // L'API du panier exige une authentification : sans compte elle repond 401
+    // « Unauthenticated. », un message anglais incomprehensible pour l'acheteur.
+    // On explique, et on rappelle qu'il peut commander sans creer de compte.
+    if (error?.status === 401 || /unauthenticated|non authentifi/i.test(error?.message || '')) {
+      toast.error(
+        'Connectez-vous pour utiliser le panier. Sinon, commandez directement avec le bouton « Commander sur WhatsApp ».',
+        { duration: 6000 }
+      );
+      return;
+    }
     toast.error(error.message || 'Erreur lors de l\'ajout au panier');
   }, []);
 

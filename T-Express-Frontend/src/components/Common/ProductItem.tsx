@@ -14,6 +14,7 @@ import { usePanierContext } from "@/context/PanierContext";
 import toast from "react-hot-toast";
 import { isBackendImageUrl } from "@/lib/image";
 import { resolveBackendImageUrl } from "@/lib/image";
+import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
 
 const ProductItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -175,6 +176,14 @@ const ProductItem = ({ item }: { item: Product }) => {
         <span className="text-dark">{formatPrice(item.discountedPrice)}</span>
         <span className="text-dark-4 line-through">{formatPrice(item.price)}</span>
       </span>
+      <BoutonCommanderWhatsApp
+        produitId={item.id}
+        nom={item.title}
+        prix={item.discountedPrice}
+        prixInitial={item.price}
+        image={resolveBackendImageUrl(item.imgs?.previews?.[0], '/images/products/default.png')}
+        className="mt-3"
+      />
     </div>
   );
 };

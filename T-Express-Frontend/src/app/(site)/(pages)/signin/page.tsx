@@ -1,5 +1,5 @@
 import Signin from "@/components/Auth/Signin";
-import React from "react";
+import React, { Suspense } from "react";
 import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Connexion | T-Express",
@@ -10,7 +10,11 @@ export const metadata: Metadata = {
 const SigninPage = () => {
   return (
     <main>
-      <Signin />
+      {/* Signin lit le parametre `redirect` : useSearchParams impose une
+          frontiere Suspense, sinon toute la page bascule en rendu dynamique. */}
+      <Suspense fallback={null}>
+        <Signin />
+      </Suspense>
     </main>
   );
 };

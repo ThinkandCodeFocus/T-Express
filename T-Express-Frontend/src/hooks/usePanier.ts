@@ -13,6 +13,22 @@ import toast from 'react-hot-toast';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+/**
+ * Envoie le visiteur sur la page de connexion, en gardant la page courante
+ * pour l'y ramener une fois connecte.
+ *
+ * Volontairement hors de React : cette redirection part d'un gestionnaire
+ * d'erreur de mutation, pas du rendu, et doit repartir d'un etat propre une
+ * fois le jeton pose.
+ */
+function redirigerVersConnexion() {
+  if (typeof window === 'undefined') return;
+  // Deja sur la page de connexion : ne pas boucler.
+  if (window.location.pathname.startsWith('/signin')) return;
+  const origine = window.location.pathname + window.location.search;
+  window.location.assign(`/signin?redirect=${encodeURIComponent(origine)}`);
+}
+
 export function usePanier() {
   // Initialiser avec un panier vide pour éviter les problèmes de null
   const [panier, setPanier] = useState<PanierContenu | null>({ lignes: [], total: 0, nombre_articles: 0 });
@@ -131,14 +147,12 @@ export function usePanier() {
 
   const handleAjouterError = useCallback((error: any) => {
     console.error('❌ Erreur lors de l\'ajout au panier:', error);
-    // L'API du panier exige une authentification : sans compte elle repond 401
-    // « Unauthenticated. », un message anglais incomprehensible pour l'acheteur.
-    // On explique, et on rappelle qu'il peut commander sans creer de compte.
+    // L'API du panier exige une authentification et repond 401
+    // « Unauthenticated. », message anglais incomprehensible pour l'acheteur.
+    // Plutot que de le lui afficher, on l'envoie directement se connecter, en
+    // gardant la page courante pour l'y ramener une fois connecte.
     if (error?.status === 401 || /unauthenticated|non authentifi/i.test(error?.message || '')) {
-      toast.error(
-        'Connectez-vous pour utiliser le panier. Sinon, commandez directement avec le bouton « Commander sur WhatsApp ».',
-        { duration: 6000 }
-      );
+      redirigerVersConnexion();
       return;
     }
     toast.error(error.message || 'Erreur lors de l\'ajout au panier');
@@ -150,6 +164,11 @@ export function usePanier() {
   }, []);
 
   const handleMettreAJourError = useCallback((error: any) => {
+    // Session expiree en cours de route : meme traitement que pour l'ajout.
+    if (error?.status === 401) {
+      redirigerVersConnexion();
+      return;
+    }
     toast.error(error.message || 'Erreur lors de la mise à jour');
   }, []);
 
@@ -159,6 +178,10 @@ export function usePanier() {
   }, []);
 
   const handleSupprimerError = useCallback((error: any) => {
+    if (error?.status === 401) {
+      redirigerVersConnexion();
+      return;
+    }
     toast.error(error.message || 'Erreur lors de la suppression');
   }, []);
 

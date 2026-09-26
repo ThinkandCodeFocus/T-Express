@@ -3,7 +3,7 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Signin = () => {
   const [email, setEmail] = useState("");
@@ -11,15 +11,24 @@ const Signin = () => {
   const [error, setError] = useState<string>("");
   const { login, loginLoading } = useAuthContext();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Le panier renvoie ici les visiteurs non connectes. Sans ce retour, un
+  // acheteur venu d'une fiche produit se retrouvait sur l'accueil apres
+  // connexion, et devait retrouver son article lui-meme.
+  const retour = searchParams.get("redirect");
+  // Un chemin interne uniquement : une URL absolue permettrait de rediriger
+  // l'acheteur vers un autre site juste en fabriquant le lien de connexion.
+  const destination = retour && /^\/(?!\/)/.test(retour) ? retour : "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
+
     try {
       const success = await login({ email, mot_de_passe: password });
       if (success) {
-        router.push("/"); // Rediriger vers la page d'accueil après connexion
+        router.push(destination);
       }
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue lors de la connexion");

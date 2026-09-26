@@ -82,3 +82,44 @@ export function messageMotDePasseOublieWhatsApp(
     "Pouvez-vous m'aider à le réinitialiser ?",
   ].join("\n");
 }
+
+export interface DonneesMessageProduit {
+  nom: string;
+  /** Prix effectivement payé, promotion déduite. */
+  prix: number;
+  /** Prix barré, seulement s'il y a une promotion. */
+  prixInitial?: number | null;
+  /** URL absolue de la fiche produit. */
+  lien: string;
+  /** URL absolue de la photo, pour que l'admin voie de quoi il s'agit. */
+  image?: string | null;
+  quantite?: number;
+}
+
+/**
+ * Demande d'achat d'un produit, envoyée à l'admin.
+ *
+ * Il n'y a plus de paiement en ligne : l'acheteur signale le produit qui
+ * l'intéresse et l'admin reprend la main sur WhatsApp. Le message porte tout
+ * ce qu'il faut pour répondre sans rien demander en retour, l'image comprise :
+ * WhatsApp affiche un aperçu du premier lien, donc celui de la fiche produit
+ * est placé avant celui de la photo.
+ */
+export function messageProduitWhatsApp(produit: DonneesMessageProduit): string {
+  const quantite = produit.quantite && produit.quantite > 1 ? produit.quantite : 1;
+
+  return [
+    `Bonjour T-Express, ce produit m'intéresse : *${produit.nom}*`,
+    "",
+    `Prix : ${formatPrice(produit.prix)}`,
+    ...(produit.prixInitial && produit.prixInitial > produit.prix
+      ? [`Prix initial : ${formatPrice(produit.prixInitial)}`]
+      : []),
+    ...(quantite > 1 ? [`Quantité souhaitée : ${quantite}`] : []),
+    "",
+    `Fiche produit : ${produit.lien}`,
+    ...(produit.image ? [`Photo : ${produit.image}`] : []),
+    "",
+    "Est-il disponible ?",
+  ].join("\n");
+}

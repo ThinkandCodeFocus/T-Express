@@ -22,15 +22,34 @@ export interface PaginationMeta {
   total: number;
 }
 
+/**
+ * Réponse paginée telle que Laravel la renvoie réellement.
+ *
+ * `paginate()` rendu directement par `response()->json()` place ses champs
+ * **au premier niveau**. Le bloc `meta` n'existe que si le contrôleur passe
+ * par une API Resource, ce qu'aucune route de ce projet ne fait.
+ *
+ * Le type annonçait pourtant `meta.last_page` : sept pages d'administration
+ * lisaient donc `undefined`, se croyaient sur une page unique et n'affichaient
+ * jamais leur bouton « Suivant ». Les deux formes sont désormais déclarées, et
+ * `nombreDePages` lit celle qui est présente.
+ */
 export interface PaginatedResponse<T> {
   data: T[];
-  links: {
-    first: string;
-    last: string;
-    prev: string | null;
-    next: string | null;
-  };
-  meta: PaginationMeta;
+  current_page?: number;
+  last_page?: number;
+  per_page?: number;
+  total?: number;
+  from?: number | null;
+  to?: number | null;
+  links?: unknown;
+  meta?: PaginationMeta;
+}
+
+/** Nombre de pages d'une réponse paginée, quelle que soit sa forme. */
+export function nombreDePages(reponse?: Partial<PaginatedResponse<unknown>> | null): number {
+  const pages = reponse?.last_page ?? reponse?.meta?.last_page;
+  return typeof pages === 'number' && pages > 0 ? pages : 1;
 }
 
 // ========== Authentification ==========

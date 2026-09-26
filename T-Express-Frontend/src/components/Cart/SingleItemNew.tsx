@@ -4,6 +4,7 @@ import Image from "next/image";
 import { usePanierContext } from "@/context/PanierContext";
 import type { LignePanier } from "@/types/api.types";
 import { API_CONFIG } from "@/config/api.config";
+import { imageProduit, isBackendImageUrl } from "@/lib/image";
 
 interface SingleItemProps {
   item: LignePanier;
@@ -52,47 +53,12 @@ const SingleItemNew = ({ item }: SingleItemProps) => {
     }).format(price);
   };
 
-  // Construire l'URL de l'image
-  const getImageUrl = () => {
-    if (!item.produit) {
-      return '/images/products/default.png';
-    }
+  // L'URL etait construite en `${base}/storage/${chemin}` sans regarder ce que
+  // contenait `chemin`. L'API renvoie une URL deja absolue, ce qui produisait
+  // des liens .../storage/https://.../storage/... donc des images cassees dans
+  // tout le panier. `imageProduit` traite les deux formes.
+  const productImage = imageProduit(item.produit);
 
-    // Construire l'URL de base sans /api pour les images
-    const imageBaseURL = API_CONFIG.baseURL.replace('/api', '');
-
-    // Si l'image principale existe, l'utiliser
-    if (item.produit.image_principale) {
-      return `${imageBaseURL}/storage/${item.produit.image_principale}`;
-    }
-
-    // Sinon, essayer avec les images (peuvent être un tableau ou une chaîne JSON)
-    if (item.produit.images) {
-      let images = [];
-      if (typeof item.produit.images === 'string') {
-        try {
-          images = JSON.parse(item.produit.images);
-        } catch (e) {
-          // Si ce n'est pas du JSON valide, traiter comme une seule image
-          images = [item.produit.images];
-        }
-      } else if (Array.isArray(item.produit.images)) {
-        images = item.produit.images;
-      }
-
-      if (images.length > 0 && images[0]) {
-        // Si l'image commence déjà par http, l'utiliser telle quelle
-        if (images[0].startsWith('http')) {
-          return images[0];
-        }
-        return `${imageBaseURL}/storage/${images[0]}`;
-      }
-    }
-
-    return '/images/products/default.png';
-  };
-
-  const productImage = getImageUrl();
 
   const unitPrice = item.produit.prix_promo || item.produit.prix;
   const subtotal = unitPrice * item.quantite;

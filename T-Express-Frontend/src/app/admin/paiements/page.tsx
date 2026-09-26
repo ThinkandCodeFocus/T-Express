@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { paiementService } from "@/services/paiement.service";
 import type { Paiement } from "@/types/api.types";
+import { nombreDePages } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
 
@@ -47,7 +48,7 @@ export default function AdminPaiements() {
         }
       );
       setPaiements(response.data || []);
-      setTotalPages(response.meta?.last_page || 1);
+      setTotalPages(nombreDePages(response));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des paiements.");
       toast.error(e.message || "Erreur lors du chargement");

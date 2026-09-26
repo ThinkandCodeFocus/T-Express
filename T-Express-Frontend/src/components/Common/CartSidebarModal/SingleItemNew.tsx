@@ -4,6 +4,7 @@ import type { LignePanier } from "@/types/api.types";
 import Image from "next/image";
 import Link from "next/link";
 import { API_CONFIG } from "@/config/api.config";
+import { imageProduit, isBackendImageUrl } from "@/lib/image";
 
 interface SingleItemNewProps {
   item: LignePanier;
@@ -26,45 +27,11 @@ const SingleItemNew = ({ item }: SingleItemNewProps) => {
     }).format(price);
   };
 
-  // Construire l'URL de l'image
-  const getImageUrl = () => {
-    if (!item.produit) {
-      return '/images/products/default-product.jpg';
-    }
-
-    // Construire l'URL de base sans /api pour les images
-    const imageBaseURL = API_CONFIG.baseURL.replace('/api', '');
-
-    // Si l'image principale existe, l'utiliser
-    if (item.produit.image_principale) {
-      return `${imageBaseURL}/storage/${item.produit.image_principale}`;
-    }
-
-    // Sinon, essayer avec les images (peuvent être un tableau ou une chaîne JSON)
-    if (item.produit.images) {
-      let images = [];
-      if (typeof item.produit.images === 'string') {
-        try {
-          images = JSON.parse(item.produit.images);
-        } catch (e) {
-          // Si ce n'est pas du JSON valide, traiter comme une seule image
-          images = [item.produit.images];
-        }
-      } else if (Array.isArray(item.produit.images)) {
-        images = item.produit.images;
-      }
-
-      if (images.length > 0 && images[0]) {
-        // Si l'image commence déjà par http, l'utiliser telle quelle
-        if (images[0].startsWith('http')) {
-          return images[0];
-        }
-        return `${imageBaseURL}/storage/${images[0]}`;
-      }
-    }
-
-    return '/images/products/default-product.jpg';
-  };
+  // L'URL etait construite en `${base}/storage/${chemin}` sans regarder ce que
+  // contenait `chemin`. L'API renvoie une URL deja absolue, ce qui produisait
+  // des liens .../storage/https://.../storage/... donc des images cassees dans
+  // tout le panier. `imageProduit` traite les deux formes.
+  const productImage = imageProduit(item.produit);
 
   return (
     <div className="flex items-center justify-between gap-5">
@@ -74,12 +41,12 @@ const SingleItemNew = ({ item }: SingleItemNewProps) => {
           className="flex items-center justify-center rounded-[10px] bg-gray-3 max-w-[90px] w-full h-22.5 overflow-hidden"
         >
           <Image
-            src={getImageUrl()}
+            src={productImage}
             alt={item.produit?.nom || 'Produit'}
             width={100}
             height={100}
             className="object-cover w-full h-full"
-            unoptimized={getImageUrl().includes(API_CONFIG.baseURL)}
+            unoptimized={isBackendImageUrl(productImage)}
           />
         </Link>
 

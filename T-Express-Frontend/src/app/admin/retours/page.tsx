@@ -4,6 +4,7 @@ import { retourService } from "@/services/retour.service";
 import type { RetourCommande } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
+import { nombreDePages } from "@/types/api.types";
 
 const STATUT_COLORS: Record<string, { bg: string; text: string }> = {
   en_attente: { bg: "bg-yellow-light-4", text: "text-yellow-dark-2" },
@@ -32,7 +33,7 @@ export default function AdminRetours() {
         filters.statut || undefined
       );
       setRetours(response.data || []);
-      setTotalPages(response.meta?.last_page || 1);
+      setTotalPages(nombreDePages(response));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des retours.");
       toast.error(e.message || "Erreur lors du chargement");

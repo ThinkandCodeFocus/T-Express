@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { adminService } from "@/services/admin.service";
 import { categorieService } from "@/services/categorie.service";
 import type { Produit, Categorie, AdminProduitData } from "@/types/api.types";
+import { nombreDePages } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import { resolveBackendImageUrl } from "@/lib/image";
 import toast from "react-hot-toast";
@@ -53,7 +54,7 @@ export default function AdminProduits() {
       ]);
       setProduits(prodResponse.data || []);
       setCategories(catData);
-      setTotalPages(prodResponse.meta?.last_page || 1);
+      setTotalPages(nombreDePages(prodResponse));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des produits.");
       toast.error(e.message || "Erreur lors du chargement");

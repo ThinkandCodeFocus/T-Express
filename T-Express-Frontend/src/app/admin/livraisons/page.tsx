@@ -2,6 +2,7 @@
 import React, { Suspense, useEffect, useState } from "react";
 import { livraisonService } from "@/services/livraison.service";
 import type { Livraison } from "@/types/api.types";
+import { nombreDePages } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
@@ -47,7 +48,7 @@ const [autoOpenHandled, setAutoOpenHandled] = useState(false);
         filters.statut || undefined
       );
       setLivraisons(response.data || []);
-      setTotalPages(response.meta?.last_page || 1);
+      setTotalPages(nombreDePages(response));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des livraisons.");
       toast.error(e.message || "Erreur lors du chargement");

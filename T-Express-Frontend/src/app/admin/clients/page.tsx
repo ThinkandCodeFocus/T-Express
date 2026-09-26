@@ -5,6 +5,7 @@ import type { Client } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
 import PhoneInput from "@/components/Common/PhoneInput";
+import { nombreDePages } from "@/types/api.types";
 
 export default function AdminClients() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -32,7 +33,7 @@ export default function AdminClients() {
     try {
       const response = await clientService.getListe(currentPage, 20, recherche || undefined);
       setClients(response.data || []);
-      setTotalPages(response.meta?.last_page || 1);
+      setTotalPages(nombreDePages(response));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des clients.");
       toast.error(e.message || "Erreur lors du chargement");

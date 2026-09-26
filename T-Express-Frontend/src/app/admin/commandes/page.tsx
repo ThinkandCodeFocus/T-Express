@@ -19,7 +19,9 @@ const COULEUR = {
   neutre: "bg-gray-2 text-dark-4",
 };
 
-// Statuts de commande (affichage seulement, pas modifiable directement)
+// Valeurs exactes de l'ENUM de la colonne `commandes.statut`. Le montant d'une
+// commande est comptabilisé à partir de « Validée » et jusqu'à « Livrée » :
+// « En attente » n'est pas encore acceptée, « Annulée » ne compte plus.
 const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
   "En attente": { label: "En attente", color: COULEUR.attente },
   "Validée": { label: "Validée", color: COULEUR.info },
@@ -29,7 +31,15 @@ const STATUTS_COMMANDE: Record<string, { label: string; color: string }> = {
   "Annulée": { label: "Annulée", color: COULEUR.echec },
 };
 
-// Valeurs exactes de l'ENUM dans la table paiements (modifiable par l'admin)
+/** Statuts a partir desquels le montant de la commande est acquis. */
+const STATUTS_ACQUIS = ["Validée", "Préparation", "Expédiée", "Livrée"];
+
+const STATUTS_COMMANDE_OPTIONS = Object.entries(STATUTS_COMMANDE).map(
+  ([value, { label }]) => ({ value, label })
+);
+
+// Valeurs exactes de l'ENUM dans la table paiements. Conservé pour les
+// commandes antérieures au retrait du paiement en ligne, les seules à en avoir.
 const STATUTS_PAIEMENT_OPTIONS = [
   { value: "en_attente", label: "En attente", color: COULEUR.attente },
   { value: "validé", label: "Validé", color: COULEUR.succes },
@@ -90,11 +100,18 @@ export default function AdminCommandes() {
   // Fermer le détail
   const closeDetail = () => setShowDetail(null);
 
-  // Changer le statut de paiement d'une commande
+  // Changer le statut de la commande.
+  //
+  // Passait auparavant par `updateStatus`, qui modifie le paiement et en déduit
+  // le statut de la commande. Plus aucune commande n'ayant de paiement, cette
+  // route répondait « Aucun paiement associé » et rien n'avançait.
   const handleStatusChange = async (commandeId: number, newStatut: string) => {
     setUpdatingStatus(commandeId);
     try {
-      const updatedCommande = await commandeService.updateStatus(commandeId, newStatut);
+      const updatedCommande = await commandeService.changerStatutCommande(
+        commandeId,
+        newStatut
+      );
       // Mettre à jour localement avec la commande retournée par le backend
       setCommandes(prev => 
         prev.map(cmd => 
@@ -127,16 +144,16 @@ export default function AdminCommandes() {
     cmd.client ? `${cmd.client.prenom} ${cmd.client.nom}` : `Client #${cmd.client_id}`;
 
   // Éléments partagés par le tableau (desktop) et les cartes (mobile).
-  const selectPaiement = (cmd: Commande) => (
+  const selectCommande = (cmd: Commande) => (
     <>
       <select
-        value={cmd.paiement?.statut || "en_attente"}
+        value={cmd.statut}
         onChange={(e) => handleStatusChange(cmd.id, e.target.value)}
-        disabled={updatingStatus === cmd.id || !cmd.paiement}
-        aria-label={`Statut du paiement de la commande #${cmd.id}`}
-        className={`text-xs font-medium rounded-lg px-2 py-1.5 border cursor-pointer ${getStatutPaiementStyle(cmd.paiement?.statut).color}`}
+        disabled={updatingStatus === cmd.id}
+        aria-label={`Statut de la commande #${cmd.id}`}
+        className={`text-xs font-medium rounded-lg px-2 py-1.5 border cursor-pointer disabled:opacity-60 ${getStatutCommandeStyle(cmd.statut)}`}
       >
-        {STATUTS_PAIEMENT_OPTIONS.map((s) => (
+        {STATUTS_COMMANDE_OPTIONS.map((s) => (
           <option key={s.value} value={s.value}>
             {s.label}
           </option>
@@ -195,9 +212,8 @@ export default function AdminCommandes() {
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mt-3">
-                    {badgeCommande(cmd)}
-                    <span className="text-xs text-dark-4">Paiement :</span>
-                    {selectPaiement(cmd)}
+                    <span className="text-xs text-dark-4">Statut :</span>
+                    {selectCommande(cmd)}
                   </div>
                   {actions(cmd, "flex gap-5 mt-3")}
                 </li>
@@ -213,15 +229,14 @@ export default function AdminCommandes() {
                   <th className="py-3 px-3 font-semibold">Client</th>
                   <th className="py-3 px-3 font-semibold">Date</th>
                   <th className="py-3 px-3 font-semibold">Montant</th>
-                  <th className="py-3 px-3 font-semibold">Statut Paiement</th>
-                  <th className="py-3 px-3 font-semibold">Statut Commande</th>
+                  <th className="py-3 px-3 font-semibold">Statut</th>
                   <th className="py-3 px-3 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {commandes.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-8 text-gray-500">
+                    <td colSpan={6} className="text-center py-8 text-gray-500">
                       Aucune commande trouvée.
                     </td>
                   </tr>
@@ -232,9 +247,7 @@ export default function AdminCommandes() {
                         <td className="py-3 px-3">{nomClient(cmd)}</td>
                         <td className="py-3 px-3">{LOCALE_CONFIG.formatDate(cmd.created_at)}</td>
                         <td className="py-3 px-3 font-medium">{LOCALE_CONFIG.formatPrice(cmd.montant_total)}</td>
-                        <td className="py-3 px-3">{selectPaiement(cmd)}</td>
-                        {/* Statut de commande en lecture seule */}
-                        <td className="py-3 px-3">{badgeCommande(cmd)}</td>
+                        <td className="py-3 px-3">{selectCommande(cmd)}</td>
                         <td className="py-3 px-3">{actions(cmd, "flex flex-col gap-1")}</td>
                       </tr>
                   ))
@@ -269,41 +282,53 @@ export default function AdminCommandes() {
                 {showDetail.client?.telephone && <p className="text-sm text-gray-600">{showDetail.client.telephone}</p>}
               </div>
 
-              {/* Statuts */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Statut de la commande : le seul que le gestionnaire pilote
+                  desormais. Le paiement en ligne ayant ete retire, le statut
+                  de paiement ne concerne plus que les commandes anciennes, et
+                  il est affiche en lecture seule quand il existe. */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Statut Paiement</h3>
+                  <h3 className="font-semibold mb-2">Statut de la commande</h3>
                   <select
-                    value={showDetail.paiement?.statut || "en_attente"}
+                    value={showDetail.statut}
                     onChange={(e) => handleStatusChange(showDetail.id, e.target.value)}
-                    disabled={updatingStatus === showDetail.id || !showDetail.paiement}
-                    className={`text-sm font-medium rounded-lg px-3 py-2 border w-full ${getStatutPaiementStyle(showDetail.paiement?.statut).color}`}
+                    disabled={updatingStatus === showDetail.id}
+                    aria-label={`Statut de la commande #${showDetail.id}`}
+                    className={`text-sm font-medium rounded-lg px-3 py-2 border w-full disabled:opacity-60 ${getStatutCommandeStyle(showDetail.statut)}`}
                   >
-                    {STATUTS_PAIEMENT_OPTIONS.map((s) => (
+                    {STATUTS_COMMANDE_OPTIONS.map((s) => (
                       <option key={s.value} value={s.value}>
                         {s.label}
                       </option>
                     ))}
                   </select>
-                  {showDetail.paiement?.methode && (
-                    <p className="text-sm text-gray-600 mt-1">Mode: {showDetail.paiement.methode}</p>
-                  )}
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Statut Commande</h3>
-                  <span className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${getStatutCommandeStyle(showDetail.statut)}`}>
-                    {STATUTS_COMMANDE[showDetail.statut]?.label || showDetail.statut}
-                  </span>
                   <p className="text-xs text-gray-500 mt-2">
-                    Le statut commande est mis à jour automatiquement quand le paiement est validé.
+                    {STATUTS_ACQUIS.includes(showDetail.statut)
+                      ? "Ce montant est comptabilise dans le chiffre d'affaires."
+                      : "Ce montant n'est pas comptabilise tant que la commande n'est pas validee."}
                   </p>
-    <Link
-  href={`/admin/livraisons?commande=${showDetail.id}`}
-  className="inline-block mt-3 text-sm text-purple-600 hover:underline font-medium"
->
-  → Gérer la livraison de cette commande
-</Link>
+                  <Link
+                    href={`/admin/livraisons?commande=${showDetail.id}`}
+                    className="inline-block mt-3 text-sm text-blue hover:underline font-medium"
+                  >
+                    Gerer la livraison de cette commande
+                  </Link>
                 </div>
+
+                {showDetail.paiement && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-semibold mb-2">Paiement</h3>
+                    <span className={`inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium ${getStatutPaiementStyle(showDetail.paiement.statut).color}`}>
+                      {getStatutPaiementStyle(showDetail.paiement.statut).label}
+                    </span>
+                    {showDetail.paiement.methode && (
+                      <p className="text-sm text-gray-600 mt-2">Mode : {showDetail.paiement.methode}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      Commande anterieure au retrait du paiement en ligne.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Infos commande */}

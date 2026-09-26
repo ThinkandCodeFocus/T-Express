@@ -56,6 +56,7 @@ export function adaptProduitToProduct(produit: Produit): Product {
     id: produit.id,
     title: produit.nom,
     reviews: produit.nombre_avis || 0,
+    rating: produit.note_moyenne ?? 0,
     price: produit.prix,
     discountedPrice: produit.prix_promo || produit.prix,
     imgs: {

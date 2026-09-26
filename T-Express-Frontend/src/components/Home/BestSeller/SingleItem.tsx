@@ -53,39 +53,19 @@ const SingleItem = ({ item }: { item: Product }) => {
         <div className="text-center px-4 py-7.5">
           <div className="flex items-center justify-center gap-2.5 mb-2">
             <div className="flex items-center gap-1">
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt=""
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt=""
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt=""
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt=""
-                width={14}
-                height={14}
-              />
-              <Image
-                src="/images/icons/icon-star.svg"
-                alt=""
-                width={14}
-                height={14}
-              />
+          {[1, 2, 3, 4, 5].map((cran) => (
+            <Image
+              key={cran}
+              src="/images/icons/icon-star.svg"
+              alt=""
+              width={14}
+              height={14}
+              className={cran <= Math.round(item.rating ?? 0) ? "" : "opacity-30 grayscale"}
+            />
+          ))}
             </div>
 
-            <p className="text-custom-sm">({item.reviews})</p>
+            <p className="text-custom-sm">({item.reviews} avis)</p>
           </div>
 
           <h3 className="font-medium text-dark ease-out duration-200 hover:text-blue mb-1.5">

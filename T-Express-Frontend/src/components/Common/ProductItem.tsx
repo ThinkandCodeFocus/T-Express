@@ -131,39 +131,19 @@ const ProductItem = ({ item }: { item: Product }) => {
 
       <div className="flex items-center gap-2.5 mb-2">
         <div className="flex items-center gap-1">
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt=""
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt=""
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt=""
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt=""
-            width={14}
-            height={14}
-          />
-          <Image
-            src="/images/icons/icon-star.svg"
-            alt=""
-            width={14}
-            height={14}
-          />
+          {[1, 2, 3, 4, 5].map((cran) => (
+            <Image
+              key={cran}
+              src="/images/icons/icon-star.svg"
+              alt=""
+              width={14}
+              height={14}
+              className={cran <= Math.round(item.rating ?? 0) ? "" : "opacity-30 grayscale"}
+            />
+          ))}
         </div>
 
-        <p className="text-custom-sm">({item.reviews})</p>
+        <p className="text-custom-sm">({item.reviews} avis)</p>
       </div>
 
       <h3

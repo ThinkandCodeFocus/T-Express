@@ -10,8 +10,8 @@ import Link from "next/link";
 import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
-import toast from "react-hot-toast";
 import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
+import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
 
 const SingleItem = ({ item }: { item: Product }) => {
   const { openModal } = useModalContext();
@@ -31,7 +31,9 @@ const SingleItem = ({ item }: { item: Product }) => {
         quantite: 1,
       });
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+      // Pas de toast ici : usePanier en affiche deja un, en francais et adapte
+      // au 401. Ce second toast reaffichait le brut « Unauthenticated. ».
+      console.error("Ajout au panier impossible :", error?.message);
     }
   };
 
@@ -94,6 +96,16 @@ const SingleItem = ({ item }: { item: Product }) => {
             <span className="text-dark">{formatPrice(item.discountedPrice)}</span>
             <span className="text-dark-4 line-through">{formatPrice(item.price)}</span>
           </span>
+
+          <div className="mt-3">
+            <BoutonCommanderWhatsApp
+              produitId={item.id}
+              nom={item.title}
+              prix={item.discountedPrice}
+              prixInitial={item.price > item.discountedPrice ? item.price : null}
+              image={resolveBackendImageUrl(item.imgs?.previews?.[0], '/images/products/default.png')}
+            />
+          </div>
         </div>
 
         <div className="flex justify-center items-center">

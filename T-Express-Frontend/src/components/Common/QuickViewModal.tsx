@@ -143,9 +143,11 @@ const QuickViewModal = () => {
 
   // Calculer le pourcentage de réduction
   const discountPercentage = useMemo(() => {
-    const prix = product?.prix || productRedux?.price || 0;
-    const prixPromo = product?.prix_promo || productRedux?.discountedPrice || 0;
-    if (prixPromo < prix && prix > 0) {
+    // Number() est indispensable : l'API renvoie les prix en chaine, et
+    // comparer « 90000.00 » a « 260000.00 » revenait a comparer du texte.
+    const prix = Number(product?.prix ?? productRedux?.price ?? 0);
+    const prixPromo = Number(product?.prix_promo ?? productRedux?.discountedPrice ?? 0);
+    if (prixPromo > 0 && prixPromo < prix && prix > 0) {
       return Math.round(((prix - prixPromo) / prix) * 100);
     }
     return 0;
@@ -166,9 +168,11 @@ const QuickViewModal = () => {
   // Obtenir la description depuis la BDD
   const description = product?.description || 'Aucune description disponible.';
   
-  // Obtenir les prix depuis la BDD
-  const prix = product?.prix || productRedux?.price || 0;
-  const prixPromo = product?.prix_promo || productRedux?.discountedPrice || prix;
+  // Prix issus de la BDD, convertis en nombres : l'API les renvoie en chaine,
+  // et `prixPromo < prix` comparait alors du texte, pas des montants.
+  const prix = Number(product?.prix ?? productRedux?.price ?? 0);
+  const prixPromoBrut = Number(product?.prix_promo ?? productRedux?.discountedPrice ?? 0);
+  const prixPromo = prixPromoBrut > 0 && prixPromoBrut < prix ? prixPromoBrut : prix;
 
   useEffect(() => {
     // closing modal while clicking outside

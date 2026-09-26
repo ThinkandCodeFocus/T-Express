@@ -52,13 +52,20 @@ export function adaptProduitToProduct(produit: Produit): Product {
   const thumbnails = liste.length > 0 ? liste : [fallback];
   const previews = [...thumbnails];
 
+  // L'API renvoie les prix en chaine (« 260000.00 »). Sans conversion, toute
+  // comparaison en aval porte sur du texte : « 90000.00 » < « 260000.00 » est
+  // faux, et une promotion reelle passait alors inapercue.
+  const prix = Number(produit.prix ?? 0);
+  const prixPromo = produit.prix_promo != null ? Number(produit.prix_promo) : null;
+  const enPromotion = prixPromo !== null && prixPromo > 0 && prixPromo < prix;
+
   return {
     id: produit.id,
     title: produit.nom,
-    reviews: produit.nombre_avis || 0,
-    rating: produit.note_moyenne ?? 0,
-    price: produit.prix,
-    discountedPrice: produit.prix_promo || produit.prix,
+    reviews: Number(produit.nombre_avis ?? 0),
+    rating: Number(produit.note_moyenne ?? 0),
+    price: prix,
+    discountedPrice: enPromotion ? (prixPromo as number) : prix,
     imgs: {
       thumbnails,
       previews,

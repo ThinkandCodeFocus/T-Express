@@ -130,6 +130,9 @@ export const API_CONFIG = {
         liste: '/admin/commandes/liste',
         detail: '/admin/commandes/detail',
         updateStatus: '/admin/commandes/changer-statut',
+        // Statut de la commande, sans passer par le paiement : depuis le
+        // retrait du paiement en ligne, aucune commande n'en a plus.
+        changerStatutCommande: '/admin/commandes/changer-statut-commande',
       },
       stock: {
         liste: '/admin/stock/liste',

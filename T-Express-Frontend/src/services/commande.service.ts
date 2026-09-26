@@ -81,11 +81,27 @@ export const commandeService = {
   },
 
   /**
-   * Modifier le statut d'une commande (admin)
+   * Modifier le statut du paiement d'une commande (admin)
+   *
+   * Conservé pour les commandes antérieures au retrait du paiement en ligne,
+   * les seules à avoir un paiement associé. Pour faire avancer une commande,
+   * utiliser `changerStatutCommande`.
    */
   async updateStatus(id: number, statut: string): Promise<Commande> {
     const response = await apiClient.post<{ commande: Commande }>(
       API_CONFIG.endpoints.admin.commandes.updateStatus,
+      { commande_id: id, statut },
+      { requiresAuth: true }
+    );
+    return response.commande;
+  },
+
+  /**
+   * Modifier le statut de la commande elle-même (admin)
+   */
+  async changerStatutCommande(id: number, statut: string): Promise<Commande> {
+    const response = await apiClient.post<{ commande: Commande }>(
+      API_CONFIG.endpoints.admin.commandes.changerStatutCommande,
       { commande_id: id, statut },
       { requiresAuth: true }
     );

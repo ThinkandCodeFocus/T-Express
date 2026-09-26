@@ -4,6 +4,7 @@ import { avisService } from "@/services/avis.service";
 import type { Avis } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import toast from "react-hot-toast";
+import { nombreDePages } from "@/types/api.types";
 
 export default function AdminAvis() {
   const [avis, setAvis] = useState<Avis[]>([]);
@@ -27,7 +28,7 @@ export default function AdminAvis() {
         }
       );
       setAvis(response.data || []);
-      setTotalPages(response.meta?.last_page || 1);
+      setTotalPages(nombreDePages(response));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des avis.");
       toast.error(e.message || "Erreur lors du chargement");

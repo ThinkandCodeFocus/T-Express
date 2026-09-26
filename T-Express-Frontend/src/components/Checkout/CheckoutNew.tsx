@@ -15,8 +15,7 @@ import { validatePhone } from "@/lib/utils";
 import { lienWhatsAppAdmin, messageCommandeWhatsApp } from "@/lib/whatsapp";
 import toast from "react-hot-toast";
 
-type Confirmation = { commandeId: number; lienWhatsApp: string };
-const CLE_CONFIRMATION = "t-express:derniere-commande";
+import { CLE_CONFIRMATION, type Confirmation } from "@/components/Commande/CommandeReussie";
 
 const CheckoutNew = () => {
   const router = useRouter();
@@ -47,26 +46,9 @@ const CheckoutNew = () => {
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
   const [notes, setNotes] = useState("");
   const [processing, setProcessing] = useState(false);
-  // Renseigné une fois la commande créée : affiche l'écran de finalisation.
-  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
-
-  // Sur mobile, basculer vers WhatsApp décharge souvent l'onglet : au retour,
-  // sans cette reprise, le client verrait "panier vide" et perdrait le lien.
-  // Seulement si le panier est vide, pour ne jamais masquer un nouveau checkout.
-  useEffect(() => {
-    if (panierLoading || confirmation) return;
-    try {
-      const sauvegarde = sessionStorage.getItem(CLE_CONFIRMATION);
-      if (!sauvegarde) return;
-      if (panier && panier.lignes.length > 0) {
-        sessionStorage.removeItem(CLE_CONFIRMATION);
-        return;
-      }
-      setConfirmation(JSON.parse(sauvegarde));
-    } catch {
-      // Stockage indisponible (navigation privée...) : pas de reprise.
-    }
-  }, [panierLoading, panier, confirmation]);
+  // La commande créée, on quitte le tunnel : le récapitulatif vit sur
+  // /commande-reussie, qui ouvre aussi WhatsApp.
+  const [commandeEnvoyee, setCommandeEnvoyee] = useState(false);
 
   // Format FCFA
   const formatPrice = (price: number) => {
@@ -213,14 +195,22 @@ const CheckoutNew = () => {
         console.warn("Commande créée mais panier non vidé :", viderError);
       }
 
-      const nouvelleConfirmation = { commandeId: commande.id, lienWhatsApp: lienWhatsAppAdmin(message) };
+      const nouvelleConfirmation: Confirmation = {
+        commandeId: commande.id,
+        lienWhatsApp: lienWhatsAppAdmin(message),
+        total: totalWithShipping,
+        nombreArticles: panier.lignes.reduce((n, l) => n + l.quantite, 0),
+      };
+
       try {
         sessionStorage.setItem(CLE_CONFIRMATION, JSON.stringify(nouvelleConfirmation));
       } catch {
-        // Stockage indisponible : l'écran s'affiche quand même, sans reprise.
+        // Stockage indisponible (navigation privée...) : la page d'arrivée le
+        // dira, plutôt que de laisser le client sur un tunnel vidé.
       }
-      setConfirmation(nouvelleConfirmation);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      setCommandeEnvoyee(true);
+      router.push("/commande-reussie");
     } catch (error: any) {
       console.error("Erreur lors de la création de la commande:", error.message);
       toast.error(error.message || "Erreur lors de la création de la commande");
@@ -229,49 +219,18 @@ const CheckoutNew = () => {
     }
   };
 
-  // Commande créée : à tester avant "panier vide", le panier vient d'être vidé.
-  if (confirmation) {
+  // La redirection vers /commande-reussie est en cours : ne pas repeindre le
+  // tunnel entre-temps, le panier vient d'etre vide et l'ecran afficherait
+  // « panier vide » une fraction de seconde.
+  if (commandeEnvoyee) {
     return (
       <>
-        <Breadcrumb title={"Commande enregistrée"} pages={["commande"]} />
-        <section className="overflow-hidden py-20 bg-gray-2">
-          <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-            <div className="bg-white rounded-[10px] shadow-1 px-4 py-10 sm:p-12.5 text-center max-w-[640px] mx-auto">
-              <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-green-light-6 text-green flex items-center justify-center">
-                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-medium text-dark mb-3">
-                Commande #{confirmation.commandeId} enregistrée
-              </h2>
-              <p className="text-dark-4 mb-2">
-                Dernière étape : envoyez-nous le récapitulatif de votre commande sur WhatsApp.
-              </p>
-              <p className="text-dark-4 mb-8">
-                Notre équipe vous répondra sur WhatsApp pour confirmer la commande et convenir avec vous
-                du paiement et de la livraison.
-              </p>
-
-              <a
-                href={confirmation.lienWhatsApp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2.5 w-full sm:w-auto font-medium text-white bg-[#25D366] py-3.5 px-8 rounded-md ease-out duration-200 hover:bg-[#1ebe5b]"
-              >
-                <WhatsAppIcon />
-                Envoyer ma commande sur WhatsApp
-              </a>
-
-              <p className="text-custom-sm text-dark-5 mt-4">
-                Le message est déjà rempli (produits, adresse, total) : il vous suffit de l&apos;envoyer.
-              </p>
-
-              <div className="mt-8 pt-6 border-t border-gray-3">
-                <Link href="/my-account/orders" className="text-blue hover:underline">
-                  Voir mes commandes
-                </Link>
-              </div>
+        <Breadcrumb title={"Commande réussie"} pages={["commande"]} />
+        <section className="py-20 bg-gray-2">
+          <div className="max-w-[640px] mx-auto px-4">
+            <div className="bg-white rounded-[10px] shadow-1 p-10 animate-pulse">
+              <div className="h-6 w-2/3 bg-gray-3 rounded mb-4" />
+              <div className="h-4 w-full bg-gray-3 rounded" />
             </div>
           </div>
         </section>

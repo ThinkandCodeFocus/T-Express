@@ -5,6 +5,7 @@ import type { Article } from "@/types/api.types";
 import { LOCALE_CONFIG } from "@/config/api.config";
 import { resolveBackendImageUrl } from "@/lib/image";
 import toast from "react-hot-toast";
+import { nombreDePages } from "@/types/api.types";
 
 export default function AdminArticles() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -41,7 +42,7 @@ export default function AdminArticles() {
         filters.categorie || undefined
       );
       setArticles(response.data || []);
-      setTotalPages(response.meta?.last_page || 1);
+      setTotalPages(nombreDePages(response));
     } catch (e: any) {
       setError(e.message || "Erreur lors du chargement des articles.");
       toast.error(e.message || "Erreur lors du chargement");

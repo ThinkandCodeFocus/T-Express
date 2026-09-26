@@ -19,28 +19,38 @@ export function adaptProduitToProduct(produit: Produit): Product {
   // ne préfixe que les chemins relatifs pour éviter de doubler l'origine.
   const toUrl = (img: string) => (/^https?:\/\//i.test(img) ? img : `${storagePath}${img}`);
 
-  const fallback = '/images/products/product-1-bg-1.png';
+  const fallback = '/images/products/default.png';
   let images: string[] = [];
   if (Array.isArray(produit.images)) {
     images = produit.images;
   } else if (typeof produit.images === 'string' && produit.images) {
     try {
-      images = JSON.parse(produit.images);
+      const parse = JSON.parse(produit.images);
+      images = Array.isArray(parse) ? parse : [];
     } catch {
       images = [];
     }
   }
-  const thumbnails = images.length > 0
-    ? images.map(toUrl)
-    : [fallback];
-  const previews = thumbnails; // Utiliser les mêmes images pour les previews
 
-  // Si on a une image principale, l'utiliser en premier
-  if (produit.image_principale) {
-    const mainImage = toUrl(produit.image_principale);
-    thumbnails.unshift(mainImage);
-    previews.unshift(mainImage);
-  }
+  // L'image principale vit dans son propre champ et figure souvent aussi dans
+  // `images` : `Set` evite de l'afficher deux fois dans la bande de vignettes.
+  //
+  // Auparavant `previews` etait une simple reference vers `thumbnails`, et
+  // l'image principale etait inseree par `unshift` sur les deux : la meme
+  // insertion se faisait donc deux fois sur un seul tableau, et chaque produit
+  // affichait sa photo principale en double dans l'apercu rapide.
+  const liste = Array.from(
+    new Set(
+      [
+        ...(produit.image_principale ? [produit.image_principale] : []),
+        ...images,
+      ]
+        .filter((img): img is string => typeof img === 'string' && img !== '')
+        .map(toUrl)
+    )
+  );
+  const thumbnails = liste.length > 0 ? liste : [fallback];
+  const previews = [...thumbnails];
 
   return {
     id: produit.id,

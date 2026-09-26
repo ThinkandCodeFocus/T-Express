@@ -13,7 +13,6 @@ import { usePanierContext } from "@/context/PanierContext";
 import { catalogueService } from "@/services/catalogue.service";
 import { API_CONFIG } from "@/config/api.config";
 import type { Produit } from "@/types/api.types";
-import toast from "react-hot-toast";
 import { resolveBackendImageUrl, isBackendImageUrl } from "@/lib/image";
 import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
 
@@ -33,7 +32,9 @@ const QuickViewModal = () => {
   const [loading, setLoading] = useState(false);
 
   const [activePreview, setActivePreview] = useState(0);
-  const fallbackImage = "/images/products/product-1-bg-1.png";
+  // Visuel neutre : product-1-bg-1.png est une vraie photo de produit, la
+  // montrer comme repli laissait croire a un autre article.
+  const fallbackImage = "/images/products/default.png";
 
   // Charger les données complètes du produit depuis l'API quand le modal s'ouvre
   useEffect(() => {
@@ -133,7 +134,9 @@ const QuickViewModal = () => {
         });
         closeModal();
       } catch (error: any) {
-        toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+        // Pas de toast ici : usePanier en affiche deja un, en francais et
+        // adapte au 401. Ce second toast reaffichait « Unauthenticated. ».
+        console.error("Ajout au panier impossible :", error?.message);
       }
     }
   };

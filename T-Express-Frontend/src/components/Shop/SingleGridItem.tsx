@@ -10,7 +10,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "@/lib/utils";
 import { usePanierContext } from "@/context/PanierContext";
-import toast from "react-hot-toast";
 import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
 import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
 
@@ -32,7 +31,9 @@ const SingleGridItem = ({ item }: { item: Product }) => {
         quantite: 1,
       });
     } catch (error: any) {
-      toast.error(error.message || 'Erreur lors de l\'ajout au panier');
+      // Pas de toast ici : usePanier en affiche deja un, en francais et adapte
+      // au 401. Ce second toast reaffichait le brut « Unauthenticated. ».
+      console.error("Ajout au panier impossible :", error?.message);
     }
   };
 

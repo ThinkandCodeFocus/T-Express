@@ -93,7 +93,7 @@ export const WishlistNew = () => {
                       <p className="text-dark">Product</p>
                     </div>
                     <div className="min-w-[205px]">
-                      <p className="text-dark">Unit Price</p>
+                      <p className="text-dark">Prix unitaire</p>
                     </div>
                     <div className="min-w-[265px]">
                       <p className="text-dark">Stock Status</p>

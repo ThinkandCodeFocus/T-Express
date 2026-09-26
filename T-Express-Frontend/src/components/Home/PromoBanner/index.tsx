@@ -134,7 +134,7 @@ const PromoBanner = () => {
                 href="#"
                 className="inline-flex font-medium text-xs sm:text-custom-sm text-white bg-blue py-2 sm:py-[11px] px-6 sm:px-9.5 rounded-md ease-out duration-200 hover:bg-blue-dark mt-4 sm:mt-7.5"
               >
-                Buy Now
+                Acheter
               </a>
             </div>
 
@@ -384,7 +384,7 @@ const PromoBanner = () => {
                       href="#"
                       className="inline-flex font-medium text-custom-sm text-white bg-orange py-2.5 px-8.5 rounded-md ease-out duration-200 hover:bg-orange-dark mt-7.5"
                     >
-                      Buy Now
+                      Acheter
                     </a>
                   </div>
                 </div>

@@ -151,9 +151,14 @@ const QuickViewModal = () => {
     return 0;
   }, [product, productRedux]);
 
-  // Notes fictives (bonnes notes) - toujours affichées comme dans le design original
-  const rating = 4.7; // Note fictive fixe
-  const reviewsCount = 5; // Nombre d'avis fictif fixe
+  // Note et nombre d'avis réels. Le gabarit d'origine affichait 4,7 sur 5 avis
+  // en dur pour chaque produit, soit une note inventée sur une boutique en ligne.
+  const rating = Number(product?.note_moyenne ?? 0);
+  const reviewsCount = Number(product?.nombre_avis ?? 0);
+
+  // Disponibilité réelle : le gabarit annonçait « In Stock » quoi qu'il arrive.
+  const quantiteStock = product?.stock?.quantite;
+  const enStock = quantiteStock === undefined || quantiteStock > 0;
   
   // Obtenir le nom du produit depuis la BDD
   const productName = product?.nom || productRedux?.title || '';
@@ -290,12 +295,7 @@ const QuickViewModal = () => {
             <div className="max-w-[445px] w-full">
               {discountPercentage > 0 && (
                 <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
-                  SALE {discountPercentage}% OFF
-                </span>
-              )}
-              {discountPercentage === 0 && (
-                <span className="inline-block text-custom-xs font-medium text-white py-1 px-3 bg-green mb-6.5">
-                  SALE 20% OFF
+                  PROMO -{discountPercentage} %
                 </span>
               )}
 
@@ -414,8 +414,17 @@ const QuickViewModal = () => {
                   </div>
 
                   <span>
-                    <span className="font-medium text-dark"> {rating} Rating </span>
-                    <span className="text-dark-2"> ({reviewsCount} reviews) </span>
+                    {reviewsCount > 0 ? (
+                      <>
+                        <span className="font-medium text-dark">
+                          {" "}
+                          {rating.toFixed(1).replace(".", ",")}{" "}
+                        </span>
+                        <span className="text-dark-2"> ({reviewsCount} avis) </span>
+                      </>
+                    ) : (
+                      <span className="text-dark-2"> Aucun avis pour l&apos;instant </span>
+                    )}
                   </span>
                 </div>
 
@@ -444,7 +453,10 @@ const QuickViewModal = () => {
                     </defs>
                   </svg>
 
-                  <span className="font-medium text-dark"> In Stock </span>
+                  <span className="font-medium text-dark">
+                    {" "}
+                    {enStock ? "En stock" : "Rupture de stock"}{" "}
+                  </span>
                 </div>
               </div>
 
@@ -472,7 +484,7 @@ const QuickViewModal = () => {
 
                 <div>
                   <h4 className="font-semibold text-lg text-dark mb-3.5">
-                    Quantity
+                    Quantité
                   </h4>
 
                   <div className="flex items-center gap-3">
@@ -575,7 +587,7 @@ const QuickViewModal = () => {
                       fill=""
                     />
                   </svg>
-                  Add to Wishlist
+                  Ajouter aux favoris
                 </button>
               </div>
             </div>

@@ -9,6 +9,7 @@ import { useFavorisContext } from "@/context/FavorisContext";
 import type { Produit } from "@/types/api.types";
 import { API_CONFIG } from "@/config/api.config";
 import { isBackendImageUrl, resolveBackendImageUrl } from "@/lib/image";
+import { formatPrice } from "@/lib/utils";
 import BoutonCommanderWhatsApp from "@/components/Common/BoutonCommanderWhatsApp";
 
 const IMAGE_DEFAUT = "/images/products/default.png";
@@ -94,6 +95,16 @@ const ShopDetailsNew = () => {
     )
   );
   const imageUrl = (img: string) => resolveBackendImageUrl(img, IMAGE_DEFAUT);
+
+  // L'API renvoie les prix en chaine (« 260000.00 »). Les comparer directement
+  // revenait a comparer du texte : « 90000.00 » < « 260000.00 » est faux, donc
+  // une promotion reelle pouvait passer inapercue. Et `toLocaleString` sur une
+  // chaine la renvoie telle quelle, d'ou le « 260000.00 FCFA » affiche au lieu
+  // du format utilise partout ailleurs.
+  const prix = Number(product?.prix ?? 0);
+  const prixPromo = product?.prix_promo != null ? Number(product.prix_promo) : null;
+  const enPromotion = prixPromo !== null && prixPromo > 0 && prixPromo < prix;
+  const prixAffiche = enPromotion ? (prixPromo as number) : prix;
 
   if (loading) {
     return (
@@ -190,18 +201,18 @@ const ShopDetailsNew = () => {
               </h1>
 
               <div className="flex items-center gap-3 mb-6">
-                {product.prix_promo && product.prix_promo < product.prix ? (
+                {enPromotion ? (
                   <>
                     <p className="font-semibold text-2xl text-blue">
-                      {product.prix_promo.toLocaleString()} FCFA
+                      {formatPrice(prixAffiche)}
                     </p>
                     <p className="font-medium text-lg text-dark-4 line-through">
-                      {product.prix.toLocaleString()} FCFA
+                      {formatPrice(prix)}
                     </p>
                   </>
                 ) : (
                   <p className="font-semibold text-2xl text-blue">
-                    {product.prix.toLocaleString()} FCFA
+                    {formatPrice(prix)}
                   </p>
                 )}
               </div>
@@ -308,8 +319,8 @@ const ShopDetailsNew = () => {
                 <BoutonCommanderWhatsApp
                   produitId={product.id}
                   nom={product.nom}
-                  prix={product.prix_promo && product.prix_promo < product.prix ? product.prix_promo : product.prix}
-                  prixInitial={product.prix_promo && product.prix_promo < product.prix ? product.prix : null}
+                  prix={prixAffiche}
+                  prixInitial={enPromotion ? prix : null}
                   image={images.length > 0 ? imageUrl(images[previewImg] ?? images[0]) : null}
                   quantite={quantity}
                   taille="plein"

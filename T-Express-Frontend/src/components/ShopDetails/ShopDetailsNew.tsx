@@ -240,7 +240,10 @@ const ShopDetailsNew = () => {
                 </div>
               )}
 
-              <p className="text-dark-5 mb-8">
+              {/* `whitespace-pre-line` : les descriptions sont saisies ligne
+                  par ligne (une caracteristique par ligne). Sans cela, tout se
+                  collait en un seul pave illisible. */}
+              <p className="text-dark-5 mb-8 whitespace-pre-line">
                 {product.description || "Description non disponible"}
               </p>
 
@@ -269,7 +272,8 @@ const ShopDetailsNew = () => {
                         strokeLinejoin="round"
                       />
                     </svg>
-                    En stock ({product.stock.quantite} disponibles)
+                    En stock ({product.stock.quantite}{" "}
+                    {product.stock.quantite > 1 ? "disponibles" : "disponible"})
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 text-red">

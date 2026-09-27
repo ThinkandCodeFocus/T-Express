@@ -21,9 +21,11 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/logo/logo.png",
-        width: 800,
-        height: 600,
-        alt: "T-Express",
+        // Dimensions réelles du fichier : annoncées fausses, l'aperçu partagé
+        // sur WhatsApp ou Facebook se recadre de travers.
+        width: 720,
+        height: 499,
+        alt: "Terranga-Express",
       },
     ],
     locale: "fr_FR",
